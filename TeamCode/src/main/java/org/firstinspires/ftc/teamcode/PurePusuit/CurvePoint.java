@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.PurePusuit;
 
+import com.acmerobotics.roadrunner.geometry.Vector2d;
+
 import org.firstinspires.ftc.teamcode.Math.Vector2;
 
 public class CurvePoint {
@@ -28,12 +30,12 @@ public class CurvePoint {
         this.heading = thisPoint.heading;
     }
 
-    public Vector2 toVec(){
-        return new Vector2(x, y);
+    public Vector2d toVec(){
+        return new Vector2d(x, y);
     }
 
-    public void setPoint(Vector2 Point) {
-        this.x = Point.x;
-        this.y = Point.y;
+    public void setPoint(Vector2d Point) {
+        this.x = Point.getX();
+        this.y = Point.getY();
     }
 }

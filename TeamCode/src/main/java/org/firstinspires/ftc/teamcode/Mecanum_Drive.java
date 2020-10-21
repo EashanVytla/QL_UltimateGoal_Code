@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
@@ -24,14 +25,14 @@ public class Mecanum_Drive{
     PIDFController PID_Y;
     PIDFController PID_Z;
 
-    float kp = 0.07f;
+    float kp = 0.06f;
     float ki = 0;
     float kd = 0.0125f;
 
     float kpr = 0.86f;
     float kir = 0;
     float kdr = 0.06f;
-    int currentWriteIndex = 0;
+    int counter;
 
     private double scalePower(double speed, double min, double max){
         //One
@@ -61,49 +62,45 @@ public class Mecanum_Drive{
         motors[2].motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motors[3].motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        motors[0].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        /*motors[0].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motors[1].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motors[2].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motors[3].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motors[3].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);*/
 
         PID_X = new PIDFController(new PIDCoefficients(kp, ki, kd));
         PID_Y = new PIDFController(new PIDCoefficients(kp, ki, kd));
         PID_Z = new PIDFController(new PIDCoefficients(kpr, kir, kdr));
+        counter = 0;
 
         motors[1].motor.setDirection(DcMotorSimple.Direction.REVERSE);
         motors[3].motor.setDirection(DcMotorSimple.Direction.REVERSE );
     }
 
     public void write(){
-        motors[currentWriteIndex].write();
-        currentWriteIndex = (currentWriteIndex + 1) % 4;
+        motors[counter].write();
+        counter = (counter + 1) % 4;
     }
 
-    public void setPower(double y, double x, double rightX){
-        double  FrontLeftVal = y - x + rightX;
-        double FrontRightVal = y + x - rightX;
-        double BackLeftVal = y + x + rightX;
-        double BackRightVal = y - x - rightX;
+    public void setPower(double x, double y, double rot){
+        double frontLeftMotorPower = y - x - rot;
+        double frontRightMotorPower = y + x + rot;
+        double backLeftMotorPower = y + x - rot;
+        double backRightMotorPower = y - x + rot;
 
-        //Move range to between 0 and +1, if not already
-        double[] wheelPowers = {Math.abs(FrontRightVal), Math.abs(FrontLeftVal), Math.abs(BackLeftVal), Math.abs(BackRightVal)};
-        Arrays.sort(wheelPowers);
-        if (wheelPowers[3] > 1) {
-            FrontLeftVal /= wheelPowers[3];
-            FrontRightVal /= wheelPowers[3];
-            BackLeftVal /= wheelPowers[3];
-            BackRightVal /= wheelPowers[3];
+        double motorPowers[] = {Math.abs(frontLeftMotorPower), Math.abs(backRightMotorPower), Math.abs(backLeftMotorPower), Math.abs(frontRightMotorPower)};
+        Arrays.sort(motorPowers);
+
+        if(motorPowers[3] > 1){
+            frontLeftMotorPower /= motorPowers[3];
+            frontRightMotorPower /= motorPowers[3];
+            backRightMotorPower /= motorPowers[3];
+            backLeftMotorPower /= motorPowers[3];
         }
 
-        telemetry.addData("Front Left: ", motors[0].motor.getPower());
-        telemetry.addData("Front Right: ", motors[1].motor.getPower());
-        telemetry.addData("Back Left: ", motors[2].motor.getPower());
-        telemetry.addData("Back Right: ", motors[3].motor.getPower());
-
-        motors[0].setPower(FrontLeftVal);
-        motors[1].setPower(FrontRightVal);
-        motors[2].setPower(BackLeftVal);
-        motors[3].setPower(BackRightVal);
+        motors[0].setPower(frontLeftMotorPower);
+        motors[1].setPower(frontRightMotorPower);
+        motors[2].setPower(backLeftMotorPower);
+        motors[3].setPower(backRightMotorPower);
     }
 
     public void setPower(Vector2 vec, double rot){
@@ -150,4 +147,3 @@ public class Mecanum_Drive{
         setPowerCentic(PID_X.update(currentPos.getX()), -PID_Y.update(currentPos.getY()), PID_Z.update(heading), currentPos.getHeading());
     }
 }
-

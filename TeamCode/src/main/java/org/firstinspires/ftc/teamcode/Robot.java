@@ -80,11 +80,11 @@ public class Robot{
     }
 
     public double getLeft_X_Dist(){
-        return encoderLX.getDist() * 0.6;
+        return -encoderLX.getDist();
     }
 
     public double getRight_X_Dist(){
-        return encoderRX.getDist() * 0.6;
+        return -encoderRX.getDist();
     }
 
     public double getLeft_Y_Dist(){

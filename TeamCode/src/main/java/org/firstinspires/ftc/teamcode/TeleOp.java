@@ -8,9 +8,6 @@ public class TeleOp extends OpMode {
     Robot robot;
     Pose2d storedPos = new Pose2d(0, 0, 0);
 
-    long prevTime = 0;
-    double refreshRate;
-
     enum Drive_State{
         Driving,
         AutoAllign
@@ -28,19 +25,9 @@ public class TeleOp extends OpMode {
     }
 
     public void loop(){
-        long dt = (System.currentTimeMillis() - prevTime);
-
-        if(dt != 0){
-            refreshRate = 1000/dt;
-        }
-
-        prevTime = System.currentTimeMillis();
-
-        telemetry.addData("delta time: ", refreshRate);
-
         switch (mDriveState){
             case Driving:
-                robot.drive.drive(gamepad1, 1.0, 0.5);
+                robot.drive.drive(gamepad1, 0.3, 0.3);
 
                 if(gamepad1.left_stick_button){
                     mDriveState = Drive_State.AutoAllign;
@@ -68,6 +55,10 @@ public class TeleOp extends OpMode {
         robot.drive.write();
         telemetry.addData("stored pos:", storedPos);
         telemetry.addData("State: ", mDriveState);
-        telemetry.addData("pos: ", robot.getPos());
+        telemetry.addData("Pos: ", robot.getPos());
+        telemetry.addData("Right X: ", robot.getRight_X_Dist());
+        telemetry.addData("Left X: ", robot.getLeft_X_Dist());
+        telemetry.addData("Right Y: ", robot.getRight_Y_Dist());
+        telemetry.addData("Left Y: ", robot.getLeft_Y_Dist());
     }
 }

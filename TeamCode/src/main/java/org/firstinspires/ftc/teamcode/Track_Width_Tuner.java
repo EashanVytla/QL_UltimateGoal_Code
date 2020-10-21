@@ -29,8 +29,7 @@ public class Track_Width_Tuner extends OpMode {
         robot.updatePos();
 
         if(running){
-            robot.drive.motors[2].setPower(-0.3);
-            robot.drive.motors[1].setPower(0.3);
+            robot.drive.setPower(0, 0, 0.3);
         }else{
             robot.drive.setPower(0, 0, 0);
         }

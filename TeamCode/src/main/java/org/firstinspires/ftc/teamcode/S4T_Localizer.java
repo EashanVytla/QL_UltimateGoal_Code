@@ -6,8 +6,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Math.Vector2;
 
 public class S4T_Localizer {
-    private double TRACK_WIDTH1 = 13.588809678223836505803279764389;
-    private double TRACK_WIDTH2 = 7.0363482477783826454291598271622;
+    private double TRACK_WIDTH1 = 13.581490658183012723991930114595;
+    private double TRACK_WIDTH2 = 3.2820273572065697174581206914623;
     private double EPILSON = 0.00001;
     private Pose2d mypose = new Pose2d(0, 0, 0);
     double prevheading = 0;
@@ -70,8 +70,8 @@ public class S4T_Localizer {
         mypose = mypose.plus(new Pose2d(myVec.x, myVec.y, dtheta));
         mypose = new Pose2d(mypose.getX(), mypose.getY(), heading);
 
-        telemetry.addData("Vertical Heading: ", Math.toDegrees(-(ery - ely)/ TRACK_WIDTH1));
-        telemetry.addData("Strafe Heading: ", Math.toDegrees((erx - elx)/ TRACK_WIDTH2));
+        telemetry.addData("Vertical Heading: ", Math.toDegrees(-(ery - ely)/ TRACK_WIDTH1) % (360));
+        telemetry.addData("Strafe Heading: ", Math.toDegrees((erx - elx)/ TRACK_WIDTH2) % (360));
     }
 
     public double weightedTheta(double dx, double dy, double dthetavert, double dthetastrafe){
@@ -91,7 +91,7 @@ public class S4T_Localizer {
 
     public void determineWeights(double dx, double dy){
         wf = 1;
-        ws = 1;
+        ws = 0;
 
         double highest = 0;
 
@@ -103,13 +103,23 @@ public class S4T_Localizer {
 
         highest /= 8;
 
+        //Todo: Test is weights and decision is actually working
+        //Todo: If they are not working, then try getting rid of the highest logic, and just dividing by 8
         if(highest != 0){
             dx /= highest;
             dy /= highest;
         }
 
-        wf = Math.pow(Math.E, -k_vert * Math.abs(dx));
-        ws = Math.pow(Math.E, -k_strafe * Math.abs(dy));
+        //If dx is higher, wf is lower and vice versa
+        //wf = Math.pow(Math.E, -k_vert * Math.abs(dx));
+        wf = 1;
+
+        //If dy is high, ws is lower and vice versa
+        //ws = Math.pow(Math.E, -k_strafe * Math.abs(dy));
+        ws = 0;
+
+        telemetry.addData("weight forward: ", wf);
+        telemetry.addData("weight strafe: ", ws);
     }
 
     public State determineCase(double dx, double dy){
