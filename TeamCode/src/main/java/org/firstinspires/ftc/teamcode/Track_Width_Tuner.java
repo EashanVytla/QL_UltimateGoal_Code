@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
@@ -29,12 +30,11 @@ public class Track_Width_Tuner extends OpMode {
         robot.updatePos();
 
         if(running){
-            robot.drive.setPower(0, 0, 0.3);
+            robot.GoTo(new Pose2d(0, 0, (14 * Math.PI)), new Pose2d(1.0, 1.0, 0.3));
         }else{
             robot.drive.setPower(0, 0, 0);
+            robot.drive.write();
         }
-
-        robot.drive.write();
 
         telemetry.addData("Pos: ", robot.getPos());
         telemetry.addData("Right X: ", robot.getRight_X_Dist());

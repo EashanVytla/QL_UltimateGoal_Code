@@ -18,20 +18,24 @@ public class Robot{
     public static Robot robot = null;
     public ExpansionHubEx hub1;
     // The IMU sensor object
-    BNO055IMU imu;
+    private BNO055IMU imu;
     // State used for updating telemetry
-    Orientation angles;
-    S4T_Localizer localizer;
-    S4T_Encoder encoderLY;
-    S4T_Encoder encoderLX;
-    S4T_Encoder encoderRY;
-    S4T_Encoder encoderRX;
-    RevBulkData data;
-    HardwareMap hardwareMap;
-    Pose2d speedLimits;
+    private Orientation angles;
+    private S4T_Localizer localizer;
+    private S4T_Encoder encoderLY;
+    private S4T_Encoder encoderLX;
+    private S4T_Encoder encoderRY;
+    private S4T_Encoder encoderRX;
+    private RevBulkData data;
+    private HardwareMap hardwareMap;
+    private Pose2d speedLimits;
 
     Pose2d setPoint;
     Telemetry telemetry;
+
+    //Todo: Once all robot hardware is on the main robot, make these their own classes
+    WobbleGoal wobbleGoal;
+    Shooter shooter;
 
 
     private Robot(HardwareMap map, Telemetry telemetry){
@@ -48,6 +52,9 @@ public class Robot{
         encoderRX = new S4T_Encoder(map, "back_right");
 
         drive = new Mecanum_Drive(map, telemetry);
+        wobbleGoal = new WobbleGoal(map, telemetry);
+        shooter = new Shooter(map, telemetry);
+
         setPoint  = new Pose2d(0, 0, 0);
 
         localizer = new S4T_Localizer(telemetry);
@@ -123,16 +130,14 @@ public class Robot{
     }
 
     public void GoTo(Pose2d pose, Pose2d speedLimits){
-        setPoint = pose;
-        this.speedLimits = speedLimits;
+        updateGoTo(pose, speedLimits);
     }
 
     public void GoTo(double x, double y, double heading, double maxspeed_x, double maxspeed_y, double maxspeed_z){
-        setPoint = new Pose2d(x, y, heading);
-        speedLimits = new Pose2d(maxspeed_x, maxspeed_y, maxspeed_z);
+        updateGoTo(new Pose2d(x, y, heading), new Pose2d(maxspeed_x, maxspeed_y, maxspeed_z));
     }
 
-    public void updateGoTo(){
+    private void updateGoTo(Pose2d pose, Pose2d speedLimits){
         drive.goToPoint(setPoint, getPos(), speedLimits.getX(), speedLimits.getY(), speedLimits.getHeading());
         telemetry.addData("Position: ", getPos());
         telemetry.addData("Target Position: ", setPoint);

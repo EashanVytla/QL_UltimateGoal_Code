@@ -34,7 +34,6 @@ public class RobotMovement {
             previous_index = index;
 
             robot.GoTo(followMe.x, followMe.y, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).heading, followMe.moveSpeed, followMe.moveSpeed, followMe.turnSpeed);
-            robot.updateGoTo();
         }catch(Exception e){
             System.out.println("Error: " + e);
         }

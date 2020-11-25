@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.openftc.revextensions2.RevBulkData;
@@ -8,7 +9,7 @@ import org.openftc.revextensions2.RevBulkData;
 public class Caching_Motor {
     HardwareMap hardwareMap;
     String name;
-    DcMotor motor;
+    DcMotorEx motor;
     double prev_power = 0.0;
 
     double query = -2.0;
@@ -24,7 +25,7 @@ public class Caching_Motor {
         this.hardwareMap = hardwareMap;
         this.name = name;
 
-        motor = hardwareMap.dcMotor.get(name);
+        motor = hardwareMap.get(DcMotorEx.class, name);
     }
 
     public void setPower(double power){

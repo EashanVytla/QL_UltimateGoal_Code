@@ -111,12 +111,16 @@ public class S4T_Localizer {
         }
 
         //If dx is higher, wf is lower and vice versa
-        //wf = Math.pow(Math.E, -k_vert * Math.abs(dx));
-        wf = 1;
+        if(dx != 0) {
+            wf = Math.pow(Math.E, -k_vert * Math.abs(dx));
+        }
+        //wf = 1;
 
         //If dy is high, ws is lower and vice versa
-        //ws = Math.pow(Math.E, -k_strafe * Math.abs(dy));
-        ws = 0;
+        if(dy != 0) {
+            ws = Math.pow(Math.E, -k_strafe * Math.abs(dy));
+        }
+        //ws = 0;
 
         telemetry.addData("weight forward: ", wf);
         telemetry.addData("weight strafe: ", ws);

@@ -82,21 +82,31 @@ public class Mecanum_Drive{
     }
 
     public void setPower(double x, double y, double rot){
+        //Calculating the 4 motor powers
         double frontLeftMotorPower = y - x - rot;
         double frontRightMotorPower = y + x + rot;
         double backLeftMotorPower = y + x - rot;
         double backRightMotorPower = y - x + rot;
 
-        double motorPowers[] = {Math.abs(frontLeftMotorPower), Math.abs(backRightMotorPower), Math.abs(backLeftMotorPower), Math.abs(frontRightMotorPower)};
+        //Creating an array of all motor powers
+        double motorPowers[] = {Math.abs(frontLeftMotorPower),
+                Math.abs(backRightMotorPower),
+                Math.abs(backLeftMotorPower),
+                Math.abs(frontRightMotorPower)};
+        //Sorting the motor powers to find the highest one
         Arrays.sort(motorPowers);
 
-        if(motorPowers[3] > 1){
+        //Verifying highest motor power != 0 to avoid a divide by 0 error
+        //todo: this used to be > 1, so if it is not working, CHANGE IT BACK!!
+        if(motorPowers[3] != 0){
+            //Normalizing the values to be within 0-1
             frontLeftMotorPower /= motorPowers[3];
             frontRightMotorPower /= motorPowers[3];
             backRightMotorPower /= motorPowers[3];
             backLeftMotorPower /= motorPowers[3];
         }
 
+        //Setting the powers
         motors[0].setPower(frontLeftMotorPower);
         motors[1].setPower(frontRightMotorPower);
         motors[2].setPower(backLeftMotorPower);

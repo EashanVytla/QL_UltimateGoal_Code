@@ -19,6 +19,6 @@ public class S4T_Localizer_Tester extends OpMode {
     public void loop(){
         robot.updatePos();
 
-        telemetry.addData("Pos: ", robot.localizer.getPose());
+        telemetry.addData("Pos: ", robot.getPos());
     }
 }
