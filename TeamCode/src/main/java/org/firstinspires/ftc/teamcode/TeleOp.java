@@ -1,25 +1,21 @@
 package org.firstinspires.ftc.teamcode;
 
+import android.graphics.Path;
+
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.openftc.easyopencv.OpenCvCamera;
-import org.openftc.easyopencv.OpenCvCameraFactory;
-import org.openftc.easyopencv.OpenCvCameraRotation;
-import org.openftc.easyopencv.OpenCvInternalCamera;
-
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp(name = "TeleOp")
+@com.qualcomm.robotcore.eventloop.opmode.TeleOp
 public class TeleOp extends OpMode {
     Robot robot;
     Pose2d storedPos = new Pose2d(0, 0, 0);
     private boolean previousDpadUp = false;
     private boolean previousDpadDown = false;
-    private boolean previousA = false;
-    private boolean grabberToggle = false;
+    private Pose2d currentPoseSnapShot = new Pose2d(0, 0, 0);
 
     enum Drive_State{
         Driving,
+        AutoDrivePos,
         AutoAllign
     }
 
@@ -28,7 +24,6 @@ public class TeleOp extends OpMode {
 
     public void init(){
         robot = Robot.getInstance(hardwareMap, telemetry);
-
     }
 
     @Override
@@ -39,17 +34,22 @@ public class TeleOp extends OpMode {
     public void loop(){
         switch (mDriveState){
             case Driving:
-                robot.drive.drive(gamepad1, 0.3, 0.3);
+                robot.drive.driveCentric(gamepad1, 1.0, 1.0, robot.getPos().getHeading() + Math.toRadians(90));
 
-                if(gamepad1.left_stick_button){
-                    mDriveState = Drive_State.AutoAllign;
+                if(gamepad1.right_stick_button){
+                    mDriveState = Drive_State.AutoDrivePos;
                 }else if(gamepad1.a){
                     storedPos = robot.getPos();
                 }
 
+                if(gamepad1.left_stick_button){
+                    mDriveState = Drive_State.AutoAllign;
+                    currentPoseSnapShot = robot.getPos();
+                }
+
                 break;
-            case AutoAllign:
-                if(gamepad1.left_stick_x > 0.3 || gamepad1.right_stick_x > 0.3){
+            case AutoDrivePos:
+                if(!gamepad1.atRest()){
                     mDriveState = Drive_State.Driving;
                 }
 
@@ -61,32 +61,46 @@ public class TeleOp extends OpMode {
                 }
 
                 break;
+            case AutoAllign:
+                if(!gamepad1.atRest()){
+                    mDriveState = Drive_State.Driving;
+                }
+
+                double angle = Math.atan2(robot.getPos().getX(), robot.getPos().getY());
+
+                if(Math.abs(robot.getPos().getHeading() - angle) <= Math.toRadians(1.0)){
+                    robot.GoTo(currentPoseSnapShot, new Pose2d(1.0, 1.0, 1.0));
+                }else{
+                    robot.drive.setPower(0, 0, 0);
+                    mDriveState = Drive_State.Driving;
+                }
+
+                break;
         }
 
-        if(gamepad1.a && !previousA){
-            grabberToggle = !grabberToggle;
-
-            if(grabberToggle){
-                robot.wobbleGoal.clamp();
-            }else{
-                robot.wobbleGoal.release();
-            }
-        }
-
-        if(gamepad1.dpad_up && !previousDpadUp){
+        if(gamepad2.dpad_up && !previousDpadUp){
             robot.shooter.lift_auto();
         }
 
-        if(gamepad1.dpad_down && !previousDpadDown){
+        if(gamepad2.dpad_down && !previousDpadDown){
             robot.shooter.drop();
         }
 
         previousDpadUp = gamepad1.dpad_up;
         previousDpadDown = gamepad1.dpad_down;
-        previousA = gamepad1.a;
 
         robot.updatePos();
         robot.drive.write();
+
+        robot.shooter.operate(gamepad1, gamepad2);
+        robot.shooter.write();
+
+        robot.wobbleGoal.operate(gamepad2);
+        robot.wobbleGoal.write();
+
+        robot.intake.operate(gamepad1);
+        robot.intake.write();
+
         telemetry.addData("stored pos:", storedPos);
         telemetry.addData("State: ", mDriveState);
         telemetry.addData("Pos: ", robot.getPos());

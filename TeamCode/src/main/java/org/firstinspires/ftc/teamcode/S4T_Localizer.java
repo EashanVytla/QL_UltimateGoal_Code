@@ -7,7 +7,7 @@ import org.firstinspires.ftc.teamcode.Math.Vector2;
 
 public class S4T_Localizer {
     private double TRACK_WIDTH1 = 13.581490658183012723991930114595;
-    private double TRACK_WIDTH2 = 3.2820273572065697174581206914623;
+    private double TRACK_WIDTH2 = 6.8542971111369223086049488009311;
     private double EPILSON = 0.00001;
     private Pose2d mypose = new Pose2d(0, 0, 0);
     double prevheading = 0;
@@ -55,7 +55,7 @@ public class S4T_Localizer {
         preverx = erx;
         prevery = ery;
 
-        double dthetastrafe = (dErx - dElx) / TRACK_WIDTH2;
+        double dthetastrafe = -(dErx - dElx) / TRACK_WIDTH2;
         double dthetavert = -(dEry - dEly) / TRACK_WIDTH1;
 
         double dtheta = weightedTheta(dx, dy, dthetavert, dthetastrafe);
@@ -71,7 +71,7 @@ public class S4T_Localizer {
         mypose = new Pose2d(mypose.getX(), mypose.getY(), heading);
 
         telemetry.addData("Vertical Heading: ", Math.toDegrees(-(ery - ely)/ TRACK_WIDTH1) % (360));
-        telemetry.addData("Strafe Heading: ", Math.toDegrees((erx - elx)/ TRACK_WIDTH2) % (360));
+        telemetry.addData("Strafe Heading: ", Math.toDegrees(-(erx - elx)/ TRACK_WIDTH2) % (360));
     }
 
     public double weightedTheta(double dx, double dy, double dthetavert, double dthetastrafe){
