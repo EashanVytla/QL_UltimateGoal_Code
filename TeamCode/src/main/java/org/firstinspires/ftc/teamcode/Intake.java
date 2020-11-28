@@ -3,7 +3,7 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-class Intake {
+public class Intake {
     private Caching_Motor intake;
     private boolean intakeToggle = false;
     private  boolean previousA = false;

@@ -6,7 +6,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 
-class WobbleGoal {
+public class WobbleGoal {
     private double clamp_pos = 0.5;
     private double release_pos = 0.5;
     private Caching_Servo servo;

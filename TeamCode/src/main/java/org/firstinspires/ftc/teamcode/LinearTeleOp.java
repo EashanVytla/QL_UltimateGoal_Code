@@ -5,10 +5,8 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
-class LinearTeleOp extends LinearOpMode {
+public class LinearTeleOp extends LinearOpMode {
     //Gamepad1:
-    //B = save position
-    //Right Stick Button = drive to saved position
     //Left Stick Button = align to goal
     //a/y = intake in/out
 
@@ -24,7 +22,6 @@ class LinearTeleOp extends LinearOpMode {
 
     enum Drive_State{
         Driving,
-        AutoDrivePos,
         AutoAllign
     }
 
@@ -49,28 +46,10 @@ class LinearTeleOp extends LinearOpMode {
                 case Driving:
                     robot.drive.driveCentric(gamepad1, 1.0, 1.0, robot.getPos().getHeading() + Math.toRadians(90));
 
-                    if(gamepad1.right_stick_button){
-                        mDriveState = Drive_State.AutoDrivePos;
-                    }else if(gamepad1.b){
-                        storedPos = robot.getPos();
-                    }
 
                     if(gamepad1.left_stick_button){
                         mDriveState = Drive_State.AutoAllign;
                         currentPoseSnapShot = robot.getPos();
-                    }
-
-                    break;
-                case AutoDrivePos:
-                    if(!gamepad1.atRest()){
-                        mDriveState = Drive_State.Driving;
-                    }
-
-                    if(robot.getPos().vec().distTo(storedPos.vec()) >= 0.5){
-                        robot.GoTo(storedPos, new Pose2d(1.0, 1.0, 1.0));
-                    }else{
-                        robot.drive.setPower(0, 0, 0);
-                        mDriveState = Drive_State.Driving;
                     }
 
                     break;
@@ -103,13 +82,13 @@ class LinearTeleOp extends LinearOpMode {
             previousDpadDown = gamepad1.dpad_down;
 
             robot.updatePos();
-            robot.drive.write();
+            //robot.drive.write();
 
             robot.shooter.operate(gamepad1, gamepad2);
             robot.shooter.write();
 
-            robot.wobbleGoal.operate(gamepad1);
-            robot.wobbleGoal.write();
+            //robot.wobbleGoal.operate(gamepad1);
+            //robot.wobbleGoal.write();
 
             telemetry.addData("stored pos:", storedPos);
             telemetry.addData("State: ", mDriveState);

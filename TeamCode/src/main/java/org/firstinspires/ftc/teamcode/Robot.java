@@ -34,9 +34,9 @@ public class Robot{
     Telemetry telemetry;
 
     //Todo: Once all robot hardware is on the main robot, make these their own classes
-    WobbleGoal wobbleGoal;
+    //WobbleGoal wobbleGoal;
     Shooter shooter;
-    Intake intake;
+    //Intake intake;
 
 
     private Robot(HardwareMap map, Telemetry telemetry){
@@ -53,13 +53,13 @@ public class Robot{
         encoderRX = new S4T_Encoder(map, "back_right");
 
         drive = new Mecanum_Drive(map, telemetry);
-        wobbleGoal = new WobbleGoal(map, telemetry, 0.5);
+        //wobbleGoal = new WobbleGoal(map, telemetry, 0.5);
         shooter = new Shooter(map, telemetry);
 
         setPoint  = new Pose2d(0, 0, 0);
 
         localizer = new S4T_Localizer(telemetry);
-        intake = new Intake(hardwareMap);
+        //intake = new Intake(hardwareMap);
     }
 
     public static Robot getInstance(HardwareMap map, Telemetry telemetry){

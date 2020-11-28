@@ -95,11 +95,11 @@ public class TeleOp extends OpMode {
         robot.shooter.operate(gamepad1, gamepad2);
         robot.shooter.write();
 
-        robot.wobbleGoal.operate(gamepad2);
-        robot.wobbleGoal.write();
+        //robot.wobbleGoal.operate(gamepad2);
+        //robot.wobbleGoal.write();
 
-        robot.intake.operate(gamepad1);
-        robot.intake.write();
+        //robot.intake.operate(gamepad1);
+        //robot.intake.write();
 
         telemetry.addData("stored pos:", storedPos);
         telemetry.addData("State: ", mDriveState);
