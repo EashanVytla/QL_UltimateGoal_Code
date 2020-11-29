@@ -28,7 +28,12 @@ public class LinearTeleOp extends LinearOpMode {
     Drive_State mDriveState = Drive_State.Driving;
 
     @Override
+<<<<<<< Updated upstream
     public void runOpMode() {
+=======
+    public void runOpMode() throws InterruptedException{
+        telemetry.addData("Robot Status", Robot.robotS==null?"null":"filled");
+>>>>>>> Stashed changes
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -98,6 +103,11 @@ public class LinearTeleOp extends LinearOpMode {
             telemetry.addData("Right Y: ", robot.getRight_Y_Dist());
             telemetry.addData("Left Y: ", robot.getLeft_Y_Dist());
             telemetry.update();
+<<<<<<< Updated upstream
+=======
+
+            idle();
+>>>>>>> Stashed changes
         }
     }
 }
