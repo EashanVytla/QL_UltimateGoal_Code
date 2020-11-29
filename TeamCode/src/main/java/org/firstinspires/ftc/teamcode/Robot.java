@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -12,10 +13,12 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.RevBulkData;
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 
-public class Robot{
+public class Robot {
+    public static final String TAG = "QL LOGS: ";
     Mecanum_Drive drive;
-    //public static Robot robot = null;
+    public static Robot robotS = null;
     public ExpansionHubEx hub1;
     // The IMU sensor object
     private BNO055IMU imu;
@@ -30,6 +33,7 @@ public class Robot{
     private HardwareMap hardwareMap;
     private Pose2d speedLimits;
 
+
     Pose2d setPoint;
     Telemetry telemetry;
 
@@ -40,7 +44,7 @@ public class Robot{
 
 
     public Robot(HardwareMap map, Telemetry telemetry){
-        //robot = null;
+        robotS = null;
 
         this.hardwareMap = map;
         this.telemetry = telemetry;
@@ -62,18 +66,19 @@ public class Robot{
         //intake = new Intake(hardwareMap);
     }
 
-    /*public static Robot getInstance(HardwareMap map, Telemetry telemetry){
-        if( robot == null)
+    public static Robot getInstance(HardwareMap map, Telemetry telemetry){
+        if(robotS == null)
         {
-            robot = new Robot(map, telemetry);
+            robotS = new Robot(map, telemetry);
         }
 
-        return robot;
+        return robotS;
     }
 
     public void stop(){
-        robot = null;
-    }*/
+        robotS = null;
+        RobotLog.vv(TAG, "Robot null stopped!");
+    }
 
     private void updateBulkData(){
         data = hub1.getBulkInputData();

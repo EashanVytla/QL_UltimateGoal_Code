@@ -4,6 +4,8 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
+
 @TeleOp
 public class LinearTeleOp extends LinearOpMode {
     //Gamepad1:
@@ -14,7 +16,7 @@ public class LinearTeleOp extends LinearOpMode {
     //Dpad Up/Down = Wobble Goal Slides
     //b(toggle) = Wobble Goal Grabber
 
-    Robot robot;
+    Robot robot = null;
     Pose2d storedPos = new Pose2d(0, 0, 0);
     private boolean previousDpadUp = false;
     private boolean previousDpadDown = false;
@@ -29,6 +31,7 @@ public class LinearTeleOp extends LinearOpMode {
 
     @Override
     public void runOpMode(){
+        telemetry.addData("Robot Status", Robot.robotS==null?"null":"filled");
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -44,7 +47,7 @@ public class LinearTeleOp extends LinearOpMode {
         while (opModeIsActive()) {
             switch (mDriveState){
                 case Driving:
-                    robot.drive.driveCentric(gamepad1, 1.0, 1.0, robot.getPos().getHeading() + Math.toRadians(90));
+                    robot.drive.driveCentric(gamepad1, robot.shooter.aToggle ? 0.5 : 1.0, robot.shooter.aToggle ? 0.3 : 1.0, robot.getPos().getHeading() + Math.toRadians(90));
 
 
                     if(gamepad1.left_stick_button){
@@ -82,7 +85,7 @@ public class LinearTeleOp extends LinearOpMode {
             previousDpadDown = gamepad1.dpad_down;
 
             robot.updatePos();
-            //robot.drive.write();
+            robot.drive.write();
 
             robot.shooter.operate(gamepad1, gamepad2);
             robot.shooter.write();
