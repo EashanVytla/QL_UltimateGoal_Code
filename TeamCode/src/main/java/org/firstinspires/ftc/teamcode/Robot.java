@@ -4,6 +4,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
@@ -12,8 +13,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.RevBulkData;
+import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 
-public class Robot{
+public class Robot {
+    public static final String TAG = "QL LOGS: ";
     Mecanum_Drive drive;
     public static Robot robotS = null;
     public ExpansionHubEx hub1;
@@ -29,6 +32,7 @@ public class Robot{
     private RevBulkData data;
     private HardwareMap hardwareMap;
     private Pose2d speedLimits;
+
 
     Pose2d setPoint;
     Telemetry telemetry;
@@ -73,6 +77,7 @@ public class Robot{
 
     public void stop(){
         robotS = null;
+        RobotLog.vv(TAG, "Robot null stopped!");
     }
 
     private void updateBulkData(){

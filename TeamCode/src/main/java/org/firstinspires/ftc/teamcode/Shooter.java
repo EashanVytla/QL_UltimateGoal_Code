@@ -57,9 +57,6 @@ public class Shooter {
         pushSlide.setPosition(pushIdle);
 
         this.telemetry = telemetry;
-
-      //  shooter.setPositionPIDFCoefficients(5);
-      //  shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
     public void lift_auto(){
@@ -119,7 +116,6 @@ public class Shooter {
         previousA = gamepad1.a;
         previousLB = gamepad1.left_bumper;
 
-       // shooter.setVelocity(4, AngleUnit.RADIANS);
 
         switch (mRobotState){
             case PREPARE:
