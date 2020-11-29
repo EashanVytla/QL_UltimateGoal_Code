@@ -30,8 +30,7 @@ public class LinearTeleOp extends LinearOpMode {
     Drive_State mDriveState = Drive_State.Driving;
 
     @Override
-    public void runOpMode(){
-        telemetry.addData("Robot Status", Robot.robotS==null?"null":"filled");
+    public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
