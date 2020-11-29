@@ -5,11 +5,11 @@ import com.qualcomm.robotcore.hardware.Servo;
 
 public class Caching_Servo {
     Servo servo;
-    double prev_pos = 0.0;
+    private double prev_pos = 0.0;
 
-    double query = -2.0;
+    private double query = -2.0;
 
-    double EPSILON = 0.001;
+    private double EPSILON = 0.001;
 
     public Caching_Servo(HardwareMap map, String name){
         servo = map.servo.get(name);

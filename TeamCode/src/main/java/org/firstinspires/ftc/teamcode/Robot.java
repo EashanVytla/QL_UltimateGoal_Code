@@ -15,7 +15,7 @@ import org.openftc.revextensions2.RevBulkData;
 
 public class Robot{
     Mecanum_Drive drive;
-    public static Robot robot = null;
+    public static Robot robotS = null;
     public ExpansionHubEx hub1;
     // The IMU sensor object
     private BNO055IMU imu;
@@ -39,8 +39,8 @@ public class Robot{
     //Intake intake;
 
 
-    private Robot(HardwareMap map, Telemetry telemetry){
-        robot = null;
+    public Robot(HardwareMap map, Telemetry telemetry){
+        robotS = null;
 
         this.hardwareMap = map;
         this.telemetry = telemetry;
@@ -63,16 +63,16 @@ public class Robot{
     }
 
     public static Robot getInstance(HardwareMap map, Telemetry telemetry){
-        if( robot == null)
+        if(robotS == null)
         {
-            robot = new Robot(map, telemetry);
+            robotS = new Robot(map, telemetry);
         }
 
-        return robot;
+        return robotS;
     }
 
     public void stop(){
-        robot = null;
+        robotS = null;
     }
 
     private void updateBulkData(){
