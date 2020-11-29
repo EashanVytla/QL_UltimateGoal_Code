@@ -33,8 +33,8 @@ public class Shooter {
     private boolean previousA = false;
     public boolean aToggle = false;
     private boolean rbToggle = false;
-    public final double pushIdle = 0.95;
-    public final double pushForward = 0.46;
+    public final double pushIdle = 0.90;
+    public final double pushForward = 0.29;
 
     private enum ShootState{
         PREPARE,
@@ -58,8 +58,8 @@ public class Shooter {
 
         this.telemetry = telemetry;
 
-        shooter.setPositionPIDFCoefficients(5);
-        shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
+      //  shooter.setPositionPIDFCoefficients(5);
+      //  shooter.setMode(DcMotorEx.RunMode.RUN_USING_ENCODER);
     }
 
     public void lift_auto(){
@@ -119,12 +119,12 @@ public class Shooter {
         previousA = gamepad1.a;
         previousLB = gamepad1.left_bumper;
 
-        shooter.setVelocity(4, AngleUnit.RADIANS);
+       // shooter.setVelocity(4, AngleUnit.RADIANS);
 
         switch (mRobotState){
             case PREPARE:
-                if(mStateTime.time() <= 1){
-                    //shooter.setPower(1);
+                if(mStateTime.time() <= 4){
+                    shooter.setPower(1);
                     flicker.setPosition(flickPosDown);
                     stopper.setPosition(stopPosUp);
                     first = false;
@@ -134,7 +134,7 @@ public class Shooter {
                 }
                 break;
             case SHOOT:
-                if(mStateTime.time() <= 1){
+                if(mStateTime.time() <= 2){
                     shooter.setPower(1);
                     pushSlide.setPosition(pushForward);
                 } else {
@@ -154,7 +154,6 @@ public class Shooter {
         }
 
         telemetry.addData("Velocity: ", shooter.getVelocity(AngleUnit.RADIANS));
-
         telemetry.addData("slide pos: ", slidePos);
         telemetry.addData("servo pos: ", pushSlide.getPosition());
     }
