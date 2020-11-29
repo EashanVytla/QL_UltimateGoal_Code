@@ -28,15 +28,14 @@ public class LinearTeleOp extends LinearOpMode {
     Drive_State mDriveState = Drive_State.Driving;
 
     @Override
-    public void runOpMode() throws InterruptedException{
-        telemetry.addData("Robot Status", Robot.robot==null?"You are good to run!":"STOP AND RESTART. ERROR ERROR ERROR.");
+    public void runOpMode(){
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
         // Initialize the hardware variables. Note that the strings used here as parameters
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
-        robot = Robot.getInstance(hardwareMap, telemetry);
+        robot = new Robot(hardwareMap, telemetry);
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
@@ -99,10 +98,6 @@ public class LinearTeleOp extends LinearOpMode {
             telemetry.addData("Right Y: ", robot.getRight_Y_Dist());
             telemetry.addData("Left Y: ", robot.getLeft_Y_Dist());
             telemetry.update();
-
-            idle();
         }
-
-        robot.stop();
     }
 }
