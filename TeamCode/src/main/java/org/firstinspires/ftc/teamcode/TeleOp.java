@@ -90,8 +90,8 @@ public class TeleOp extends OpMode {
         //robot.wobbleGoal.operate(gamepad2);
         //robot.wobbleGoal.write();
 
-        //robot.intake.operate(gamepad1);
-        //robot.intake.write();
+        robot.intake.operate(gamepad1, gamepad2);
+        robot.intake.write();
 
         telemetry.addData("MA3 Readings: ", robot.getShooterAngle());
 

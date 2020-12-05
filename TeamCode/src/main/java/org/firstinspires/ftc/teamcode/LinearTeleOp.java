@@ -90,6 +90,9 @@ public class LinearTeleOp extends LinearOpMode {
             //robot.wobbleGoal.operate(gamepad1);
             //robot.wobbleGoal.write();
 
+            robot.intake.operate(gamepad1, gamepad2);
+            robot.intake.write();
+
             telemetry.addData("stored pos:", storedPos);
             telemetry.addData("State: ", mDriveState);
             telemetry.addData("Pos: ", robot.getPos());

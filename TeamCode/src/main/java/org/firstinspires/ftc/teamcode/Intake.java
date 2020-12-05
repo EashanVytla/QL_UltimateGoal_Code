@@ -20,13 +20,13 @@ public class Intake {
         intake.write();
     }
 
-    public void operate(Gamepad gamepad1){
+    public void operate(Gamepad gamepad1, Gamepad gamepad2){
         //a = start intake
         //y = outake
         //if y let go then whatever a command is doing
 
 
-        if(gamepad1.a && !previousA){
+        /*if(gamepad1.a && !previousA){
             intakeToggle = !intakeToggle;
         }
 
@@ -38,6 +38,8 @@ public class Intake {
             intake.setPower(0.0);
         }
 
-        previousA = gamepad1.a;
+        previousA = gamepad1.a;*/
+
+        intake.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
     }
 }
