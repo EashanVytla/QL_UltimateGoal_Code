@@ -55,8 +55,8 @@ public class S4T_Localizer {
         preverx = erx;
         prevery = ery;
 
-        double dthetastrafe = -(dErx - dElx) / TRACK_WIDTH2;
-        double dthetavert = -(dEry - dEly) / TRACK_WIDTH1;
+        double dthetastrafe = (dErx - dElx) / TRACK_WIDTH2;
+        double dthetavert = (dEry - dEly) / TRACK_WIDTH1;
 
         double dtheta = weightedTheta(dx, dy, dthetavert, dthetastrafe);
         //double dtheta = nonweightedTheta(dx, dy, dthetavert, dthetastrafe);
@@ -68,7 +68,7 @@ public class S4T_Localizer {
         prevheading = heading;
 
         mypose = mypose.plus(new Pose2d(myVec.x, myVec.y, dtheta));
-        mypose = new Pose2d(mypose.getX(), mypose.getY(), heading);
+        mypose = new Pose2d(mypose.getX(), mypose.getY(), (Math.toRadians(360) - heading) % Math.toRadians(360));
 
         telemetry.addData("Vertical Heading: ", Math.toDegrees(-(ery - ely)/ TRACK_WIDTH1) % (360));
         telemetry.addData("Strafe Heading: ", Math.toDegrees(-(erx - elx)/ TRACK_WIDTH2) % (360));

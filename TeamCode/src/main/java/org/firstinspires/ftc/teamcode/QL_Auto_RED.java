@@ -43,6 +43,7 @@ public class QL_Auto_RED extends OpMode {
 
     @Override
     public void loop() {
+        robot.updateBulkData();
         telemetry.addData("Pose: ", robot.getPos().toString());
 
         ArrayList<CurvePoint> allPoints = new ArrayList<>();
@@ -51,7 +52,7 @@ public class QL_Auto_RED extends OpMode {
             case GRAB_WOBBLE:
                 //robot.wobbleGoal.clamp();
                 if(time.time() >= 1.5){
-                    robot.shooter.lift_auto();
+                    //robot.shooter.lift_auto();
                 }
                 break;
             case DRIVE_TO_ZONE:
@@ -61,7 +62,7 @@ public class QL_Auto_RED extends OpMode {
                         run = 1;
                         RobotMovement.resetIndex();
                     }else{
-                        robot.shooter.drop();
+                        //robot.shooter.drop();
                         if(time.time() >= 1.5){
                             //robot.wobbleGoal.release();
                         }
@@ -83,7 +84,7 @@ public class QL_Auto_RED extends OpMode {
                     }else{
                         //robot.wobbleGoal.clamp();
                         if(time.time() >= 1.5){
-                            robot.shooter.lift_auto();
+                            //robot.shooter.lift_auto();
                         }
                     }
                 }else{
@@ -100,7 +101,7 @@ public class QL_Auto_RED extends OpMode {
                         run = 3;
                         RobotMovement.resetIndex();
                     }else{
-                        robot.shooter.drop();
+                        //robot.shooter.drop();
                         if(time.time() >= 1.5){
                             //robot.wobbleGoal.release();
                         }
@@ -126,7 +127,7 @@ public class QL_Auto_RED extends OpMode {
                     run = 1;
                     RobotMovement.resetIndex();
                 }else{
-                    robot.shooter.drop();
+                    //robot.shooter.drop();
                     if(time.time() >= 1.5){
                         //robot.wobbleGoal.release();
                     }
@@ -147,7 +148,7 @@ public class QL_Auto_RED extends OpMode {
                 }else{
                     //robot.wobbleGoal.clamp();
                     if(time.time() >= 1.5){
-                        robot.shooter.lift_auto();
+                        //robot.shooter.lift_auto();
                     }
                 }
             }else{
@@ -163,7 +164,7 @@ public class QL_Auto_RED extends OpMode {
                     run = 3;
                     RobotMovement.resetIndex();
                 }else{
-                    robot.shooter.drop();
+                    //robot.shooter.drop();
                     if(time.time() >= 1.5){
                         //robot.wobbleGoal.release();
                     }

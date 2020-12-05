@@ -78,21 +78,13 @@ public class TeleOp extends OpMode {
                 break;
         }
 
-        if(gamepad2.dpad_up && !previousDpadUp){
-            robot.shooter.lift_auto();
-        }
-
-        if(gamepad2.dpad_down && !previousDpadDown){
-            robot.shooter.drop();
-        }
-
         previousDpadUp = gamepad1.dpad_up;
         previousDpadDown = gamepad1.dpad_down;
 
         robot.updatePos();
         robot.drive.write();
 
-        robot.shooter.operate(gamepad1, gamepad2);
+        robot.shooter.operate(gamepad1, gamepad2, robot.getPos().vec().distTo(robot.ULTIMATE_GOAL_POS));
         robot.shooter.write();
 
         //robot.wobbleGoal.operate(gamepad2);
@@ -100,6 +92,8 @@ public class TeleOp extends OpMode {
 
         //robot.intake.operate(gamepad1);
         //robot.intake.write();
+
+        telemetry.addData("MA3 Readings: ", robot.getShooterAngle());
 
         telemetry.addData("stored pos:", storedPos);
         telemetry.addData("State: ", mDriveState);

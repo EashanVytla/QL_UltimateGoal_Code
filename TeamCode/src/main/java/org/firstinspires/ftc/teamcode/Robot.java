@@ -1,8 +1,10 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.RobotLog;
 
@@ -16,7 +18,7 @@ import org.openftc.revextensions2.RevBulkData;
 import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 
 public class Robot {
-    public static final String TAG = "QL LOGS: ";
+    public final Vector2d ULTIMATE_GOAL_POS = new Vector2d(-12, 130);
     Mecanum_Drive drive;
     public static Robot robotS = null;
     public ExpansionHubEx hub1;
@@ -33,8 +35,6 @@ public class Robot {
     private HardwareMap hardwareMap;
     private Pose2d speedLimits;
 
-
-    Pose2d setPoint;
     Telemetry telemetry;
 
     //Todo: Once all robot hardware is on the main robot, make these their own classes
@@ -56,11 +56,10 @@ public class Robot {
         encoderRY = new S4T_Encoder(map, "front_right");
         encoderRX = new S4T_Encoder(map, "back_right");
 
+
         drive = new Mecanum_Drive(map, telemetry);
         //wobbleGoal = new WobbleGoal(map, telemetry, 0.5);
         shooter = new Shooter(map, telemetry);
-
-        setPoint  = new Pose2d(0, 0, 0);
 
         localizer = new S4T_Localizer(telemetry);
         //intake = new Intake(hardwareMap);
@@ -77,20 +76,23 @@ public class Robot {
 
     public void stop(){
         robotS = null;
-        RobotLog.vv(TAG, "Robot null stopped!");
     }
 
-    private void updateBulkData(){
+    public void updateBulkData(){
         data = hub1.getBulkInputData();
+        shooter.setData(data);
     }
 
     public void updatePos(){
-        updateBulkData();
         encoderLX.update(data);
         encoderLY.update(data);
         encoderRX.update(data);
         encoderRY.update(data);
         localizer.update(getLeft_X_Dist(), getLeft_Y_Dist(), getRight_X_Dist(), getRight_Y_Dist());
+    }
+
+    public double getShooterAngle(){
+        return shooter.getShooterAngle(data);
     }
 
     public double getLeft_X_Dist(){
@@ -145,9 +147,9 @@ public class Robot {
     }
 
     private void updateGoTo(Pose2d pose, Pose2d speedLimits){
-        drive.goToPoint(setPoint, getPos(), speedLimits.getX(), speedLimits.getY(), speedLimits.getHeading());
+        drive.goToPoint(pose, getPos(), speedLimits.getX(), speedLimits.getY(), speedLimits.getHeading());
         telemetry.addData("Position: ", getPos());
-        telemetry.addData("Target Position: ", setPoint);
+        telemetry.addData("Target Position: ", pose);
         drive.write();
         updatePos();
     }

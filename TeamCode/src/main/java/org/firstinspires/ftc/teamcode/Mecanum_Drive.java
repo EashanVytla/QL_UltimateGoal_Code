@@ -155,4 +155,28 @@ public class Mecanum_Drive{
 
         setPowerCentic(PID_X.update(currentPos.getX()), -PID_Y.update(currentPos.getY()), PID_Z.update(heading), currentPos.getHeading());
     }
+
+    public void driveWithHeading(double x, double y, double targetHeading, double currentHeading, double FCcurrentHeading, double speed){
+        PID_Z.setOutputBounds(-speed, speed);
+
+        double heading = 0;
+        double target_heading = targetHeading;
+
+        if(currentHeading <= Math.PI){
+            heading = currentHeading;
+        }else{
+            heading = -((2 * Math.PI ) - currentHeading);
+        }
+
+        if(Math.abs(target_heading - heading) >= Math.toRadians(180.0)){
+            target_heading = -((2 * Math.PI) - target_heading);
+        }
+
+        telemetry.addData("Target heading: ", target_heading);
+        telemetry.addData("Current heading: ", heading);
+
+        PID_Z.setTargetPosition(target_heading);
+
+        setPowerCentic(x, y, PID_Z.update(heading), FCcurrentHeading);
+    }
 }
