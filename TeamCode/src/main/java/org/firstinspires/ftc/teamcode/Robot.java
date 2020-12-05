@@ -40,7 +40,7 @@ public class Robot {
     //Todo: Once all robot hardware is on the main robot, make these their own classes
     //WobbleGoal wobbleGoal;
     Shooter shooter;
-    //Intake intake;
+    Intake intake;
 
 
     public Robot(HardwareMap map, Telemetry telemetry){
@@ -62,7 +62,7 @@ public class Robot {
         shooter = new Shooter(map, telemetry);
 
         localizer = new S4T_Localizer(telemetry);
-        //intake = new Intake(hardwareMap);
+        intake = new Intake(hardwareMap);
     }
 
     public static Robot getInstance(HardwareMap map, Telemetry telemetry){
