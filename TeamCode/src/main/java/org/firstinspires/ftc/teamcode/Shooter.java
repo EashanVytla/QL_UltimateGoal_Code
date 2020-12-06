@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
+import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
@@ -15,6 +16,7 @@ import com.qualcomm.robotcore.util.Range;
 import org.firstinspires.ftc.robotcore.external.State;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.openftc.revextensions2.RevBulkData;
 
 @Config
@@ -59,6 +61,7 @@ public class Shooter {
 
     private ElapsedTime mStateTime;
     private AnalogInput MA3;
+    private DistanceSensor sensor;
 
     private PIDFController slidesController;
     private RevBulkData data;
@@ -85,6 +88,7 @@ public class Shooter {
         stopper.setPosition(stopPosDown);
         pushSlide.setPosition(pushIdle);
         MA3 = map.get(AnalogInput.class, "ma3");
+        sensor = map.get(DistanceSensor.class, "dist");
 
         slidesController = new PIDFController(new PIDCoefficients(kp_shooter, ki_shooter, kd_shooter));
 
@@ -94,7 +98,7 @@ public class Shooter {
     }
 
     public double getShooterAngle(RevBulkData data){
-        return ((data.getAnalogInputValue(MA3) * (2 * Math.PI))/(3260.0)) - Math.toRadians(289.4);
+        return ((data.getAnalogInputValue(MA3) * (2 * Math.PI))/(3260.0)) + Math.toRadians(16.25);
     }
 
     public void write(){
@@ -161,6 +165,7 @@ public class Shooter {
         double shooterTargetAngle = calculateShooterAngle(distFromGoal);
 
         telemetry.addData("Shooter Angle Required", shooterTargetAngle);
+        telemetry.addData("Sensor Data: ", sensor.getDistance(DistanceUnit.INCH));
 
         if(gamepad1.b){
             pushSlide.setPosition(pushForward);

@@ -1,13 +1,15 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Math.Vector2;
 
+@Config
 public class S4T_Localizer {
-    private double TRACK_WIDTH1 = 13.581490658183012723991930114595;
-    private double TRACK_WIDTH2 = 6.8542971111369223086049488009311;
+    public static double TRACK_WIDTH1 = 13.581490658183012723991930114595;
+    public static double TRACK_WIDTH2 = 6.832055564243586;//6.8542971111369223086049488009311;
     private double EPILSON = 0.00001;
     private Pose2d mypose = new Pose2d(0, 0, 0);
     double prevheading = 0;
