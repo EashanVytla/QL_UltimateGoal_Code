@@ -26,8 +26,8 @@ public class Shooter {
     public static double kd_shooter = 0.1;
 
     private Caching_Servo pushSlide;
-    private Caching_Servo stopper;
-    private Caching_Servo flicker;
+    public Caching_Servo stopper;
+    public Caching_Servo flicker;
 
     private Caching_Motor shooter;
     private Telemetry telemetry;
@@ -35,11 +35,11 @@ public class Shooter {
     private final double AUTO_LIFT_HEIGHT = 0.2;
     private final double RESTING_POS = 0.01;
 
-    private final double flickPosDown = 0.0;
-    private final double flickPosUp = 0.2;
+    public final double flickPosDown = 0.1139999;
+    public final double flickPosUp = 0.314;
 
-    private final double stopPosUp = 0.6;
-    private final double stopPosDown = 1;
+    public final double stopPosUp = 0.6;
+    public final double stopPosDown = 1;
 
     public final double pushIdle = 0.90;
     public final double pushForward = 0.29;
@@ -47,6 +47,8 @@ public class Shooter {
     private double slidePos = 0.12;
 
     private float prev_time = 0;
+
+    private final double FF = 0.2;
 
     private boolean previousLB = false;
     private boolean previousA = false;
@@ -59,14 +61,14 @@ public class Shooter {
     private Caching_Motor leftSlide;
     private Caching_Motor rightSlide;
 
-    private ElapsedTime mStateTime;
+    public ElapsedTime mStateTime;
     private AnalogInput MA3;
     private DistanceSensor sensor;
 
     private PIDFController slidesController;
     private RevBulkData data;
 
-    private enum ShootState{
+    public enum ShootState{
         PREPARE,
         SHOOT,
         IDLE
@@ -150,6 +152,10 @@ public class Shooter {
         leftSlide.setPower(Range.clip(power + 0.26, -1, 1));
     }
 
+    public void setShooterPower(double power){
+        shooter.setPower(power);
+    }
+
     public void operate(Gamepad gamepad1, Gamepad gamepad2, double distFromGoal){
         /*setHeightSlidePos(slidePos);
         if(gamepad2.left_trigger > 0.3){
@@ -207,7 +213,7 @@ public class Shooter {
 
         switch (mRobotState){
             case PREPARE:
-                if(mStateTime.time() <= 4){
+                if(Math.abs(shooter.motor.getVelocity(AngleUnit.RADIANS) - 5) <= 0.2){
                     shooter.setPower(1);
                     flicker.setPosition(flickPosDown);
                     stopper.setPosition(stopPosUp);
@@ -222,6 +228,9 @@ public class Shooter {
                     shooter.setPower(1);
                     pushSlide.setPosition(pushForward);
                 } else {
+                    stopper.setPosition(stopPosDown);
+                    flicker.setPosition(flickPosUp);
+                    shooter.setPower(FF);
                     mRobotState = ShootState.IDLE;
                     mStateTime.reset();
                 }
@@ -229,15 +238,13 @@ public class Shooter {
             case IDLE:
                 if (mStateTime.time() <= 1){
                     pushSlide.setPosition(pushIdle);
-                    shooter.setPower(0);
-                } else {
-                    stopper.setPosition(stopPosDown);
-                    flicker.setPosition(flickPosUp);
                 }
                 break;
         }
 
         telemetry.addData("slide pos: ", slidePos);
         telemetry.addData("servo pos: ", pushSlide.getPosition());
+        telemetry.addData("Velocity", shooter.motor.getVelocity(AngleUnit.RADIANS));
+        telemetry.addData("Encoder Velocity", shooter.motor.getCurrentPosition());
     }
 }
