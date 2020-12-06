@@ -213,7 +213,7 @@ public class Shooter {
 
         switch (mRobotState){
             case PREPARE:
-                if(Math.abs(shooter.motor.getVelocity(AngleUnit.RADIANS) - 5) <= 0.2){
+                if(Math.abs(shooter.motor.getVelocity(AngleUnit.RADIANS) - 5.2) <= 0.2){
                     shooter.setPower(1);
                     flicker.setPosition(flickPosDown);
                     stopper.setPosition(stopPosUp);
