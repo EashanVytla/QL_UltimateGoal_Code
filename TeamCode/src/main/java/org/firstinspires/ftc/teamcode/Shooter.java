@@ -26,20 +26,20 @@ public class Shooter {
     public static double kd_shooter = 0.1;
 
     private Caching_Servo pushSlide;
-    private Caching_Servo stopper;
-    private Caching_Servo flicker;
+    public Caching_Servo stopper;
+    public Caching_Servo flicker;
 
-    private Caching_Motor shooter;
+    public Caching_Motor shooter;
     private Telemetry telemetry;
 
     private final double AUTO_LIFT_HEIGHT = 0.2;
     private final double RESTING_POS = 0.01;
 
-    private final double flickPosDown = 0.0;
-    private final double flickPosUp = 0.2;
+    public final double flickPosDown = 0.09;//.07
+    public final double flickPosUp = 0.09;//0.314;
 
-    private final double stopPosUp = 0.6;
-    private final double stopPosDown = 1;
+    public final double stopPosUp = 0.82;
+    public final double stopPosDown = 1;
 
     public final double pushIdle = 0.90;
     public final double pushForward = 0.29;
@@ -59,14 +59,14 @@ public class Shooter {
     private Caching_Motor leftSlide;
     private Caching_Motor rightSlide;
 
-    private ElapsedTime mStateTime;
+    public ElapsedTime mStateTime;
     private AnalogInput MA3;
     private DistanceSensor sensor;
 
     private PIDFController slidesController;
     private RevBulkData data;
 
-    private enum ShootState{
+    public enum ShootState{
         PREPARE,
         SHOOT,
         IDLE
@@ -95,6 +95,8 @@ public class Shooter {
         leftSlide.motor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         this.telemetry = telemetry;
+
+        shooter.setPower(0.2);
     }
 
     public double getShooterAngle(RevBulkData data){
@@ -177,7 +179,7 @@ public class Shooter {
             aToggle = !aToggle;
         }
 
-        if(gamepad1.left_bumper && !previousLB){
+        if(gamepad2.left_bumper && !previousLB){
             mStateTime.reset();
             mRobotState = !rbToggle ? ShootState.PREPARE : ShootState.IDLE;
             rbToggle = !rbToggle;
@@ -200,14 +202,14 @@ public class Shooter {
         }
 
         previousA = gamepad1.a;
-        previousLB = gamepad1.left_bumper;
+        previousLB = gamepad2.left_bumper;
 
         previousDpadUp = gamepad1.dpad_up;
 
 
         switch (mRobotState){
             case PREPARE:
-                if(mStateTime.time() <= 4){
+                if(Math.abs(shooter.motor.getVelocity(AngleUnit.RADIANS)) <= 5.1){
                     shooter.setPower(1);
                     flicker.setPosition(flickPosDown);
                     stopper.setPosition(stopPosUp);
@@ -218,10 +220,13 @@ public class Shooter {
                 }
                 break;
             case SHOOT:
-                if(mStateTime.time() <= 2){
+                if(mStateTime.time() <= 5){
                     shooter.setPower(1);
                     pushSlide.setPosition(pushForward);
                 } else {
+                    shooter.setPower(0.2);
+                    stopper.setPosition(stopPosDown);
+                    flicker.setPosition(flickPosUp);
                     mRobotState = ShootState.IDLE;
                     mStateTime.reset();
                 }
@@ -229,14 +234,11 @@ public class Shooter {
             case IDLE:
                 if (mStateTime.time() <= 1){
                     pushSlide.setPosition(pushIdle);
-                    shooter.setPower(0);
-                } else {
-                    stopper.setPosition(stopPosDown);
-                    flicker.setPosition(flickPosUp);
                 }
                 break;
         }
 
+        telemetry.addData("Motor Velocity: ", shooter.motor.getVelocity(AngleUnit.RADIANS));
         telemetry.addData("slide pos: ", slidePos);
         telemetry.addData("servo pos: ", pushSlide.getPosition());
     }

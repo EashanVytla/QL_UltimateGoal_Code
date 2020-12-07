@@ -25,11 +25,11 @@ public class Mecanum_Drive{
     PIDFController PID_Y;
     PIDFController PID_Z;
 
-    float kp = 0.06f;
+    float kp = 0.08f;
     float ki = 0;
     float kd = 0.0125f;
 
-    float kpr = 0.86f;
+    float kpr = 0.89f;
     float kir = 0;
     float kdr = 0.06f;
     int counter;

@@ -8,7 +8,7 @@ public class Servo_Tester extends LinearOpMode {
     Robot robot;
     Caching_Servo servo;
     private double pos = 0;
-    final String name = "push_slide";
+    final String name = "stopper";
 
     @Override
     public void runOpMode(){
