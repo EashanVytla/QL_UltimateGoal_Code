@@ -92,7 +92,7 @@ public class Robot {
     }
 
     public double getShooterAngle(){
-        return shooter.getShooterAngle(data);
+        return shooter.getShooterAngle();
     }
 
     public double getLeft_X_Dist(){

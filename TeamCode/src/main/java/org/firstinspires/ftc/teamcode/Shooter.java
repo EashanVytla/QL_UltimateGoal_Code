@@ -36,7 +36,7 @@ public class Shooter {
     private final double RESTING_POS = 0.01;
 
     public final double flickPosDown = 0.09;//.07
-    public final double flickPosUp = 0.09;//0.314;
+    public final double flickPosUp = 0.314;
 
     public final double stopPosUp = 0.82;
     public final double stopPosDown = 1;
@@ -55,12 +55,12 @@ public class Shooter {
     private boolean first = true;
     private boolean previousDpadUp = false;
     private boolean PROTO_AlignSlides = false;
+    private boolean previousX = false;
 
     private Caching_Motor leftSlide;
     private Caching_Motor rightSlide;
 
     public ElapsedTime mStateTime;
-    private AnalogInput MA3;
     private DistanceSensor sensor;
 
     private PIDFController slidesController;
@@ -87,7 +87,6 @@ public class Shooter {
         flicker.setPosition(flickPosDown);
         stopper.setPosition(stopPosDown);
         pushSlide.setPosition(pushIdle);
-        MA3 = map.get(AnalogInput.class, "ma3");
         sensor = map.get(DistanceSensor.class, "dist");
 
         slidesController = new PIDFController(new PIDCoefficients(kp_shooter, ki_shooter, kd_shooter));
@@ -96,11 +95,12 @@ public class Shooter {
 
         this.telemetry = telemetry;
 
-        shooter.setPower(0.2);
+        //shooter.setPower(0.2);
     }
 
-    public double getShooterAngle(RevBulkData data){
-        return ((data.getAnalogInputValue(MA3) * (2 * Math.PI))/(3260.0)) + Math.toRadians(16.25);
+    public double getShooterAngle(/*RevBulkData data*/){
+        return Math.atan2(sensor.getDistance(DistanceUnit.INCH), 2.855);
+        //return ((data.get...(ma3) * (2 * Math.PI))/(3260.0)) + Math.toRadians(16.25);
     }
 
     public void write(){
@@ -175,8 +175,16 @@ public class Shooter {
             pushSlide.setPosition(pushIdle);
         }
 
+        previousX = gamepad2.x;
+
         if(gamepad1.a && !previousA){
             aToggle = !aToggle;
+        }
+
+        if(aToggle){
+            flicker.setPosition(flickPosUp);
+        }else{
+            flicker.setPosition(flickPosDown);
         }
 
         if(gamepad2.left_bumper && !previousLB){
@@ -196,12 +204,12 @@ public class Shooter {
         }
 
         if(PROTO_AlignSlides){
-            setShooterAngle(Math.toRadians(shooterTargetAngle), getShooterAngle(data));
+            setShooterAngle(Math.toRadians(shooterTargetAngle), getShooterAngle());
         }else{
             slideSetPower(gamepad2.left_stick_y);
         }
 
-        previousA = gamepad1.a;
+        previousA = gamepad1.x;
         previousLB = gamepad2.left_bumper;
 
         previousDpadUp = gamepad1.dpad_up;
