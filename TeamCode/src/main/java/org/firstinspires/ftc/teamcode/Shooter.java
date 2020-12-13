@@ -35,14 +35,14 @@ public class Shooter {
     private final double AUTO_LIFT_HEIGHT = 0.2;
     private final double RESTING_POS = 0.01;
 
-    public final double flickPosDown = 0.09;//.07
-    public final double flickPosUp = 0.314;
+    public final double flickPosDown = 0.113;//.07
+    public final double flickPosUp = 0.2429;
 
-    public final double stopPosUp = 0.82;
-    public final double stopPosDown = 1;
+    public  double stopPosUp = 0.82;
+    public  double stopPosDown = 0.952;
 
-    public final double pushIdle = 0.90;
-    public final double pushForward = 0.29;
+    public final double pushIdle = 0.859;
+    public final double pushForward = 0.36;
 
     private double slidePos = 0.12;
 
@@ -95,7 +95,7 @@ public class Shooter {
 
         this.telemetry = telemetry;
 
-        //shooter.setPower(0.2);
+        shooter.setPower(0.2);
     }
 
     public double getShooterAngle(/*RevBulkData data*/){
@@ -152,18 +152,8 @@ public class Shooter {
         leftSlide.setPower(Range.clip(power + 0.26, -1, 1));
     }
 
+
     public void operate(Gamepad gamepad1, Gamepad gamepad2, double distFromGoal){
-        /*setHeightSlidePos(slidePos);
-        if(gamepad2.left_trigger > 0.3){
-            slidePos += 0.001;
-        }*/
-
-        /*if(gamepad1.dpad_up){
-            slidePos+=.001;
-        }else if(gamepad1.dpad_down){
-            slidePos-=.001;
-        }*/
-
         double shooterTargetAngle = calculateShooterAngle(distFromGoal);
 
         telemetry.addData("Shooter Angle Required", shooterTargetAngle);
@@ -177,9 +167,10 @@ public class Shooter {
 
         previousX = gamepad2.x;
 
-        if(gamepad1.a && !previousA){
+        if(gamepad2.x && !previousA){
             aToggle = !aToggle;
         }
+
 
         if(aToggle){
             flicker.setPosition(flickPosUp);
@@ -193,12 +184,6 @@ public class Shooter {
             rbToggle = !rbToggle;
         }
 
-        /*if(gamepad1.right_bumper || gamepad2.a){
-            shooter.setPower(-1.0);
-        } else {
-            shooter.setPower(0);
-        }*/
-
         if(gamepad1.dpad_up && !previousDpadUp){
             PROTO_AlignSlides = !PROTO_AlignSlides;
         }
@@ -209,7 +194,7 @@ public class Shooter {
             slideSetPower(gamepad2.left_stick_y);
         }
 
-        previousA = gamepad1.x;
+        previousA = gamepad2.x;
         previousLB = gamepad2.left_bumper;
 
         previousDpadUp = gamepad1.dpad_up;
@@ -217,7 +202,7 @@ public class Shooter {
 
         switch (mRobotState){
             case PREPARE:
-                if(Math.abs(shooter.motor.getVelocity(AngleUnit.RADIANS)) <= 5.1){
+                if(Math.abs(shooter.motor.getVelocity(AngleUnit.RADIANS)) <= 5.4){
                     shooter.setPower(1);
                     flicker.setPosition(flickPosDown);
                     stopper.setPosition(stopPosUp);
@@ -243,6 +228,8 @@ public class Shooter {
                 if (mStateTime.time() <= 1){
                     pushSlide.setPosition(pushIdle);
                 }
+                //todo: TAKE THIS OUT!
+                stopper.setPosition(stopPosDown);
                 break;
         }
 

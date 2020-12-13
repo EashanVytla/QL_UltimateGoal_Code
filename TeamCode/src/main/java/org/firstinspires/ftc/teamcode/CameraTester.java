@@ -125,11 +125,11 @@ public class CameraTester extends LinearOpMode
                 REGION_TOPLEFT_ANCHOR_POINT.y);
         Point upper_region_pointB = new Point(
                 REGION_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH,
-                REGION_TOPLEFT_ANCHOR_POINT.y + (REGION_HEIGHT * (2/3)));
+                REGION_TOPLEFT_ANCHOR_POINT.y + (REGION_HEIGHT * (2.0/3.0)));
 
         Point lower_region_pointA = new Point(
                 REGION_TOPLEFT_ANCHOR_POINT.x,
-                REGION_TOPLEFT_ANCHOR_POINT.y + (REGION_HEIGHT * (2/3)));
+                REGION_TOPLEFT_ANCHOR_POINT.y + (REGION_HEIGHT * (2.0/3.0)));
         Point lower_region_pointB = new Point(
                 REGION_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH,
                 REGION_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);

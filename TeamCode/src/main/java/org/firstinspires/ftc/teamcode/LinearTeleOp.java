@@ -51,7 +51,6 @@ public class LinearTeleOp extends LinearOpMode {
             switch (mDriveState){
                 case Driving:
                     robot.drive.driveCentric(gamepad1, robot.shooter.aToggle ? 0.5 : 1.0, robot.shooter.aToggle ? 0.3 : 1.0, robot.getPos().getHeading() + Math.toRadians(90));
-                    //robot.drive.driveWithHeading(gamepad1.left_stick_x, gamepad1.left_stick_y, (angle + Math.toRadians(180)) % Math.toRadians(360), robot.getPos().getHeading(), robot.getPos().getHeading() + Math.toRadians(90), 1.0);
 
                     if(gamepad1.right_stick_button){
                         mDriveState = Drive_State.AutoAllign;

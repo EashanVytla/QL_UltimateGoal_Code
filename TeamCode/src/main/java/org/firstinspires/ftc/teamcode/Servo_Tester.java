@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 public class Servo_Tester extends LinearOpMode {
     Robot robot;
     Caching_Servo servo;
-    private double pos = 0;
-    final String name = "stopper";
+    private double pos = 0.113;
+    final String name = "flicker";
 
     @Override
     public void runOpMode(){
