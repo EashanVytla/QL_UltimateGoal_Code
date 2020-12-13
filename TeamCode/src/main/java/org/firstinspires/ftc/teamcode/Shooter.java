@@ -29,26 +29,24 @@ public class Shooter {
     public Caching_Servo stopper;
     public Caching_Servo flicker;
 
-    private Caching_Motor shooter;
+    public Caching_Motor shooter;
     private Telemetry telemetry;
 
     private final double AUTO_LIFT_HEIGHT = 0.2;
     private final double RESTING_POS = 0.01;
 
-    public final double flickPosDown = 0.1139999;
-    public final double flickPosUp = 0.314;
+    public final double flickPosDown = 0.113;//.07
+    public final double flickPosUp = 0.2429;
 
-    public final double stopPosUp = 0.6;
-    public final double stopPosDown = 1;
+    public  double stopPosUp = 0.82;
+    public  double stopPosDown = 0.952;
 
-    public final double pushIdle = 0.90;
-    public final double pushForward = 0.29;
+    public final double pushIdle = 0.859;
+    public final double pushForward = 0.36;
 
     private double slidePos = 0.12;
 
     private float prev_time = 0;
-
-    private final double FF = 0.2;
 
     private boolean previousLB = false;
     private boolean previousA = false;
@@ -57,12 +55,12 @@ public class Shooter {
     private boolean first = true;
     private boolean previousDpadUp = false;
     private boolean PROTO_AlignSlides = false;
+    private boolean previousX = false;
 
     private Caching_Motor leftSlide;
     private Caching_Motor rightSlide;
 
     public ElapsedTime mStateTime;
-    private AnalogInput MA3;
     private DistanceSensor sensor;
 
     private PIDFController slidesController;
@@ -89,7 +87,6 @@ public class Shooter {
         flicker.setPosition(flickPosDown);
         stopper.setPosition(stopPosDown);
         pushSlide.setPosition(pushIdle);
-        MA3 = map.get(AnalogInput.class, "ma3");
         sensor = map.get(DistanceSensor.class, "dist");
 
         slidesController = new PIDFController(new PIDCoefficients(kp_shooter, ki_shooter, kd_shooter));
@@ -97,10 +94,13 @@ public class Shooter {
         leftSlide.motor.setDirection(DcMotorSimple.Direction.REVERSE);
 
         this.telemetry = telemetry;
+
+        shooter.setPower(0.2);
     }
 
-    public double getShooterAngle(RevBulkData data){
-        return ((data.getAnalogInputValue(MA3) * (2 * Math.PI))/(3260.0)) + Math.toRadians(16.25);
+    public double getShooterAngle(/*RevBulkData data*/){
+        return Math.atan2(sensor.getDistance(DistanceUnit.INCH), 2.855);
+        //return ((data.get...(ma3) * (2 * Math.PI))/(3260.0)) + Math.toRadians(16.25);
     }
 
     public void write(){
@@ -152,22 +152,8 @@ public class Shooter {
         leftSlide.setPower(Range.clip(power + 0.26, -1, 1));
     }
 
-    public void setShooterPower(double power){
-        shooter.setPower(power);
-    }
 
     public void operate(Gamepad gamepad1, Gamepad gamepad2, double distFromGoal){
-        /*setHeightSlidePos(slidePos);
-        if(gamepad2.left_trigger > 0.3){
-            slidePos += 0.001;
-        }*/
-
-        /*if(gamepad1.dpad_up){
-            slidePos+=.001;
-        }else if(gamepad1.dpad_down){
-            slidePos-=.001;
-        }*/
-
         double shooterTargetAngle = calculateShooterAngle(distFromGoal);
 
         telemetry.addData("Shooter Angle Required", shooterTargetAngle);
@@ -179,41 +165,44 @@ public class Shooter {
             pushSlide.setPosition(pushIdle);
         }
 
-        if(gamepad1.a && !previousA){
+        previousX = gamepad2.x;
+
+        if(gamepad2.x && !previousA){
             aToggle = !aToggle;
         }
 
-        if(gamepad1.left_bumper && !previousLB){
+
+        if(aToggle){
+            flicker.setPosition(flickPosUp);
+        }else{
+            flicker.setPosition(flickPosDown);
+        }
+
+        if(gamepad2.left_bumper && !previousLB){
             mStateTime.reset();
             mRobotState = !rbToggle ? ShootState.PREPARE : ShootState.IDLE;
             rbToggle = !rbToggle;
         }
-
-        /*if(gamepad1.right_bumper || gamepad2.a){
-            shooter.setPower(-1.0);
-        } else {
-            shooter.setPower(0);
-        }*/
 
         if(gamepad1.dpad_up && !previousDpadUp){
             PROTO_AlignSlides = !PROTO_AlignSlides;
         }
 
         if(PROTO_AlignSlides){
-            setShooterAngle(Math.toRadians(shooterTargetAngle), getShooterAngle(data));
+            setShooterAngle(Math.toRadians(shooterTargetAngle), getShooterAngle());
         }else{
             slideSetPower(gamepad2.left_stick_y);
         }
 
-        previousA = gamepad1.a;
-        previousLB = gamepad1.left_bumper;
+        previousA = gamepad2.x;
+        previousLB = gamepad2.left_bumper;
 
         previousDpadUp = gamepad1.dpad_up;
 
 
         switch (mRobotState){
             case PREPARE:
-                if(Math.abs(shooter.motor.getVelocity(AngleUnit.RADIANS) - 5.2) <= 0.2){
+                if(Math.abs(shooter.motor.getVelocity(AngleUnit.RADIANS)) <= 5.4){
                     shooter.setPower(1);
                     flicker.setPosition(flickPosDown);
                     stopper.setPosition(stopPosUp);
@@ -224,13 +213,13 @@ public class Shooter {
                 }
                 break;
             case SHOOT:
-                if(mStateTime.time() <= 2){
+                if(mStateTime.time() <= 5){
                     shooter.setPower(1);
                     pushSlide.setPosition(pushForward);
                 } else {
+                    shooter.setPower(0.2);
                     stopper.setPosition(stopPosDown);
                     flicker.setPosition(flickPosUp);
-                    shooter.setPower(FF);
                     mRobotState = ShootState.IDLE;
                     mStateTime.reset();
                 }
@@ -239,12 +228,13 @@ public class Shooter {
                 if (mStateTime.time() <= 1){
                     pushSlide.setPosition(pushIdle);
                 }
+                //todo: TAKE THIS OUT!
+                stopper.setPosition(stopPosDown);
                 break;
         }
 
+        telemetry.addData("Motor Velocity: ", shooter.motor.getVelocity(AngleUnit.RADIANS));
         telemetry.addData("slide pos: ", slidePos);
         telemetry.addData("servo pos: ", pushSlide.getPosition());
-        telemetry.addData("Velocity", shooter.motor.getVelocity(AngleUnit.RADIANS));
-        telemetry.addData("Encoder Velocity", shooter.motor.getCurrentPosition());
     }
 }

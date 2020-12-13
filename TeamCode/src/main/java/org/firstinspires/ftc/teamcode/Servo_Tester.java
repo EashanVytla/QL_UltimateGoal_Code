@@ -1,30 +1,39 @@
 package org.firstinspires.ftc.teamcode;
 
-import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 @TeleOp
-public class Servo_Tester extends OpMode {
-    Caching_Servo Servo;
-    String name = "flicker";
-    double pos = 0;
+public class Servo_Tester extends LinearOpMode {
+    Robot robot;
+    Caching_Servo servo;
+    private double pos = 0.113;
+    final String name = "flicker";
 
     @Override
-    public void init() {
-        Servo = new Caching_Servo(hardwareMap, name);
-    }
+    public void runOpMode(){
+        robot = Robot.getInstance(hardwareMap, telemetry);
+        servo = new Caching_Servo(hardwareMap, name);
 
-    public void loop(){
-        if(gamepad1.dpad_up){
-            Servo.setPosition(pos += .001);
+        waitForStart();
+        while(opModeIsActive()) {
+            if (gamepad1.dpad_up) {
+                if(pos < 1){
+                    pos += 0.00001;
+                }
+            } else if (gamepad1.dpad_down){
+                if(pos > 0){
+                    pos -= 0.00001;
+                }
+            }
+
+            servo.setPosition(pos);
+
+            servo.write();
+
+            telemetry.addData("Position", servo.getPosition());
+            telemetry.update();
         }
-
-        if(gamepad1.dpad_down){
-            Servo.setPosition(pos -= .001);
-        }
-
-        telemetry.addData("Position", pos);
-
-        Servo.write();
+        robot.stop();
     }
 }
