@@ -1,11 +1,10 @@
-package org.firstinspires.ftc.teamcode;
-
-import android.graphics.Path;
+/*package org.firstinspires.ftc.teamcode.OpModes;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 
-@com.qualcomm.robotcore.eventloop.opmode.TeleOp
+import org.firstinspires.ftc.teamcode.Components.Robot;
+
 public class TeleOp extends OpMode {
     Robot robot;
     Pose2d storedPos = new Pose2d(0, 0, 0);
@@ -93,7 +92,7 @@ public class TeleOp extends OpMode {
         robot.intake.operate(gamepad1, gamepad2);
         robot.intake.write();
 
-        telemetry.addData("MA3 Readings: ", robot.getShooterAngle());
+        //telemetry.addData("MA3 Readings: ", robot.getShooterAngle());
 
         telemetry.addData("stored pos:", storedPos);
         telemetry.addData("State: ", mDriveState);
@@ -103,4 +102,4 @@ public class TeleOp extends OpMode {
         telemetry.addData("Right Y: ", robot.getRight_Y_Dist());
         telemetry.addData("Left Y: ", robot.getLeft_Y_Dist());
     }
-}
+}*/

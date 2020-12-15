@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Components;
 
 
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Math.Vector2;
+import org.firstinspires.ftc.teamcode.Wrapper.Caching_Motor;
 
 import java.util.Arrays;
 
@@ -25,7 +26,7 @@ public class Mecanum_Drive{
     PIDFController PID_Y;
     PIDFController PID_Z;
 
-    float kp = 0.08f;
+    float kp = 0.09f;
     float ki = 0;
     float kd = 0.0125f;
 
