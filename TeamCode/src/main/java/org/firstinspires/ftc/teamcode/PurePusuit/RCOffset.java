@@ -1,15 +1,15 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.PurePusuit;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 
 import org.firstinspires.ftc.teamcode.Math.Vector2;
 
 public class RCOffset {
-    double left = 0.0;
-    double right = 0.0;
-    double x = 0.0;
-    double y = 0.0;
-    double dtheta = 0.0;
+    public double left = 0.0;
+    public double right = 0.0;
+    public double x = 0.0;
+    public double y = 0.0;
+    public double dtheta = 0.0;
 
     public RCOffset(double left, double right, double x, double y, double dtheta){
         this.left = left;

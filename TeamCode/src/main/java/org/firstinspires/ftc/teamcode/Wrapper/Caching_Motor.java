@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Wrapper;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
@@ -9,7 +9,7 @@ import org.openftc.revextensions2.RevBulkData;
 public class Caching_Motor {
     HardwareMap hardwareMap;
     String name;
-    DcMotorEx motor;
+    public DcMotorEx motor;
     double prev_power = 0.0;
 
     double query = -2.0;

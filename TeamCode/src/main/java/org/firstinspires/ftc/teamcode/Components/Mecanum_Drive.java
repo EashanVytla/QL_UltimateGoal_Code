@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Components;
 
 
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
@@ -12,6 +12,7 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Math.Vector2;
+import org.firstinspires.ftc.teamcode.Wrapper.Caching_Motor;
 
 import java.util.Arrays;
 
@@ -25,11 +26,11 @@ public class Mecanum_Drive{
     PIDFController PID_Y;
     PIDFController PID_Z;
 
-    float kp = 0.06f;
+    float kp = 0.09f;
     float ki = 0;
     float kd = 0.0125f;
 
-    float kpr = 0.86f;
+    float kpr = 0.89f;
     float kir = 0;
     float kdr = 0.06f;
     int counter;
@@ -154,29 +155,5 @@ public class Mecanum_Drive{
         PID_Z.setTargetPosition(target_heading);
 
         setPowerCentic(PID_X.update(currentPos.getX()), -PID_Y.update(currentPos.getY()), PID_Z.update(heading), currentPos.getHeading());
-    }
-
-    public void driveWithHeading(double x, double y, double targetHeading, double currentHeading, double FCcurrentHeading, double speed){
-        PID_Z.setOutputBounds(-speed, speed);
-
-        double heading = 0;
-        double target_heading = targetHeading;
-
-        if(currentHeading <= Math.PI){
-            heading = currentHeading;
-        }else{
-            heading = -((2 * Math.PI ) - currentHeading);
-        }
-
-        if(Math.abs(target_heading - heading) >= Math.toRadians(180.0)){
-            target_heading = -((2 * Math.PI) - target_heading);
-        }
-
-        telemetry.addData("Target heading: ", target_heading);
-        telemetry.addData("Current heading: ", heading);
-
-        PID_Z.setTargetPosition(target_heading);
-
-        setPowerCentic(x, y, PID_Z.update(heading), FCcurrentHeading);
     }
 }

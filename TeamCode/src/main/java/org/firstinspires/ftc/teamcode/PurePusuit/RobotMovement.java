@@ -5,11 +5,9 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.teamcode.PurePusuit.CurvePoint;
-import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.Components.Robot;
 
 import java.util.ArrayList;
-import java.util.Scanner;
 
 public class RobotMovement {
     private static int index = 0;

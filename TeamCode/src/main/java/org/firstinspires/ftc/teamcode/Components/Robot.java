@@ -1,25 +1,24 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Components;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.teamcode.Odometry.S4T_Encoder;
+import org.firstinspires.ftc.teamcode.Odometry.S4T_Localizer;
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.RevBulkData;
-import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 
 public class Robot {
     public final Vector2d ULTIMATE_GOAL_POS = new Vector2d(-12, 130);
-    Mecanum_Drive drive;
+    public Mecanum_Drive drive;
     public static Robot robotS = null;
     public ExpansionHubEx hub1;
     // The IMU sensor object
@@ -35,12 +34,12 @@ public class Robot {
     private HardwareMap hardwareMap;
     private Pose2d speedLimits;
 
-    Telemetry telemetry;
+    private Telemetry telemetry;
 
     //Todo: Once all robot hardware is on the main robot, make these their own classes
     //WobbleGoal wobbleGoal;
-    Shooter shooter;
-    Intake intake;
+    public Shooter shooter;
+    public Intake intake;
 
 
     public Robot(HardwareMap map, Telemetry telemetry){
@@ -89,10 +88,6 @@ public class Robot {
         encoderRX.update(data);
         encoderRY.update(data);
         localizer.update(getLeft_X_Dist(), getLeft_Y_Dist(), getRight_X_Dist(), getRight_Y_Dist());
-    }
-
-    public double getShooterAngle(){
-        return shooter.getShooterAngle(data);
     }
 
     public double getLeft_X_Dist(){

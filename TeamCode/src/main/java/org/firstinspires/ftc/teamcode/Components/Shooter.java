@@ -1,11 +1,9 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Components;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
-import com.qualcomm.robotcore.hardware.AnalogInput;
-import com.qualcomm.robotcore.hardware.DcMotor;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -13,17 +11,19 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.State;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.Wrapper.Caching_Motor;
+import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
+import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 import org.openftc.revextensions2.RevBulkData;
 
 @Config
 public class Shooter {
-    public static double kp_shooter = 6;
+    public static double kp_shooter = 0;
     public static double ki_shooter = 0;
-    public static double kd_shooter = 0.1;
+    public static double kd_shooter = 0;
 
     private Caching_Servo pushSlide;
     public Caching_Servo stopper;
@@ -32,39 +32,27 @@ public class Shooter {
     public Caching_Motor shooter;
     private Telemetry telemetry;
 
-    private final double AUTO_LIFT_HEIGHT = 0.2;
-    private final double RESTING_POS = 0.01;
+    public final double flickPosDown = 0.250;//.07
+    public final double flickPosUp = 0.0;
 
-    public final double flickPosDown = 0.113;//.07
-    public final double flickPosUp = 0.2429;
-
-    public  double stopPosUp = 0.82;
-    public  double stopPosDown = 0.952;
+    public  double stopPosUp = 0.0;
+    public  double stopPosDown = 0.346;
 
     public final double pushIdle = 0.859;
-    public final double pushForward = 0.36;
+    public final double pushForward = 0.346;
 
-    private double slidePos = 0.12;
-
-    private float prev_time = 0;
-
-    private boolean previousLB = false;
-    private boolean previousA = false;
-    public boolean aToggle = false;
     private boolean rbToggle = false;
-    private boolean first = true;
-    private boolean previousDpadUp = false;
     private boolean PROTO_AlignSlides = false;
-    private boolean previousX = false;
 
     private Caching_Motor leftSlide;
     private Caching_Motor rightSlide;
 
     public ElapsedTime mStateTime;
     private DistanceSensor sensor;
+    private RevBulkData data;
 
     private PIDFController slidesController;
-    private RevBulkData data;
+    private boolean flickerToggle = false;
 
     public enum ShootState{
         PREPARE,
@@ -84,7 +72,7 @@ public class Shooter {
         shooter = new Caching_Motor(map, "shooter");
         mStateTime = new ElapsedTime();
         mStateTime.startTime();
-        flicker.setPosition(flickPosDown);
+        flicker.setPosition(flickPosUp);
         stopper.setPosition(stopPosDown);
         pushSlide.setPosition(pushIdle);
         sensor = map.get(DistanceSensor.class, "dist");
@@ -96,10 +84,12 @@ public class Shooter {
         this.telemetry = telemetry;
 
         shooter.setPower(0.2);
+        write();
     }
 
     public double getShooterAngle(/*RevBulkData data*/){
-        return Math.atan2(sensor.getDistance(DistanceUnit.INCH), 2.855);
+        return Math.atan2(sensor.getDistance(DistanceUnit.MM), 46.877636208134828577760733236494);
+        //return sensor.getDistance(DistanceUnit.MM);
         //return ((data.get...(ma3) * (2 * Math.PI))/(3260.0)) + Math.toRadians(16.25);
     }
 
@@ -123,13 +113,18 @@ public class Shooter {
         y -= 2.49734 * myDist;
         y += 89.3327;*/
 
-        double y = (1.4892 * Math.pow(10.0, -11.0)) * Math.pow(myDist, 6);
-        y -= (9.2159 * Math.pow(10.0, -9.0)) * Math.pow(myDist, 5);
-        y += 0.0000024491 * Math.pow(myDist, 4);
+        /*double y = (1.4892 * Math.pow(10.0, -11.0)) * Math.pow(myDist, 6);
+        //y -= (9.2159 * Math.pow(10.0, -9.0)) * Math.pow(myDist, 5);
+        //y += 0.0000024491 * Math.pow(myDist, 4);
         y -= 0.00036536 * Math.pow(myDist, 3);
         y += 0.0336898 * Math.pow(myDist, 2);
         y -= 1.90701 * myDist;
-        y += 75.5784;
+        y += 75.5784;*/
+
+        double y = -0.000146832 * Math.pow(myDist, 3);
+        y += 0.0422034 * Math.pow(myDist, 2);
+        y -= 4.09676 * myDist;
+        y += 153.494;
 
         return y;
     }
@@ -138,6 +133,9 @@ public class Shooter {
         slidesController.setTargetPosition(targetAngle);
         double power = slidesController.update(currentAngle);
         telemetry.addData("PID Power", power);
+        telemetry.addData("Target Angle", targetAngle);
+        telemetry.addData("Current Angle", currentAngle);
+        telemetry.addData("Error", targetAngle - currentAngle);
         //rightSlide.setPower(Range.clip(power, -1, 1));
         //leftSlide.setPower(Range.clip(power, -1, 1));
         slideSetPower(power);
@@ -148,57 +146,63 @@ public class Shooter {
     }
 
     public void slideSetPower(double power){
-        rightSlide.setPower(Range.clip(power + 0.26, -1, 1));
-        leftSlide.setPower(Range.clip(power + 0.26, -1, 1));
+        rightSlide.setPower(Range.clip(power + 0.05, -1, 1));
+        leftSlide.setPower(Range.clip(power + 0.05, -1, 1));
+        telemetry.addData("Slide Power", power);
     }
 
+    double desiredAngle = 25;
 
-    public void operate(Gamepad gamepad1, Gamepad gamepad2, double distFromGoal){
+    public void operate(GamepadEx gamepad1, GamepadEx gamepad2, double distFromGoal){
         double shooterTargetAngle = calculateShooterAngle(distFromGoal);
 
         telemetry.addData("Shooter Angle Required", shooterTargetAngle);
-        telemetry.addData("Sensor Data: ", sensor.getDistance(DistanceUnit.INCH));
+        telemetry.addData("Shooter Angle Current", Math.toDegrees(getShooterAngle()));
 
-        if(gamepad1.b){
-            pushSlide.setPosition(pushForward);
-        }else{
-            pushSlide.setPosition(pushIdle);
-        }
-
-        previousX = gamepad2.x;
-
-        if(gamepad2.x && !previousA){
-            aToggle = !aToggle;
-        }
-
-
-        if(aToggle){
-            flicker.setPosition(flickPosUp);
-        }else{
-            flicker.setPosition(flickPosDown);
-        }
-
-        if(gamepad2.left_bumper && !previousLB){
+        if(gamepad2.isPress(GamepadEx.Control.left_bumper)){
             mStateTime.reset();
             mRobotState = !rbToggle ? ShootState.PREPARE : ShootState.IDLE;
             rbToggle = !rbToggle;
         }
 
-        if(gamepad1.dpad_up && !previousDpadUp){
-            PROTO_AlignSlides = !PROTO_AlignSlides;
+        if(gamepad2.isPress(GamepadEx.Control.y)){
+            mRobotState = ShootState.SHOOT;
         }
+
+        if(gamepad2.isPress(GamepadEx.Control.dpad_up)){
+            PROTO_AlignSlides = !PROTO_AlignSlides;
+            //desiredAngle += 1;
+        }
+
+        /*if(gamepad2.isPress(GamepadEx.Control.dpad_down)){
+            desiredAngle -= 1;
+        }*/
+
+        telemetry.addData("CHECK THIS", PROTO_AlignSlides);
 
         if(PROTO_AlignSlides){
             setShooterAngle(Math.toRadians(shooterTargetAngle), getShooterAngle());
         }else{
-            slideSetPower(gamepad2.left_stick_y);
+            //if(Math.abs(getShooterAngle() - Math.toRadians(desiredAngle)) >= Math.toRadians(0.1) && gamepad2.gamepad.atRest()){
+            //    setShooterAngle(Math.toRadians(desiredAngle), getShooterAngle());
+            //}else{
+                slideSetPower(gamepad2.gamepad.left_stick_y * 0.25);
+            //}
         }
 
-        previousA = gamepad2.x;
-        previousLB = gamepad2.left_bumper;
+        telemetry.addData("desired angle value", desiredAngle);
 
-        previousDpadUp = gamepad1.dpad_up;
+        if(gamepad2.isPress(GamepadEx.Control.b)){
+            flickerToggle = !flickerToggle;
+        }
 
+        if (flickerToggle) {
+            flicker.setPosition(flickPosDown);
+        }else{
+            flicker.setPosition(flickPosUp);
+        }
+
+        telemetry.addData("Motor Velocity: ", shooter.motor.getVelocity(AngleUnit.RADIANS));
 
         switch (mRobotState){
             case PREPARE:
@@ -206,14 +210,13 @@ public class Shooter {
                     shooter.setPower(1);
                     flicker.setPosition(flickPosDown);
                     stopper.setPosition(stopPosUp);
-                    first = false;
                 } else {
                     mStateTime.reset();
                     mRobotState = ShootState.SHOOT;
                 }
                 break;
             case SHOOT:
-                if(mStateTime.time() <= 5){
+                if(mStateTime.time() <= 2){
                     shooter.setPower(1);
                     pushSlide.setPosition(pushForward);
                 } else {
@@ -228,13 +231,7 @@ public class Shooter {
                 if (mStateTime.time() <= 1){
                     pushSlide.setPosition(pushIdle);
                 }
-                //todo: TAKE THIS OUT!
-                stopper.setPosition(stopPosDown);
                 break;
         }
-
-        telemetry.addData("Motor Velocity: ", shooter.motor.getVelocity(AngleUnit.RADIANS));
-        telemetry.addData("slide pos: ", slidePos);
-        telemetry.addData("servo pos: ", pushSlide.getPosition());
     }
 }

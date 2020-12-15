@@ -1,14 +1,12 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Vision;
 
 import android.graphics.Bitmap;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -21,11 +19,11 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 
-import static org.firstinspires.ftc.teamcode.VisionConstants.FOUR_RING_THRESHOLD;
-import static org.firstinspires.ftc.teamcode.VisionConstants.ONE_RING_THRESHOLD;
-import static org.firstinspires.ftc.teamcode.VisionConstants.REGION_HEIGHT;
-import static org.firstinspires.ftc.teamcode.VisionConstants.REGION_TOPLEFT_ANCHOR_POINT;
-import static org.firstinspires.ftc.teamcode.VisionConstants.REGION_WIDTH;
+import static org.firstinspires.ftc.teamcode.Vision.VisionConstants.FOUR_RING_THRESHOLD;
+import static org.firstinspires.ftc.teamcode.Vision.VisionConstants.ONE_RING_THRESHOLD;
+import static org.firstinspires.ftc.teamcode.Vision.VisionConstants.REGION_HEIGHT;
+import static org.firstinspires.ftc.teamcode.Vision.VisionConstants.REGION_TOPLEFT_ANCHOR_POINT;
+import static org.firstinspires.ftc.teamcode.Vision.VisionConstants.REGION_WIDTH;
 
 @TeleOp
 public class CameraTester extends LinearOpMode
