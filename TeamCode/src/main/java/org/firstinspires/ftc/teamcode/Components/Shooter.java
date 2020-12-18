@@ -32,7 +32,7 @@ public class Shooter {
     public Caching_Motor shooter;
     private Telemetry telemetry;
 
-    public final double flickPosDown = 0.250;//.07
+    public final double flickPosDown = 0.304;//.07
     public final double flickPosUp = 0.0;
 
     public  double stopPosUp = 0.0;
