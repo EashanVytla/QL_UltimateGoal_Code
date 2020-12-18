@@ -21,9 +21,11 @@ import org.openftc.revextensions2.RevBulkData;
 
 @Config
 public class Shooter {
-    public static double kp_shooter = 0;
+    public static double kp_shooter = 5;
     public static double ki_shooter = 0;
-    public static double kd_shooter = 0;
+    public static double kd_shooter = 0.1;
+
+    public static double SlidesTunerAngle = 30;
 
     private Caching_Servo pushSlide;
     public Caching_Servo stopper;
@@ -59,7 +61,7 @@ public class Shooter {
         SHOOT,
         IDLE
     }
-    ShootState mRobotState = ShootState.IDLE;
+    public ShootState mRobotState = ShootState.IDLE;
 
     public Shooter(HardwareMap map, Telemetry telemetry){
         rightSlide = new Caching_Motor(map, "right_slide");
@@ -129,16 +131,16 @@ public class Shooter {
         return y;
     }
 
-    public void setShooterAngle(double targetAngle, double currentAngle){
+    public void setShooterAngle(double targetAngle, double currentAngle, double maxPower){
         slidesController.setTargetPosition(targetAngle);
         double power = slidesController.update(currentAngle);
         telemetry.addData("PID Power", power);
-        telemetry.addData("Target Angle", targetAngle);
-        telemetry.addData("Current Angle", currentAngle);
-        telemetry.addData("Error", targetAngle - currentAngle);
+        telemetry.addData("Target Angle", Math.toDegrees(targetAngle));
+        telemetry.addData("Current Angle", Math.toDegrees(currentAngle));
+        telemetry.addData("Error", Math.toDegrees(targetAngle - currentAngle));
         //rightSlide.setPower(Range.clip(power, -1, 1));
         //leftSlide.setPower(Range.clip(power, -1, 1));
-        slideSetPower(power);
+        slideSetPower(Range.clip(power, -maxPower, maxPower));
     }
 
     public void setData(RevBulkData data){
@@ -152,12 +154,13 @@ public class Shooter {
     }
 
     double desiredAngle = 25;
+    private boolean reset = false;
 
     public void operate(GamepadEx gamepad1, GamepadEx gamepad2, double distFromGoal){
         double shooterTargetAngle = calculateShooterAngle(distFromGoal);
 
         telemetry.addData("Shooter Angle Required", shooterTargetAngle);
-        telemetry.addData("Shooter Angle Current", Math.toDegrees(getShooterAngle()));
+
 
         if(gamepad2.isPress(GamepadEx.Control.left_bumper)){
             mStateTime.reset();
@@ -174,6 +177,11 @@ public class Shooter {
             //desiredAngle += 1;
         }
 
+        if(gamepad2.isPress(GamepadEx.Control.dpad_down)){
+            PROTO_AlignSlides = false;
+            reset = true;
+        }
+
         /*if(gamepad2.isPress(GamepadEx.Control.dpad_down)){
             desiredAngle -= 1;
         }*/
@@ -181,28 +189,41 @@ public class Shooter {
         telemetry.addData("CHECK THIS", PROTO_AlignSlides);
 
         if(PROTO_AlignSlides){
-            setShooterAngle(Math.toRadians(shooterTargetAngle), getShooterAngle());
+            double currentAngle = getShooterAngle();
+            if(Math.abs(currentAngle - Math.toRadians(shooterTargetAngle)) < Math.toRadians(0.2)){
+                PROTO_AlignSlides = false;
+            }else{
+                //setShooterAngle(Math.toRadians(shooterTargetAngle), currentAngle);
+                setShooterAngle(Math.toRadians(SlidesTunerAngle), currentAngle, 1.0);
+            }
         }else{
             //if(Math.abs(getShooterAngle() - Math.toRadians(desiredAngle)) >= Math.toRadians(0.1) && gamepad2.gamepad.atRest()){
             //    setShooterAngle(Math.toRadians(desiredAngle), getShooterAngle());
             //}else{
-                slideSetPower(gamepad2.gamepad.left_stick_y * 0.25);
+
             //}
+
+            if(reset){
+                double currentAngle = getShooterAngle();
+                setShooterAngle(Math.toRadians(17.1), currentAngle, 0.5);
+                if(Math.abs(currentAngle - Math.toRadians(17.1)) < Math.toRadians(0.3)){
+                    reset = false;
+                }
+            }else{
+                slideSetPower(gamepad2.gamepad.left_stick_y * 0.25);
+            }
         }
 
         telemetry.addData("desired angle value", desiredAngle);
 
         if(gamepad2.isPress(GamepadEx.Control.b)){
             flickerToggle = !flickerToggle;
+            if (flickerToggle) {
+                flicker.setPosition(flickPosDown);
+            }else{
+                flicker.setPosition(flickPosUp);
+            }
         }
-
-        if (flickerToggle) {
-            flicker.setPosition(flickPosDown);
-        }else{
-            flicker.setPosition(flickPosUp);
-        }
-
-        telemetry.addData("Motor Velocity: ", shooter.motor.getVelocity(AngleUnit.RADIANS));
 
         switch (mRobotState){
             case PREPARE:

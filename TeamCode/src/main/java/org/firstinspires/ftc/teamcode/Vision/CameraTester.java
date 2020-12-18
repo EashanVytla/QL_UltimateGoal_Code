@@ -5,7 +5,9 @@ import android.graphics.Bitmap;
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.vuforia.Rectangle;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
@@ -80,7 +82,7 @@ public class CameraTester extends LinearOpMode
              */
             FtcDashboard.getInstance().sendImage(pipeline.getImage());
             telemetry.addData("Analysis", pipeline.getAnalysis());
-            telemetry.update();
+
 
             //The "if" statement below will stop streaming from the camera when the "A" button on gamepad 1 is pressed.
             if(gamepad1.a)
@@ -108,7 +110,9 @@ public class CameraTester extends LinearOpMode
                 //webcam.closeCameraDevice();
             }
 
-            sleep(100);
+            telemetry.update();
+
+            //sleep(100);
         }
     }
 
@@ -139,6 +143,9 @@ public class CameraTester extends LinearOpMode
         int avgUpper;
         int avgLower;
         private Bitmap image;
+
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
         private volatile int ringCase = 0;
 
@@ -240,6 +247,11 @@ public class CameraTester extends LinearOpMode
             //if the average is greater than 150 -> ringcase = 4
             //if the average is greater than 135 and less than 150 -> ringcase = 1
             //if the average is lower than 135 -> ringcase = 0
+
+            dashboardTelemetry.addData("Average Lower", avgLower);
+            dashboardTelemetry.addData("Average Upper", avgUpper);
+            dashboardTelemetry.update();
+
             if(avgLower > ONE_RING_THRESHOLD){
                 ringCase = 0;
             }else if(avgLower < ONE_RING_THRESHOLD){

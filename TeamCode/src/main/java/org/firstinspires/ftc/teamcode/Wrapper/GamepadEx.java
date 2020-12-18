@@ -15,6 +15,7 @@ public class GamepadEx {
     private boolean b_click;
     private boolean back_click;
     private boolean dpad_left_click;
+    private boolean dpad_right_click;
     private boolean dpad_up_click;
     private boolean right_stick_button_click;
     private boolean start_click;
@@ -29,6 +30,7 @@ public class GamepadEx {
     private boolean b_prev;
     private boolean back_prev;
     private boolean dpad_left_prev;
+    private boolean dpad_right_prev;
     private boolean dpad_up_prev;
     private boolean right_stick_button_prev;
     private boolean start_prev;
@@ -38,6 +40,7 @@ public class GamepadEx {
         x,
         y,
         dpad_down,
+        dpad_right,
         left_stick_button,
         right_bumper,
         left_bumper,
@@ -73,6 +76,8 @@ public class GamepadEx {
                 return back_click;
             case dpad_left:
                 return dpad_left_click;
+            case dpad_right:
+                return dpad_right_click;
             case dpad_up:
                 return dpad_up_click;
             case right_stick_button:
@@ -97,6 +102,7 @@ public class GamepadEx {
         boolean b = gamepad.b;
         boolean back = gamepad.back;
         boolean dpad_left = gamepad.dpad_left;
+        boolean dpad_right = gamepad.dpad_left;
         boolean dpad_up = gamepad.dpad_up;
         boolean right_stick_button = gamepad.right_stick_button;
         boolean start = gamepad.start;
@@ -111,6 +117,7 @@ public class GamepadEx {
         b_click = b && !b_prev;
         back_click = back && !back_prev;
         dpad_left_click = dpad_left && !dpad_left_prev;
+        dpad_right_click = dpad_right && !dpad_right_prev;
         dpad_up_click = dpad_up && !dpad_up_prev;
         right_stick_button_click = right_stick_button && !right_stick_button_prev;
         start_click = start && !start_prev;
@@ -125,6 +132,7 @@ public class GamepadEx {
         b_prev = b;
         back_prev = back;
         dpad_left_prev = dpad_left;
+        dpad_right_prev = dpad_right;
         dpad_up_prev = dpad_up;
         right_stick_button_prev = right_stick_button;
         start_prev = start;

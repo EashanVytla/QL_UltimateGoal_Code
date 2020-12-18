@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.PurePusuit;
 
+import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 
 import org.firstinspires.ftc.teamcode.Math.Vector2;
@@ -19,6 +20,15 @@ public class CurvePoint {
         this.turnSpeed = turnSpeed;
         this.followDistance = followDistance;
         this.heading = heading;
+    }
+
+    public CurvePoint(Pose2d target, double moveSpeed, double turnSpeed, double followDistance){
+        this.x = target.getX();
+        this.y = target.getY();
+        this.moveSpeed = moveSpeed;
+        this.turnSpeed = turnSpeed;
+        this.followDistance = followDistance;
+        this.heading = target.getHeading();
     }
 
     public CurvePoint(CurvePoint thisPoint){

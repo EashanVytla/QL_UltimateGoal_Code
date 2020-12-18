@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Components.Robot;
+import org.firstinspires.ftc.teamcode.Components.Shooter;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 @TeleOp(name = "TeleOp")
@@ -74,23 +75,23 @@ public class LinearTeleOp extends LinearOpMode {
                     }
 
                     //Angle Based Auto Align Code
-                    /*double angle = Math.atan2(robot.ULTIMATE_GOAL_POS.getX() - currentPoseSnapShot.getX(), robot.ULTIMATE_GOAL_POS.getY() - currentPoseSnapShot.getY());
+                    double angle = Math.atan2(robot.ULTIMATE_GOAL_POS.getX() - currentPoseSnapShot.getX(), robot.ULTIMATE_GOAL_POS.getY() - currentPoseSnapShot.getY());
                     angle += Math.toRadians(180);
 
                     if(Math.abs(robot.getPos().getHeading() - angle) >= Math.toRadians(1.0)){
-                        robot.shooter.mStateTime.reset();
-                        robot.shooter.shooter.setPower(1.0);
-                        robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
-                        robot.shooter.flicker.setPosition(robot.shooter.flickPosDown);
+                        //robot.shooter.mStateTime.reset();
+                        //robot.shooter.shooter.setPower(1.0);
+                        //robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
+                        //robot.shooter.flicker.setPosition(robot.shooter.flickPosDown);
                         robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));
                     }else{
-                        robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
+                        //robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
                         robot.drive.setPower(0, 0, 0);
                         mDriveState = Drive_State.Driving;
-                    }*/
+                    }
 
                     //Position Based Auto Align Code
-                    robot.GoTo(new Pose2d(-13, 48, Math.toRadians(180)), new Pose2d(1.0, 1.0, 1.0));
+                    //robot.GoTo(new Pose2d(-13, 48, Math.toRadians(180)), new Pose2d(1.0, 1.0, 1.0));
 
                     break;
             }
@@ -102,8 +103,8 @@ public class LinearTeleOp extends LinearOpMode {
             robot.shooter.operate(gamepad1ex, gamepad2ex, robot.getPos().vec().distTo(robot.ULTIMATE_GOAL_POS));
             robot.shooter.write();
 
-            //robot.wobbleGoal.operate(gamepad1);
-            //robot.wobbleGoal.write();
+            robot.wobbleGoal.operate(gamepad2ex);
+            robot.wobbleGoal.write();
 
             robot.intake.operate(gamepad1, gamepad2);
             robot.intake.write();
