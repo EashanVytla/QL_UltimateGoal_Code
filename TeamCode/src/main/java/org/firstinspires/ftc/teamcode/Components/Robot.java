@@ -7,12 +7,18 @@ import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
 import org.firstinspires.ftc.teamcode.Odometry.S4T_Encoder;
 import org.firstinspires.ftc.teamcode.Odometry.S4T_Localizer;
+import org.firstinspires.ftc.teamcode.Vision.CameraTester;
+import org.firstinspires.ftc.teamcode.Vision.RingDetectionPipeline;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.RevBulkData;
 
@@ -37,9 +43,12 @@ public class Robot {
     private Telemetry telemetry;
 
     //Todo: Once all robot hardware is on the main robot, make these their own classes
-    //WobbleGoal wobbleGoal;
+    public WobbleGoal wobbleGoal;
     public Shooter shooter;
     public Intake intake;
+
+    OpenCvCamera webcam;
+    RingDetectionPipeline detector;
 
 
     public Robot(HardwareMap map, Telemetry telemetry){
@@ -57,11 +66,30 @@ public class Robot {
 
 
         drive = new Mecanum_Drive(map, telemetry);
-        //wobbleGoal = new WobbleGoal(map, telemetry, 0.5);
+        wobbleGoal = new WobbleGoal(map, telemetry, 0.5);
         shooter = new Shooter(map, telemetry);
 
         localizer = new S4T_Localizer(telemetry);
         intake = new Intake(hardwareMap);
+
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+
+        detector = new RingDetectionPipeline();
+        webcam.setPipeline(detector);
+
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+            }
+        });
+    }
+
+    public int getRingStackCase(){
+        return detector.getAnalysis();
     }
 
     public static Robot getInstance(HardwareMap map, Telemetry telemetry){

@@ -10,17 +10,17 @@ public class S4T_Localizer_Tester extends OpMode {
     Robot robot;
 
     public void init() {
-        robot = Robot.getInstance(hardwareMap, telemetry);
-    }
-
-    @Override
-    public void stop() {
-        robot.stop();
+        robot = new Robot(hardwareMap, telemetry);
     }
 
     public void loop(){
+        robot.updateBulkData();
+
         robot.updatePos();
 
+        robot.drive.drive(gamepad1, 1.0, 1.0);
+
         telemetry.addData("Pos: ", robot.getPos());
+        robot.drive.write();
     }
 }

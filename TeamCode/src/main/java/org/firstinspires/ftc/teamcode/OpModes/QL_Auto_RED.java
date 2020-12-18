@@ -2,16 +2,23 @@ package org.firstinspires.ftc.teamcode.OpModes;
 
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.teamcode.PurePusuit.CurvePoint;
 import org.firstinspires.ftc.teamcode.PurePusuit.RobotMovement;
 import org.firstinspires.ftc.teamcode.Components.Robot;
+import org.firstinspires.ftc.teamcode.Vision.CameraTester;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 
 import java.util.ArrayList;
 
 @Autonomous(name = "QL_Auto_RED")
+//@Disabled
 public class QL_Auto_RED extends OpMode {
     Robot robot;
     int run;
@@ -31,7 +38,6 @@ public class QL_Auto_RED extends OpMode {
     @Override
     public void init() {
         robot = Robot.getInstance(hardwareMap, telemetry);
-        run = 0;
     }
 
     @Override
@@ -57,7 +63,7 @@ public class QL_Auto_RED extends OpMode {
                 if(robot.getPos().vec().distTo(new Vector2d(35, -55)) <= 2.0){
                     //telemetry.addData("Time", String.valueOf(time.timeSeconds()));
                     if(time.time() >= 1){
-                        run = 1;
+                        //run = 1;
                         RobotMovement.resetIndex();
                     }else{
                         //robot.shooter.drop();
@@ -67,8 +73,8 @@ public class QL_Auto_RED extends OpMode {
                     }
                 }else{
                     allPoints.add(new CurvePoint(0, 0, 1, 1, 15, 0));
-                    allPoints.add(new CurvePoint(5, -105, 1, 1, 15, 0));
-                    allPoints.add(new CurvePoint(35, -55, 1, 1, 15, 0));
+                    allPoints.add(new CurvePoint(8, 24, 1, 1, 15, 0));
+                    allPoints.add(new CurvePoint(13, 61, 1, 1, 15, 0));
 
                     time.reset();
                 }

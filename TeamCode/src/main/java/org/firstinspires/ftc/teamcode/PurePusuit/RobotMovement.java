@@ -19,7 +19,6 @@ public class RobotMovement {
         thisTelemetry = telemetry;
         try{
             if(index >= allPoints.size() - 2 && robot.getPos().vec().distTo(new Vector2d(allPoints.get(allPoints.size() - 1).x, allPoints.get(allPoints.size() - 1).y)) <= 17){
-                telemetry.addData("Last line!", "Lets goooo babbyyyy!");
 
                 followMe = allPoints.get(allPoints.size() - 1);
             }else{
@@ -30,6 +29,8 @@ public class RobotMovement {
             index = getCurrentLine(followMe.toVec(), allPoints);
             telemetry.addData("Current Line: ", index);
             previous_index = index;
+
+            telemetry.addData("PURE PURESUIT POS", robot.getPos());
 
             robot.GoTo(followMe.x, followMe.y, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).heading, followMe.moveSpeed, followMe.moveSpeed, followMe.turnSpeed);
         }catch(Exception e){
