@@ -25,20 +25,20 @@ public class Shooter {
     public static double ki_shooter = 0;
     public static double kd_shooter = 0.1;
 
-    public static double SlidesTunerAngle = 30;
+    public static double SlidesTunerAngle = 22;
 
-    private Caching_Servo pushSlide;
+    public Caching_Servo pushSlide;
     public Caching_Servo stopper;
     public Caching_Servo flicker;
 
     public Caching_Motor shooter;
     private Telemetry telemetry;
 
-    public final double flickPosDown = 0.304;//.07
+    public final double flickPosDown = .248;//.07
     public final double flickPosUp = 0.0;
 
     public  double stopPosUp = 0.0;
-    public  double stopPosDown = 0.346;
+    public  double stopPosDown = 0.3;
 
     public final double pushIdle = 0.859;
     public final double pushForward = 0.346;
@@ -55,6 +55,10 @@ public class Shooter {
 
     private PIDFController slidesController;
     private boolean flickerToggle = false;
+
+    ElapsedTime time = new ElapsedTime();
+
+    private int powerShotToggle = 0;
 
     public enum ShootState{
         PREPARE,
@@ -74,9 +78,7 @@ public class Shooter {
         shooter = new Caching_Motor(map, "shooter");
         mStateTime = new ElapsedTime();
         mStateTime.startTime();
-        flicker.setPosition(flickPosUp);
-        stopper.setPosition(stopPosDown);
-        pushSlide.setPosition(pushIdle);
+
         sensor = map.get(DistanceSensor.class, "dist");
 
         slidesController = new PIDFController(new PIDCoefficients(kp_shooter, ki_shooter, kd_shooter));
@@ -85,6 +87,15 @@ public class Shooter {
 
         this.telemetry = telemetry;
 
+
+
+        time.startTime();
+    }
+
+    public void init(){
+        flicker.setPosition(flickPosUp);
+        stopper.setPosition(stopPosDown);
+        pushSlide.setPosition(pushIdle);
         shooter.setPower(0.2);
         write();
     }
@@ -156,14 +167,51 @@ public class Shooter {
     double desiredAngle = 25;
     private boolean reset = false;
 
+    public void powerShot(ElapsedTime time){
+        if(time.time() >= 3){
+            pushSlide.setPosition(pushIdle);
+        }else if(time.time() >= 2){
+            pushSlide.setPosition(pushForward);
+        }else if(time.time() >= 1){
+            pushSlide.setPosition(pushIdle - ((2*(pushIdle - pushForward)/3)));
+        }else{
+            pushSlide.setPosition(pushIdle - ((pushIdle - pushForward)/3));
+        }
+    }
+
+    public void powerShot(int state){
+        if(state == 3){
+            pushSlide.setPosition(pushIdle);
+        }else if(state == 2){
+            pushSlide.setPosition(pushForward);
+        }else if(state == 1){
+            pushSlide.setPosition(pushIdle - ((2*(pushIdle - pushForward)/3) - 0.025));
+        }else if(state == 0){
+            pushSlide.setPosition(pushIdle - ((pushIdle - pushForward)/3));
+        }else{
+            pushSlide.setPosition(pushIdle);
+        }
+    }
+
+    public void reset(){
+        double currentAngle = getShooterAngle();
+        setShooterAngle(17.1, currentAngle, 0.5);
+        shooter.setPower(0.2);
+        stopper.setPosition(stopPosDown);
+        flicker.setPosition(flickPosUp);
+        mRobotState = ShootState.IDLE;
+        mStateTime.reset();
+    }
+
     public void operate(GamepadEx gamepad1, GamepadEx gamepad2, double distFromGoal){
         double shooterTargetAngle = calculateShooterAngle(distFromGoal);
 
         telemetry.addData("Shooter Angle Required", shooterTargetAngle);
 
 
-        if(gamepad2.isPress(GamepadEx.Control.left_bumper)){
+        if(gamepad2.isPress(GamepadEx.Control.left_trigger)){
             mStateTime.reset();
+            stopper.setPosition(stopPosUp);
             mRobotState = !rbToggle ? ShootState.PREPARE : ShootState.IDLE;
             rbToggle = !rbToggle;
         }
@@ -182,18 +230,20 @@ public class Shooter {
             reset = true;
         }
 
-        /*if(gamepad2.isPress(GamepadEx.Control.dpad_down)){
-            desiredAngle -= 1;
-        }*/
+        if(gamepad2.isPress(GamepadEx.Control.start)){
+            powerShot(powerShotToggle);
+            powerShotToggle += 1;
+            powerShotToggle %= 4;
+        }
 
-        telemetry.addData("CHECK THIS", PROTO_AlignSlides);
+        double currentAngle = 0;
 
         if(PROTO_AlignSlides){
-            double currentAngle = getShooterAngle();
+            currentAngle = getShooterAngle();
             if(Math.abs(currentAngle - Math.toRadians(shooterTargetAngle)) < Math.toRadians(0.2)){
                 PROTO_AlignSlides = false;
             }else{
-                //setShooterAngle(Math.toRadians(shooterTargetAngle), currentAngle);
+                //setShooterAngle(Math.toRadians(shooterTargetAngle), currentAngle, 1.0);
                 setShooterAngle(Math.toRadians(SlidesTunerAngle), currentAngle, 1.0);
             }
         }else{
@@ -204,9 +254,9 @@ public class Shooter {
             //}
 
             if(reset){
-                double currentAngle = getShooterAngle();
+                currentAngle = getShooterAngle();
                 setShooterAngle(Math.toRadians(17.1), currentAngle, 0.5);
-                if(Math.abs(currentAngle - Math.toRadians(17.1)) < Math.toRadians(0.3)){
+                if(Math.abs(currentAngle - Math.toRadians(17.1)) < Math.toRadians(0.3) || !gamepad2.gamepad.atRest()){
                     reset = false;
                 }
             }else{
@@ -215,14 +265,23 @@ public class Shooter {
         }
 
         telemetry.addData("desired angle value", desiredAngle);
+        telemetry.addData("Current Angle(Last Read)", Math.toDegrees(currentAngle));
 
-        if(gamepad2.isPress(GamepadEx.Control.b)){
+        if(gamepad2.isPress(GamepadEx.Control.right_trigger)){
             flickerToggle = !flickerToggle;
             if (flickerToggle) {
                 flicker.setPosition(flickPosDown);
+                shooter.setPower(1.0);
+                stopper.setPosition(stopPosUp);
             }else{
                 flicker.setPosition(flickPosUp);
+                shooter.setPower(0.2);
+                stopper.setPosition(stopPosDown);
             }
+        }
+
+        if(gamepad2.isPress(GamepadEx.Control.b)){
+            reset();
         }
 
         switch (mRobotState){
@@ -237,7 +296,7 @@ public class Shooter {
                 }
                 break;
             case SHOOT:
-                if(mStateTime.time() <= 2){
+                if(mStateTime.time() <= 1){
                     shooter.setPower(1);
                     pushSlide.setPosition(pushForward);
                 } else {
@@ -249,7 +308,7 @@ public class Shooter {
                 }
                 break;
             case IDLE:
-                if (mStateTime.time() <= 1){
+                if (mStateTime.time() <= 0.5){
                     pushSlide.setPosition(pushIdle);
                 }
                 break;

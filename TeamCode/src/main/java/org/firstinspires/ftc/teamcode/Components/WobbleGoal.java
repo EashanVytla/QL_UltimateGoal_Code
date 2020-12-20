@@ -8,15 +8,15 @@ import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 public class WobbleGoal {
-    private double clamp_pos = 0.178;
-    private double grabber_idle = 0.489;
-    private double release_pos = 0.95;
-    private double lift_pos = 0.97;
-    private double drop_over_lift_pos = 0.36;
-    private double middle_lift_pos = 0.66;
-    private double down_pos = 0.07;
-    private Caching_Servo servo_lift;
-    private Caching_Servo servo_grab;
+    public double clamp_pos = 0.178;
+    public double grabber_idle = 0.489;
+    public double release_pos = 0.95;
+    public double lift_pos = 0.665;
+    public double drop_over_lift_pos = 0.36;
+    public double auto_lift_pos = 0.17;
+    public double down_pos = 0.07;
+    public Caching_Servo servo_lift;
+    public Caching_Servo servo_grab;
     private Telemetry telemetry;
     boolean grabberToggle = false;
     int grabberLiftToggle = 0;
@@ -24,11 +24,15 @@ public class WobbleGoal {
     public WobbleGoal(HardwareMap map, Telemetry telemetry, double initPos){
         servo_lift = new Caching_Servo(map, "wobble_lift");
         servo_grab = new Caching_Servo(map, "wobble_grab");
+
+        this.telemetry = telemetry;
+    }
+
+    public void init(){
         servo_grab.setPosition(release_pos);
         servo_lift.setPosition(lift_pos);
         servo_lift.write();
         servo_grab.write();
-        this.telemetry = telemetry;
     }
 
     public void clamp(){
@@ -52,8 +56,8 @@ public class WobbleGoal {
         servo_lift.setPosition(lift_pos);
     }
 
-    public void midLift(){
-        servo_lift.setPosition(middle_lift_pos);
+    public void autoLift(){
+        servo_lift.setPosition(auto_lift_pos);
     }
 
     public void down(){
@@ -75,22 +79,18 @@ public class WobbleGoal {
             }
         }
 
-        if(gamepad.isPress(GamepadEx.Control.x)){
-            release();
-        }
-
         if(gamepad.isPress(GamepadEx.Control.dpad_left)){
             if(grabberLiftToggle == 0){
                 down();
-            }else if(grabberLiftToggle == 1){
+            }/*else if(grabberLiftToggle == 1){
                 midLift();
-            }else if(grabberLiftToggle == 3){
-                DropOverWallLift();
-            }else if(grabberLiftToggle == 2){
+            }*/else if(grabberLiftToggle == 1){
                 lift();
+            }else if(grabberLiftToggle == 2){
+                DropOverWallLift();
             }
 
-            grabberLiftToggle = (grabberLiftToggle + 1) % 4;
+            grabberLiftToggle = (grabberLiftToggle + 1) % 3;
         }
     }
 }
