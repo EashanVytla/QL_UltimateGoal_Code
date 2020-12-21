@@ -10,7 +10,6 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 @TeleOp(name = "TeleOp")
 public class LinearTeleOp extends LinearOpMode {
-
     Robot robot = null;
     Pose2d storedPos = new Pose2d(0, 0, 0);
     private Pose2d currentPoseSnapShot = new Pose2d(0, 0, 0);
@@ -35,6 +34,9 @@ public class LinearTeleOp extends LinearOpMode {
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
         robot = new Robot(hardwareMap, telemetry);
+        
+        robot.shooter.init();
+        robot.wobbleGoal.init();
 
         gamepad1ex = new GamepadEx(gamepad1);
         gamepad2ex = new GamepadEx(gamepad2);

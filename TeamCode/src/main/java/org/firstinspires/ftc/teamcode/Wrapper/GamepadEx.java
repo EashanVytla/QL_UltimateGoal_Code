@@ -19,6 +19,8 @@ public class GamepadEx {
     private boolean dpad_up_click;
     private boolean right_stick_button_click;
     private boolean start_click;
+    private boolean right_trigger_click;
+    private boolean left_trigger_click;
 
     private boolean a_prev;
     private boolean x_prev;
@@ -34,6 +36,8 @@ public class GamepadEx {
     private boolean dpad_up_prev;
     private boolean right_stick_button_prev;
     private boolean start_prev;
+    private boolean right_trigger_prev;
+    private boolean left_trigger_prev;
 
     public enum Control{
         a,
@@ -44,6 +48,8 @@ public class GamepadEx {
         left_stick_button,
         right_bumper,
         left_bumper,
+        left_trigger,
+        right_trigger,
         b,
         back,
         dpad_left,
@@ -86,6 +92,10 @@ public class GamepadEx {
                 return left_bumper_click;
             case start:
                 return start_click;
+            case left_trigger:
+                return left_trigger_click;
+            case right_trigger:
+                return right_trigger_click;
             default:
                 return false;
         }
@@ -106,6 +116,8 @@ public class GamepadEx {
         boolean dpad_up = gamepad.dpad_up;
         boolean right_stick_button = gamepad.right_stick_button;
         boolean start = gamepad.start;
+        boolean right_trigger = gamepad.right_trigger > 0.3;
+        boolean left_trigger = gamepad.left_trigger > 0.3;
 
         a_click = a && !a_prev;
         x_click = x && !x_prev;
@@ -121,6 +133,8 @@ public class GamepadEx {
         dpad_up_click = dpad_up && !dpad_up_prev;
         right_stick_button_click = right_stick_button && !right_stick_button_prev;
         start_click = start && !start_prev;
+        right_trigger_click = right_trigger && !right_trigger_prev;
+        left_trigger_click = left_trigger && !left_trigger_prev;
 
         a_prev = a;
         x_prev = x;
@@ -136,5 +150,7 @@ public class GamepadEx {
         dpad_up_prev = dpad_up;
         right_stick_button_prev = right_stick_button;
         start_prev = start;
+        right_trigger_prev = right_trigger;
+        left_trigger_prev = left_trigger;
     }
 }
