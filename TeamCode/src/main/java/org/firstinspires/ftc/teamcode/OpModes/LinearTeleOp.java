@@ -10,13 +10,6 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 @TeleOp(name = "TeleOp")
 public class LinearTeleOp extends LinearOpMode {
-    //Gamepad1:
-    //Left Stick Button = align to goal
-    //a/y = intake in/out
-
-    //Gamepad2:
-    //Dpad Up/Down = Wobble Goal Slides
-    //b(toggle) = Wobble Goal Grabber
 
     Robot robot = null;
     Pose2d storedPos = new Pose2d(0, 0, 0);
@@ -53,8 +46,6 @@ public class LinearTeleOp extends LinearOpMode {
         while (opModeIsActive()) {
             robot.updateBulkData();
 
-            //double angle = Math.atan2(robot.ULTIMATE_GOAL_POS.getX() - currentPoseSnapShot.getX(), robot.ULTIMATE_GOAL_POS.getY() - currentPoseSnapShot.getY());
-
             switch (mDriveState){
                 case Driving:
                     if(gamepad1ex.isPress(GamepadEx.Control.x)){
@@ -79,19 +70,16 @@ public class LinearTeleOp extends LinearOpMode {
                     angle += Math.toRadians(180);
 
                     if(Math.abs(robot.getPos().getHeading() - angle) >= Math.toRadians(1.0)){
-                        //robot.shooter.mStateTime.reset();
-                        //robot.shooter.shooter.setPower(1.0);
-                        //robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
-                        //robot.shooter.flicker.setPosition(robot.shooter.flickPosDown);
+                        robot.shooter.mStateTime.reset();
+                        robot.shooter.shooter.setPower(1.0);
+                        robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
+                        robot.shooter.flicker.setPosition(robot.shooter.flickPosDown);
                         robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));
                     }else{
-                        //robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
+                        robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
                         robot.drive.setPower(0, 0, 0);
                         mDriveState = Drive_State.Driving;
                     }
-
-                    //Position Based Auto Align Code
-                    //robot.GoTo(new Pose2d(-13, 48, Math.toRadians(180)), new Pose2d(1.0, 1.0, 1.0));
 
                     break;
             }

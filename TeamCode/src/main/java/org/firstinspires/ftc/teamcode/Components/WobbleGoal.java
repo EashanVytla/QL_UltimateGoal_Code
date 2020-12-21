@@ -39,13 +39,13 @@ public class WobbleGoal {
         servo_grab.setPosition(release_pos);
     }
 
+    public void release(){
+        servo_grab.setPosition(grabber_idle);
+    }
+
     public void write(){
         servo_grab.write();
         servo_lift.write();
-    }
-
-    public void release(){
-        servo_grab.setPosition(grabber_idle);
     }
 
     public void lift(){
@@ -84,10 +84,10 @@ public class WobbleGoal {
                 down();
             }else if(grabberLiftToggle == 1){
                 midLift();
-            }else if(grabberLiftToggle == 3){
-                DropOverWallLift();
             }else if(grabberLiftToggle == 2){
                 lift();
+            }else if(grabberLiftToggle == 3){
+                DropOverWallLift();
             }
 
             grabberLiftToggle = (grabberLiftToggle + 1) % 4;

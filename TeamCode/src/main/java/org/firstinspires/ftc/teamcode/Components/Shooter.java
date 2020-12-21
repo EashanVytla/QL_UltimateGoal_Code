@@ -42,6 +42,7 @@ public class Shooter {
 
     public final double pushIdle = 0.859;
     public final double pushForward = 0.346;
+    double previousLT = 0;
 
     private boolean rbToggle = false;
     private boolean PROTO_AlignSlides = false;
@@ -158,6 +159,7 @@ public class Shooter {
 
     public void operate(GamepadEx gamepad1, GamepadEx gamepad2, double distFromGoal){
         double shooterTargetAngle = calculateShooterAngle(distFromGoal);
+        double LT = gamepad2.gamepad.left_trigger;
 
         telemetry.addData("Shooter Angle Required", shooterTargetAngle);
 
@@ -216,7 +218,7 @@ public class Shooter {
 
         telemetry.addData("desired angle value", desiredAngle);
 
-        if(gamepad2.isPress(GamepadEx.Control.b)){
+        if(LT > 0.3 && previousLT < 0.1){
             flickerToggle = !flickerToggle;
             if (flickerToggle) {
                 flicker.setPosition(flickPosDown);
@@ -254,5 +256,7 @@ public class Shooter {
                 }
                 break;
         }
+
+        previousLT = gamepad2.gamepad.left_trigger;
     }
 }
