@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.Odometry;
 
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.qualcomm.ftccommon.FtcEventLoop;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Math.Vector2;
@@ -9,8 +10,8 @@ import org.firstinspires.ftc.teamcode.PurePusuit.RCOffset;
 
 @Config
 public class S4T_Localizer {
-    public static double TRACK_WIDTH1 = 13.581490658183012723991930114595;
-    public static double TRACK_WIDTH2 = 6.832055564243586;//6.8542971111369223086049488009311;
+    public static double TRACK_WIDTH1 = 13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
+    public static double TRACK_WIDTH2 = 6.8514614115633455971196003213002;//6.8542971111369223086049488009311;
     private double EPILSON = 0.00001;
     private Pose2d mypose = new Pose2d(0, 0, 0);
     double prevheading = 0;
@@ -22,7 +23,7 @@ public class S4T_Localizer {
     double preverx = 0;
     double heading = 0;
     Telemetry telemetry;
-    float k_strafe = 1;
+    float k_strafe = 0.8f;
     float k_vert = 1;
 
     float CaseSwitchEPLSN = 0.3f;
@@ -35,6 +36,7 @@ public class S4T_Localizer {
         STRAFE,
         VERTICAL
     }
+    State OdometryCase = State.VERTICAL;
 
     double wf = 1;
     double ws = 1;
@@ -79,11 +81,22 @@ public class S4T_Localizer {
 
     public double weightedTheta(double dx, double dy, double dthetavert, double dthetastrafe){
         determineWeights(dx, dy);
-        return ((wf * dthetavert) + (ws * dthetastrafe)) / (wf + ws);
+
+        telemetry.addData("Case: ", OdometryCase);
+        if(ws > wf){
+            OdometryCase = State.STRAFE;
+            return dthetastrafe;
+        }else{
+            OdometryCase = State.VERTICAL;
+            return dthetavert;
+        }
+        //return ((wf * dthetavert) + (ws * dthetastrafe)) / (wf + ws);
     }
 
     public double nonweightedTheta(double dx, double dy, double dthetavert, double dthetastrafe){
-        State OdometryCase = determineCase(dx, dy);
+        OdometryCase = determineCase(dx, dy, dthetavert, dthetastrafe);
+
+        telemetry.addData("Case: ", OdometryCase);
 
         if(OdometryCase == State.STRAFE){
             return dthetastrafe;
@@ -127,13 +140,18 @@ public class S4T_Localizer {
 
         telemetry.addData("weight forward: ", wf);
         telemetry.addData("weight strafe: ", ws);
+        telemetry.addData("weight total", wf + ws);
     }
 
-    public State determineCase(double dx, double dy){
-        if(Math.abs(dx) > Math.abs(dy)){
-            return State.STRAFE;
-        }else{
+    public State determineCase(double dx, double dy, double dthethavert, double dthetastrafe){
+        if(dthethavert >= Math.toRadians(0.01) || dthetastrafe >= Math.toRadians(0.01)){
             return State.VERTICAL;
+        }else{
+            if(Math.abs(dx) > Math.abs(dy)){
+                return State.STRAFE;
+            }else{
+                return State.VERTICAL;
+            }
         }
     }
 

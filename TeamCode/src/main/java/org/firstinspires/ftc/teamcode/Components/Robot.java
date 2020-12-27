@@ -47,8 +47,8 @@ public class Robot {
     public Shooter shooter;
     public Intake intake;
 
-    OpenCvCamera webcam;
-    RingDetectionPipeline detector;
+    //OpenCvCamera webcam;
+    //RingDetectionPipeline detector;
 
 
     public Robot(HardwareMap map, Telemetry telemetry){
@@ -72,24 +72,25 @@ public class Robot {
         localizer = new S4T_Localizer(telemetry);
         intake = new Intake(hardwareMap);
 
-        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+        //int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        //webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
-        detector = new RingDetectionPipeline();
-        webcam.setPipeline(detector);
+        //detector = new RingDetectionPipeline();
+        //webcam.setPipeline(detector);
 
-        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        /*webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
             public void onOpened()
             {
                 webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
             }
-        });
+        });*/
     }
 
     public int getRingStackCase(){
-        return detector.getAnalysis();
+        //return detector.getAnalysis();
+        return 0;
     }
 
     public static Robot getInstance(HardwareMap map, Telemetry telemetry){

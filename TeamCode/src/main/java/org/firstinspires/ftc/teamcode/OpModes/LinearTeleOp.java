@@ -18,12 +18,12 @@ public class LinearTeleOp extends LinearOpMode {
     GamepadEx gamepad1ex;
     GamepadEx gamepad2ex;
 
-    enum Drive_State{
+    public enum Drive_State{
         Driving,
         AutoAllign
     }
 
-    Drive_State mDriveState = Drive_State.Driving;
+    public static Drive_State mDriveState = Drive_State.Driving;
 
     @Override
     public void runOpMode() {
@@ -34,7 +34,7 @@ public class LinearTeleOp extends LinearOpMode {
         // to 'get' must correspond to the names assigned during the robot configuration
         // step (using the FTC Robot Controller app on the phone).
         robot = new Robot(hardwareMap, telemetry);
-        
+
         robot.shooter.init();
         robot.wobbleGoal.init();
 
@@ -73,16 +73,20 @@ public class LinearTeleOp extends LinearOpMode {
                     double angle = Math.atan2(robot.ULTIMATE_GOAL_POS.getX() - currentPoseSnapShot.getX(), robot.ULTIMATE_GOAL_POS.getY() - currentPoseSnapShot.getY());
                     angle += Math.toRadians(180);
 
-                    if(Math.abs(robot.getPos().getHeading() - angle) >= Math.toRadians(1.0)){
-                        //robot.shooter.mStateTime.reset();
-                        //robot.shooter.shooter.setPower(1.0);
-                        //robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
-                        //robot.shooter.flicker.setPosition(robot.shooter.flickPosDown);
+                    if(robot.getPos().vec().distTo(robot.ULTIMATE_GOAL_POS) <= 120.0){
                         robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));
+                        if(Math.abs(robot.getPos().getHeading() - angle) >= Math.toRadians(1.0)){
+                            robot.shooter.mStateTime.reset();
+                            robot.shooter.shooter.setPower(1.0);
+                            robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
+                            robot.shooter.flicker.setPosition(robot.shooter.flickPosDown);
+                        }else{
+                            robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
+                            robot.drive.setPower(0, 0, 0);
+                            mDriveState = Drive_State.Driving;
+                        }
                     }else{
-                        //robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
-                        robot.drive.setPower(0, 0, 0);
-                        mDriveState = Drive_State.Driving;
+                        robot.drive.setPowerCentic(0.0, 1.0, 0.0, robot.getPos().getHeading());
                     }
 
                     //Position Based Auto Align Code
