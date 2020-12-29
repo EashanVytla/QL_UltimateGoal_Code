@@ -4,6 +4,8 @@ import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.hardware.ColorRangeSensor;
+import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -36,11 +38,11 @@ public class Shooter {
     public Caching_Motor shooter;
     private Telemetry telemetry;
 
-    public final double flickPosDown = .2559;//.07
+    public final double flickPosDown = 0.2599;//.07
     public final double flickPosUp = 0.0;
 
     public  double stopPosUp = 0.0;
-    public  double stopPosDown = 0.3;
+    public  double stopPosDown = 0.16;
 
     public final double pushIdle = 0.9327;
     public final double pushForward = 0.346;
@@ -58,11 +60,12 @@ public class Shooter {
 
     private PIDFController slidesController;
     private boolean flickerToggle = false;
+    private boolean shooterToggle = false;
 
     ElapsedTime time = new ElapsedTime();
 
     private int powerShotToggle = 0;
-    private double shooterff = 0.0;
+    private double shooterff = 0.2;
 
     public enum ShootState{
         PREPARE,
@@ -199,7 +202,7 @@ public class Shooter {
 
     public void reset(){
         double currentAngle = getShooterAngle();
-        setShooterAngle(17.1, currentAngle, 0.5);
+        setShooterAngle(19.0, currentAngle, 0.5);
         shooter.setPower(shooterff);
         stopper.setPosition(stopPosDown);
         flicker.setPosition(flickPosUp);
@@ -209,7 +212,6 @@ public class Shooter {
 
     public void operate(GamepadEx gamepad1, GamepadEx gamepad2, double distFromGoal){
         double shooterTargetAngle = calculateShooterAngle(distFromGoal);
-        double LT = gamepad2.gamepad.left_trigger;
 
         telemetry.addData("Shooter Angle Required", shooterTargetAngle);
 
@@ -222,8 +224,15 @@ public class Shooter {
         }
 
         if(gamepad2.isPress(GamepadEx.Control.y)){
-            mRobotState = ShootState.SHOOT;
+            //mRobotState = ShootState.SHOOT;
+            shooterToggle = !shooterToggle;
+            if (shooterToggle) {
+                shooter.setPower(1.0);
+            } else{
+                shooter.setPower(shooterff);
+            }
         }
+
 
         if(gamepad2.isPress(GamepadEx.Control.dpad_up)){
             PROTO_AlignSlides = !PROTO_AlignSlides;
@@ -259,6 +268,7 @@ public class Shooter {
                 shooter.setPower(shooterff);
             }
         }
+
 
         if(gamepad2.isPress(GamepadEx.Control.b)){
             reset();

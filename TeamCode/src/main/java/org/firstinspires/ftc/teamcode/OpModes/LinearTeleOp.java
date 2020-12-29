@@ -75,11 +75,13 @@ public class LinearTeleOp extends LinearOpMode {
                         robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));
                         if(Math.abs(robot.getPos().getHeading() - angle) >= Math.toRadians(1.0)){
                             robot.shooter.mStateTime.reset();
+                           /*
                             robot.shooter.shooter.setPower(1.0);
                             robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
-                            robot.shooter.flicker.setPosition(robot.shooter.flickPosDown);
+                            robot.shooter.flicker.setPosition(robot.shooter.flickPosDown)
+                           */
                         }else{
-                            robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
+                        //  robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
                             robot.drive.setPower(0, 0, 0);
                             mDriveState = Drive_State.Driving;
                         }
