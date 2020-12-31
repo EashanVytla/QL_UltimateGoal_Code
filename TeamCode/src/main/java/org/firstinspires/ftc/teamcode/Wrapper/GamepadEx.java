@@ -102,7 +102,9 @@ public class GamepadEx {
     }
 
     public void loop(){
-        boolean a = gamepad.a;
+        //LOGITECH CONTROLLER
+        //----------------------------------------------------------------------------------------//
+        /*boolean a = gamepad.a;
         boolean x = gamepad.x;
         boolean y = gamepad.y;
         boolean dpad_down = gamepad.dpad_down;
@@ -117,7 +119,28 @@ public class GamepadEx {
         boolean right_stick_button = gamepad.right_stick_button;
         boolean start = gamepad.start;
         boolean right_trigger = gamepad.right_trigger > 0.3;
-        boolean left_trigger = gamepad.left_trigger > 0.3;
+        boolean left_trigger = gamepad.left_trigger > 0.3;*/
+        //----------------------------------------------------------------------------------------//
+
+        //PS4 CONTROLLER
+        //----------------------------------------------------------------------------------------//
+        boolean a = gamepad.circle;
+        boolean x = gamepad.cross;
+        boolean y = gamepad.square;
+        boolean dpad_down = gamepad.dpad_down;
+        boolean left_stick_button = gamepad.left_stick_button;
+        boolean right_bumper = gamepad.right_bumper;
+        boolean left_bumper = gamepad.y;
+        boolean b = gamepad.circle;
+        boolean back = gamepad.back;
+        boolean dpad_left = gamepad.dpad_left;
+        boolean dpad_right = gamepad.dpad_left;
+        boolean dpad_up = gamepad.dpad_up;
+        boolean right_stick_button = gamepad.start;
+        boolean start = gamepad.start;
+        boolean right_trigger = gamepad.right_bumper;
+        boolean left_trigger = gamepad.left_bumper;
+        //----------------------------------------------------------------------------------------//
 
         a_click = a && !a_prev;
         x_click = x && !x_prev;

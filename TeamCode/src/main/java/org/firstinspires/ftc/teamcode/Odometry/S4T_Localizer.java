@@ -96,7 +96,7 @@ public class S4T_Localizer {
 
         telemetry.addData("Vertical Heading", Math.toDegrees(-(ery - ely)/TRACK_WIDTH1) % (360));
         telemetry.addData("Strafe Heading", Math.toDegrees(-(erx - elx)/TRACK_WIDTH2) % (360));
-        
+
         DashboardUtil.drawRobot(fieldOverlay, mypose);
         dashboard.sendTelemetryPacket(packet);
 
