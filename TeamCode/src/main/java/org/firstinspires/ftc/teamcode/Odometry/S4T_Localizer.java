@@ -1,7 +1,9 @@
 package org.firstinspires.ftc.teamcode.Odometry;
 
 import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.ftccommon.FtcEventLoop;
 
@@ -31,8 +33,13 @@ public class S4T_Localizer {
     FtcDashboard dashboard = FtcDashboard.getInstance();
     Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
+    TelemetryPacket packet;
+    Canvas fieldOverlay;
+
     public S4T_Localizer(Telemetry telemetry){
         this.telemetry = telemetry;
+        packet = new TelemetryPacket();
+        fieldOverlay = packet.fieldOverlay();
     }
 
     enum State{
@@ -89,6 +96,9 @@ public class S4T_Localizer {
 
         telemetry.addData("Vertical Heading", Math.toDegrees(-(ery - ely)/TRACK_WIDTH1) % (360));
         telemetry.addData("Strafe Heading", Math.toDegrees(-(erx - elx)/TRACK_WIDTH2) % (360));
+        
+        DashboardUtil.drawRobot(fieldOverlay, mypose);
+        dashboard.sendTelemetryPacket(packet);
 
         dashboardTelemetry.addData("My Position: ", mypose.toString());
         dashboardTelemetry.update();
