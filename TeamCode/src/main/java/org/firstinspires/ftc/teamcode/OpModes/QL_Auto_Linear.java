@@ -363,16 +363,6 @@ public class QL_Auto_Linear extends LinearOpMode {
             robot.shooter.write();
             robot.intake.write();
 
-            /*TelemetryPacket packet = new TelemetryPacket();
-
-            packet.fieldOverlay()
-                    .setStrokeWidth(1)
-                    .setStroke("goldenrod")
-                    .setFill("black")
-                    .
-
-            dashboard.sendTelemetryPacket(packet);*/
-
             dashboardTelemetry.addData("Pos", robot.getPos());
             dashboardTelemetry.addData("Error", robot.getPos().vec().distTo(robot.drive.target_pos.vec()));
             dashboardTelemetry.update();
