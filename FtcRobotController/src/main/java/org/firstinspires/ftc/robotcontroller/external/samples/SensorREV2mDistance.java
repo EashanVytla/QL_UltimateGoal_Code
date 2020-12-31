@@ -32,12 +32,14 @@ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package org.firstinspires.ftc.robotcontroller.external.samples;
 
+import com.acmerobotics.dashboard.FtcDashboard;
 import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DistanceSensor;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 
 /**
@@ -55,6 +57,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 public class SensorREV2mDistance extends LinearOpMode {
 
     private DistanceSensor sensorRange;
+    FtcDashboard dashboard = FtcDashboard.getInstance();
+    Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
     @Override
     public void runOpMode() {
@@ -74,16 +78,14 @@ public class SensorREV2mDistance extends LinearOpMode {
             // generic DistanceSensor methods.
             telemetry.addData("deviceName",sensorRange.getDeviceName() );
 
-            telemetry.addData("range", String.format("%.01f mm", sensorTimeOfFlight.getDistance(DistanceUnit.MM)));
-            telemetry.addData("range", String.format("%.01f cm", sensorTimeOfFlight.getDistance(DistanceUnit.CM)));
-            telemetry.addData("range", String.format("%.01f m", sensorTimeOfFlight.getDistance(DistanceUnit.METER)));
-            telemetry.addData("range", String.format("%.01f in", sensorTimeOfFlight.getDistance(DistanceUnit.INCH)));
+            dashboardTelemetry.addData("range", String.format("%.01f mm", sensorTimeOfFlight.getDistance(DistanceUnit.MM)));
+            dashboardTelemetry.addData("range", String.format("%.01f cm", sensorTimeOfFlight.getDistance(DistanceUnit.CM)));
+            dashboardTelemetry.addData("range", String.format("%.01f m", sensorTimeOfFlight.getDistance(DistanceUnit.METER)));
+            dashboardTelemetry.addData("range", String.format("%.01f in", sensorTimeOfFlight.getDistance(DistanceUnit.INCH) - 3.5));
 
-            // Rev2mDistanceSensor specific methods.
-            telemetry.addData("ID", String.format("%x", sensorTimeOfFlight.getModelID()));
-            telemetry.addData("did time out", Boolean.toString(sensorTimeOfFlight.didTimeoutOccur()));
+            dashboardTelemetry.addData("Angle:", Math.toDegrees(Math.atan2(sensorTimeOfFlight.getDistance(DistanceUnit.INCH) - 3.5, 6.3855669792786685413835696178286)));
 
-            telemetry.update();
+            dashboardTelemetry.update();
         }
     }
 

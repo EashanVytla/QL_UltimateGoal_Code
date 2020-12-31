@@ -70,27 +70,30 @@ public class LinearTeleOp extends LinearOpMode {
                     }
 
                     //Angle Based Auto Align Code
-                    double angle = Math.atan2(robot.ULTIMATE_GOAL_POS.getX() - currentPoseSnapShot.getX(), robot.ULTIMATE_GOAL_POS.getY() - currentPoseSnapShot.getY());
+                    /*double angle = Math.atan2(robot.ULTIMATE_GOAL_POS.getX() - currentPoseSnapShot.getX(), robot.ULTIMATE_GOAL_POS.getY() - currentPoseSnapShot.getY());
                     angle += Math.toRadians(180);
 
                     if(robot.getPos().vec().distTo(robot.ULTIMATE_GOAL_POS) <= 120.0){
                         robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));
                         if(Math.abs(robot.getPos().getHeading() - angle) >= Math.toRadians(1.0)){
+                          /*
                             robot.shooter.mStateTime.reset();
                             robot.shooter.shooter.setPower(1.0);
                             robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
                             robot.shooter.flicker.setPosition(robot.shooter.flickPosDown);
-                        }else{
-                            robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
+
+                           */
+                        /*}else{
+                        //    robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
                             robot.drive.setPower(0, 0, 0);
                             mDriveState = Drive_State.Driving;
                         }
                     }else{
                         robot.drive.setPowerCentic(0.0, 1.0, 0.0, robot.getPos().getHeading());
-                    }
+                    }*/
 
                     //Position Based Auto Align Code
-                    //robot.GoTo(new Pose2d(-13, 48, Math.toRadians(180)), new Pose2d(1.0, 1.0, 1.0));
+                    robot.GoTo(new Pose2d(-13, 48, Math.toRadians(180)), new Pose2d(1.0, 1.0, 1.0));
 
                     break;
             }
@@ -105,7 +108,7 @@ public class LinearTeleOp extends LinearOpMode {
             robot.wobbleGoal.operate(gamepad2ex);
             robot.wobbleGoal.write();
 
-            robot.intake.operate(gamepad1, gamepad2);
+            robot.intake.operate(gamepad1ex, gamepad2ex, telemetry);
             robot.intake.write();
 
             telemetry.addData("State: ", mDriveState);
