@@ -116,7 +116,7 @@ public class Robot {
         encoderLY.update(data);
         encoderRX.update(data);
         encoderRY.update(data);
-        localizer.update(getLeft_X_Dist(), getLeft_Y_Dist(), getRight_X_Dist(), getRight_Y_Dist());
+        localizer.update(getLeft_X_Dist(), getLeft_Y_Dist(), getRight_X_Dist(), getRight_Y_Dist(), getRawLeft_X_Dist(), getRawLeft_Y_Dist(), getRawRight_X_Dist(), getRawRight_Y_Dist());
     }
 
     public double getLeft_X_Dist(){
@@ -133,6 +133,22 @@ public class Robot {
 
     public double getRight_Y_Dist(){
         return encoderRY.getDist();
+    }
+
+    public double getRawLeft_X_Dist(){
+        return -encoderLX.distance;
+    }
+
+    public double getRawRight_X_Dist(){
+        return -encoderRX.distance;
+    }
+
+    public double getRawLeft_Y_Dist(){
+        return encoderLY.distance;
+    }
+
+    public double getRawRight_Y_Dist(){
+        return encoderRY.distance;
     }
 
     public Pose2d getPos(){

@@ -37,7 +37,7 @@ public class S4T_Tester extends OpMode {
         encoderLY.update(data);
         encoderRX.update(data);
         encoderRY.update(data);
-        localizer.update(encoderLX.getDist() * 0.6, encoderLY.getDist(), encoderRX.getDist() * 0.6, encoderRY.getDist());
+        //localizer.update(encoderLX.getDist() * 0.6, encoderLY.getDist(), encoderRX.getDist() * 0.6, encoderRY.getDist());
 
 
         telemetry.addData("TUNER DECX: ", mydecx);

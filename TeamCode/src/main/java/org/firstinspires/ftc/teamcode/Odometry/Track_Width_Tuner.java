@@ -35,7 +35,8 @@ public class Track_Width_Tuner extends LinearOpMode {
             robot.updatePos();
 
             if(running){
-                robot.GoTo(new Pose2d(0, 0, (14 * Math.PI)), new Pose2d(1.0, 1.0, 0.3));
+                robot.drive.setPower(0, 0, 0.2);
+                robot.drive.write();
             }else{
                 robot.drive.setPower(0, 0, 0);
                 robot.drive.write();
@@ -46,6 +47,12 @@ public class Track_Width_Tuner extends LinearOpMode {
             telemetry.addData("Left X: ", robot.getLeft_X_Dist());
             telemetry.addData("Right Y: ", robot.getRight_Y_Dist());
             telemetry.addData("Left Y: ", robot.getLeft_Y_Dist());
+
+            telemetry.addData("Right X RAW", robot.getRawRight_X_Dist());
+            telemetry.addData("Left X RAW", robot.getRawLeft_X_Dist());
+            telemetry.addData("Right Y RAW", robot.getRawRight_Y_Dist());
+            telemetry.addData("Left Y RAW", robot.getRawLeft_Y_Dist());
+
             telemetry.update();
         }
     }

@@ -18,12 +18,12 @@ public class LinearTeleOp extends LinearOpMode {
     GamepadEx gamepad1ex;
     GamepadEx gamepad2ex;
 
-    public enum Drive_State{
+    enum Drive_State{
         Driving,
         AutoAllign
     }
 
-    public static Drive_State mDriveState = Drive_State.Driving;
+    Drive_State mDriveState = Drive_State.Driving;
 
     @Override
     public void runOpMode() {
@@ -58,7 +58,7 @@ public class LinearTeleOp extends LinearOpMode {
 
                     robot.drive.driveCentric(gamepad1, xToggle ? 0.5 : 1.0, xToggle ? 0.3 : 1.0, robot.getPos().getHeading() + Math.toRadians(90));
 
-                    if(gamepad1ex.gamepad.right_stick_button){
+                    if(gamepad1ex.isPress(GamepadEx.Control.touchpad)){
                         mDriveState = Drive_State.AutoAllign;
                         currentPoseSnapShot = robot.getPos();
                     }
@@ -73,7 +73,7 @@ public class LinearTeleOp extends LinearOpMode {
                     /*double angle = Math.atan2(robot.ULTIMATE_GOAL_POS.getX() - currentPoseSnapShot.getX(), robot.ULTIMATE_GOAL_POS.getY() - currentPoseSnapShot.getY());
                     angle += Math.toRadians(180);
 
-                    if(robot.getPos().vec().distTo(robot.ULTIMATE_GOAL_POS) <= 120.0){
+                    if(Math.abs(robot.getPos().vec().distTo(robot.ULTIMATE_GOAL_POS) - 120.0) <= 0.5 && Math.abs(robot.getPos().getHeading() - angle) <= Math.toRadians(0.5)){
                         robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));
                         if(Math.abs(robot.getPos().getHeading() - angle) >= Math.toRadians(1.0)){
                           /*
@@ -93,7 +93,11 @@ public class LinearTeleOp extends LinearOpMode {
                     }*/
 
                     //Position Based Auto Align Code
-                    robot.GoTo(new Pose2d(-13, 48, Math.toRadians(180)), new Pose2d(1.0, 1.0, 1.0));
+                    Pose2d testPos = new Pose2d(-13, 48, Math.toRadians(180));
+                    if(testPos.vec().distTo(robot.getPos().vec()) <= 0.5){
+                        robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
+                    }
+                    robot.GoTo(testPos, new Pose2d(1.0, 1.0, 1.0));
 
                     break;
             }

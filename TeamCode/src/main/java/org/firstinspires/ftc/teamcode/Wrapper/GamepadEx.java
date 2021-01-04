@@ -21,6 +21,7 @@ public class GamepadEx {
     private boolean start_click;
     private boolean right_trigger_click;
     private boolean left_trigger_click;
+    private boolean touchpad_click;
 
     private boolean a_prev;
     private boolean x_prev;
@@ -38,6 +39,7 @@ public class GamepadEx {
     private boolean start_prev;
     private boolean right_trigger_prev;
     private boolean left_trigger_prev;
+    private boolean touchpad_prev;
 
     public enum Control{
         a,
@@ -55,7 +57,8 @@ public class GamepadEx {
         dpad_left,
         dpad_up,
         right_stick_button,
-        start
+        start,
+        touchpad
     }
 
     public GamepadEx(Gamepad gamepad){
@@ -96,6 +99,8 @@ public class GamepadEx {
                 return left_trigger_click;
             case right_trigger:
                 return right_trigger_click;
+            case touchpad:
+                return touchpad_click;
             default:
                 return false;
         }
@@ -140,6 +145,7 @@ public class GamepadEx {
         boolean start = gamepad.start;
         boolean right_trigger = gamepad.right_bumper;
         boolean left_trigger = gamepad.left_bumper;
+        boolean touchpad = gamepad.left_stick_button;
         //----------------------------------------------------------------------------------------//
 
         a_click = a && !a_prev;
@@ -158,6 +164,7 @@ public class GamepadEx {
         start_click = start && !start_prev;
         right_trigger_click = right_trigger && !right_trigger_prev;
         left_trigger_click = left_trigger && !left_trigger_prev;
+        touchpad_click = touchpad && !touchpad_prev;
 
         a_prev = a;
         x_prev = x;
@@ -175,5 +182,6 @@ public class GamepadEx {
         start_prev = start;
         right_trigger_prev = right_trigger;
         left_trigger_prev = left_trigger;
+        touchpad_prev = gamepad.left_stick_button;
     }
 }

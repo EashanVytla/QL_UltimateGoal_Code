@@ -14,17 +14,25 @@ import org.firstinspires.ftc.teamcode.PurePusuit.RCOffset;
 
 @Config
 public class S4T_Localizer {
-    public static double TRACK_WIDTH1 = 13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
-    public static double TRACK_WIDTH2 = 6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
+    public static double TRACK_WIDTH1 = 2742.6375568310863736372894523169;//2742.1772557701833430093304257463;//13.653342515840303278727731562382;//13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
+    public static double TRACK_WIDTH2 = 6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
     private double EPILSON = 0.00001;
     private Pose2d mypose = new Pose2d(0, 0, 0);
     double prevheading = 0;
+
     double prevx = 0;
     double prevy = 0;
+
     double prevely = 0;
     double prevery = 0;
     double prevelx = 0;
     double preverx = 0;
+
+    double prevelyRaw = 0;
+    double preveryRaw = 0;
+    double prevelxRaw = 0;
+    double preverxRaw = 0;
+
     double heading = 0;
     Telemetry telemetry;
     public static double k_strafe = 1;
@@ -50,7 +58,7 @@ public class S4T_Localizer {
     double wf = 1;
     double ws = 1;
 
-    public void update(double elx, double ely, double erx, double ery){
+    public void update(double elx, double ely, double erx, double ery, double elxRaw, double elyRaw, double erxRaw, double eryRaw){
         double y = (ely + ery)/2;
         double x = (elx + erx)/2;
         double dy = y - prevy;
@@ -64,13 +72,26 @@ public class S4T_Localizer {
         double dElx = elx - prevelx;
         double dErx = erx - preverx;
 
+        double dElyRaw = elyRaw - prevelyRaw;
+        double dEryRaw = eryRaw - preveryRaw;
+        double dElxRaw = elxRaw - prevelxRaw;
+        double dErxRaw = erxRaw - preverxRaw;
+
         prevelx = elx;
         prevely = ely;
         preverx = erx;
         prevery = ery;
 
-        double dthetastrafe = (dErx - dElx) / TRACK_WIDTH2;
-        double dthetavert = (dEry - dEly) / TRACK_WIDTH1;
+        prevelxRaw = elxRaw;
+        prevelyRaw = elyRaw;
+        preverxRaw = erxRaw;
+        preveryRaw = eryRaw;
+
+        //double dthetastrafe = (dErx - dElx) / TRACK_WIDTH2;
+        //double dthetavert = (dEry - dEly) / TRACK_WIDTH1;
+
+        double dthetastrafe = (dErxRaw - dElxRaw) / TRACK_WIDTH2;
+        double dthetavert = (dEryRaw - dElyRaw) / TRACK_WIDTH1;
 
         double dtheta = weightedTheta(dx, dy, dthetavert, dthetastrafe);
         //double dtheta = nonweightedTheta(dx, dy, dthetavert, dthetastrafe);
@@ -93,17 +114,14 @@ public class S4T_Localizer {
         telemetry.addData("Vertical Heading: ", Math.toDegrees(vertHeading));
         telemetry.addData("Strafe Heading: ", Math.toDegrees(strafeHeading));*/
 
-        telemetry.addData("Vertical Heading", Math.toDegrees(-(ery - ely)/TRACK_WIDTH1) % (360));
+        telemetry.addData("Vertical Heading", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
         telemetry.addData("Strafe Heading", Math.toDegrees(-(erx - elx)/TRACK_WIDTH2) % (360));
 
         TelemetryPacket packet = new TelemetryPacket();
         Canvas fieldOverlay = packet.fieldOverlay();
 
-        DashboardUtil.drawRobot(fieldOverlay, new Pose2d(mypose.getY() + OFFSET_FROM_CENTER.getY(), mypose.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - mypose.getHeading()));
+        DashboardUtil.drawRobot(fieldOverlay, new Pose2d(mypose.getY() + OFFSET_FROM_CENTER.getY(), -mypose.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - mypose.getHeading()));
         dashboard.sendTelemetryPacket(packet);
-
-        dashboardTelemetry.addData("My Position: ", mypose.toString());
-        dashboardTelemetry.update();
     }
 
     public double angleWrap(double angle){
@@ -136,6 +154,10 @@ public class S4T_Localizer {
             ws = 0;
         }
 
+        //todo: take this out!!!!
+        wf = 1;
+        ws = 0;
+
 
         double value = 0;
         double total = wf + ws;
@@ -147,8 +169,8 @@ public class S4T_Localizer {
             value = dthetavert;
         }
 
-        dashboardTelemetry.addData("Weight Forward", wf);
-        dashboardTelemetry.addData("Weight strafe", ws);
+        telemetry.addData("Weight Forward", wf);
+        telemetry.addData("Weight strafe", ws);
 
         return value;
     }
