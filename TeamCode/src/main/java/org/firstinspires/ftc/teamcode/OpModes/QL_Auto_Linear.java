@@ -88,7 +88,7 @@ public class QL_Auto_Linear extends LinearOpMode {
             ArrayList<CurvePoint> allPoints = new ArrayList<>();
 
             if(stage < 6) {
-                robot.shooter.setShooterAngle(Math.toRadians(24.9), robot.shooter.getShooterAngle(), 1.0);
+                robot.shooter.setShooterAngle(Math.toRadians(25.9), robot.shooter.getShooterAngle(), 1.0);
             }
 
             switch (stage){
@@ -321,7 +321,7 @@ public class QL_Auto_Linear extends LinearOpMode {
                         case 3:
                             double currentAngle = robot.shooter.getShooterAngle();
                             //double targetAngle = Math.toRadians(robot.shooter.calculateShooterAngle(robot.getPos().vec().distTo(robot.ULTIMATE_GOAL_POS)));
-                            double targetAngle = Math.toRadians(28);
+                            double targetAngle = Math.toRadians(29);
 
                             robot.GoTo(INTAKE_STACK, new Pose2d(1, 0.5,1));
 

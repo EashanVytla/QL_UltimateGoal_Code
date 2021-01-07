@@ -12,6 +12,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
 import org.firstinspires.ftc.teamcode.Odometry.S4T_Encoder;
 import org.firstinspires.ftc.teamcode.Odometry.S4T_Localizer;
 import org.firstinspires.ftc.teamcode.Vision.CameraTester;
@@ -27,6 +29,8 @@ public class Robot {
     public Mecanum_Drive drive;
     public static Robot robotS = null;
     public ExpansionHubEx hub1;
+    public ExpansionHubEx hub2;
+
     // The IMU sensor object
     private BNO055IMU imu;
     // State used for updating telemetry
@@ -37,6 +41,7 @@ public class Robot {
     private S4T_Encoder encoderRY;
     private S4T_Encoder encoderRX;
     private RevBulkData data;
+    private RevBulkData data2;
     private HardwareMap hardwareMap;
     private Pose2d speedLimits;
 
@@ -58,6 +63,7 @@ public class Robot {
         this.telemetry = telemetry;
 
         hub1 = map.get(ExpansionHubEx.class, "Expansion Hub 173");
+        hub2 = map.get(ExpansionHubEx.class, "Expansion Hub 2");
 
         encoderLY = new S4T_Encoder(map, "back_left");
         encoderLX = new S4T_Encoder(map, "front_left");
@@ -88,6 +94,14 @@ public class Robot {
         });*/
     }
 
+    public RevBulkData getData(){
+        return data;
+    }
+
+    public RevBulkData getData2(){
+        return data2;
+    }
+
     public int getRingStackCase(){
         //return detector.getAnalysis();
         return 0;
@@ -108,7 +122,8 @@ public class Robot {
 
     public void updateBulkData(){
         data = hub1.getBulkInputData();
-        shooter.setData(data);
+        data2 = hub2.getBulkInputData();
+        shooter.setData(data2);
     }
 
     public void updatePos(){
@@ -176,6 +191,10 @@ public class Robot {
         // and named "imu".
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
+    }
+
+    public void startGyro(){
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
     }
 
     public void GoTo(Pose2d pose, Pose2d speedLimits){

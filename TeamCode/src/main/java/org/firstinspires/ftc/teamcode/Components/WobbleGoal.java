@@ -69,7 +69,7 @@ public class WobbleGoal {
     }
 
     public void operate(GamepadEx gamepad){
-        if(gamepad.isPress(GamepadEx.Control.a)){
+        if(gamepad.isPress(GamepadEx.Control.y)){
             grabberToggle = !grabberToggle;
 
             if(grabberToggle){

@@ -14,7 +14,7 @@ import org.firstinspires.ftc.teamcode.PurePusuit.RCOffset;
 
 @Config
 public class S4T_Localizer {
-    public static double TRACK_WIDTH1 = 2742.6375568310863736372894523169;//2742.1772557701833430093304257463;//13.653342515840303278727731562382;//13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
+    public static double TRACK_WIDTH1 = 2739.9319227985241529292184283395;//2742.1772557701833430093304257463;//13.653342515840303278727731562382;//13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
     public static double TRACK_WIDTH2 = 6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
     private double EPILSON = 0.00001;
     private Pose2d mypose = new Pose2d(0, 0, 0);
@@ -105,14 +105,14 @@ public class S4T_Localizer {
         mypose = mypose.plus(new Pose2d(myVec.x, myVec.y, dtheta));
         mypose = new Pose2d(mypose.getX(), mypose.getY(), (Math.toRadians(360) - heading) % Math.toRadians(360));
 
-        /*double vertHeading = ((ely - ery)/ TRACK_WIDTH1) % 2 * Math.PI;
+        /*double vertHeading = ((ely - ery)/ TRACK_WIDTH1);
         vertHeading = angleWrap(vertHeading);
 
-        double strafeHeading = ((elx - erx)/ TRACK_WIDTH2) % 2 * Math.PI;
-        strafeHeading = angleWrap(strafeHeading);
+        double strafeHeading = ((elx - erx)/ TRACK_WIDTH2);
+        strafeHeading = angleWrap(strafeHeading);*/
 
-        telemetry.addData("Vertical Heading: ", Math.toDegrees(vertHeading));
-        telemetry.addData("Strafe Heading: ", Math.toDegrees(strafeHeading));*/
+        //telemetry.addData("Vertical Heading: ", Math.toDegrees(vertHeading));
+        //telemetry.addData("Strafe Heading: ", Math.toDegrees(strafeHeading));
 
         telemetry.addData("Vertical Heading", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
         telemetry.addData("Strafe Heading", Math.toDegrees(-(erx - elx)/TRACK_WIDTH2) % (360));

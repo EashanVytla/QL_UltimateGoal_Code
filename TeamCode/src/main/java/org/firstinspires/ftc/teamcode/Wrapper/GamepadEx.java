@@ -129,23 +129,23 @@ public class GamepadEx {
 
         //PS4 CONTROLLER
         //----------------------------------------------------------------------------------------//
-        boolean a = gamepad.circle;
-        boolean x = gamepad.cross;
-        boolean y = gamepad.square;
+        boolean a = gamepad.cross;
+        boolean x = gamepad.square;
+        boolean y = gamepad.triangle;
         boolean dpad_down = gamepad.dpad_down;
         boolean left_stick_button = gamepad.left_stick_button;
         boolean right_bumper = gamepad.right_bumper;
-        boolean left_bumper = gamepad.y;
-        boolean b = gamepad.circle;
+        boolean left_bumper = gamepad.left_bumper;
+        boolean b = gamepad.b;
         boolean back = gamepad.back;
         boolean dpad_left = gamepad.dpad_left;
-        boolean dpad_right = gamepad.dpad_left;
+        boolean dpad_right = gamepad.dpad_right;
         boolean dpad_up = gamepad.dpad_up;
-        boolean right_stick_button = gamepad.start;
-        boolean start = gamepad.start;
-        boolean right_trigger = gamepad.right_bumper;
-        boolean left_trigger = gamepad.left_bumper;
-        boolean touchpad = gamepad.left_stick_button;
+        boolean right_stick_button = gamepad.right_stick_button;
+        boolean start = gamepad.options;
+        boolean right_trigger = gamepad.right_trigger > 0.3;
+        boolean left_trigger = gamepad.left_trigger > 0.3;
+        boolean touchpad = gamepad.touchpad;
         //----------------------------------------------------------------------------------------//
 
         a_click = a && !a_prev;
