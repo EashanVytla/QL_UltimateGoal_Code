@@ -1,27 +1,36 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Components;
 
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
-import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.RobotLog;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.robotcore.external.navigation.Orientation;
+import org.firstinspires.ftc.robotcore.external.navigation.Position;
+import org.firstinspires.ftc.robotcore.external.navigation.Velocity;
+import org.firstinspires.ftc.teamcode.Odometry.S4T_Encoder;
+import org.firstinspires.ftc.teamcode.Odometry.S4T_Localizer;
+import org.firstinspires.ftc.teamcode.Vision.CameraTester;
+import org.firstinspires.ftc.teamcode.Vision.RingDetectionPipeline;
+import org.openftc.easyopencv.OpenCvCamera;
+import org.openftc.easyopencv.OpenCvCameraFactory;
+import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.RevBulkData;
-import org.firstinspires.ftc.robotcontroller.internal.FtcRobotControllerActivity;
 
 public class Robot {
     public final Vector2d ULTIMATE_GOAL_POS = new Vector2d(-12, 130);
-    Mecanum_Drive drive;
+    public Mecanum_Drive drive;
     public static Robot robotS = null;
     public ExpansionHubEx hub1;
+    public ExpansionHubEx hub2;
+
     // The IMU sensor object
     private BNO055IMU imu;
     // State used for updating telemetry
@@ -32,15 +41,19 @@ public class Robot {
     private S4T_Encoder encoderRY;
     private S4T_Encoder encoderRX;
     private RevBulkData data;
+    private RevBulkData data2;
     private HardwareMap hardwareMap;
     private Pose2d speedLimits;
 
-    Telemetry telemetry;
+    private Telemetry telemetry;
 
     //Todo: Once all robot hardware is on the main robot, make these their own classes
-    //WobbleGoal wobbleGoal;
-    Shooter shooter;
-    Intake intake;
+    public WobbleGoal wobbleGoal;
+    public Shooter shooter;
+    public Intake intake;
+
+    //OpenCvCamera webcam;
+    //RingDetectionPipeline detector;
 
 
     public Robot(HardwareMap map, Telemetry telemetry){
@@ -50,6 +63,7 @@ public class Robot {
         this.telemetry = telemetry;
 
         hub1 = map.get(ExpansionHubEx.class, "Expansion Hub 173");
+        hub2 = map.get(ExpansionHubEx.class, "Expansion Hub 2");
 
         encoderLY = new S4T_Encoder(map, "back_left");
         encoderLX = new S4T_Encoder(map, "front_left");
@@ -58,11 +72,39 @@ public class Robot {
 
 
         drive = new Mecanum_Drive(map, telemetry);
-        //wobbleGoal = new WobbleGoal(map, telemetry, 0.5);
+        wobbleGoal = new WobbleGoal(map, telemetry, 0.5);
         shooter = new Shooter(map, telemetry);
 
         localizer = new S4T_Localizer(telemetry);
         intake = new Intake(hardwareMap);
+
+        //int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        //webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+
+        //detector = new RingDetectionPipeline();
+        //webcam.setPipeline(detector);
+
+        /*webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        {
+            @Override
+            public void onOpened()
+            {
+                webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
+            }
+        });*/
+    }
+
+    public RevBulkData getData(){
+        return data;
+    }
+
+    public RevBulkData getData2(){
+        return data2;
+    }
+
+    public int getRingStackCase(){
+        //return detector.getAnalysis();
+        return 0;
     }
 
     public static Robot getInstance(HardwareMap map, Telemetry telemetry){
@@ -80,7 +122,8 @@ public class Robot {
 
     public void updateBulkData(){
         data = hub1.getBulkInputData();
-        shooter.setData(data);
+        data2 = hub2.getBulkInputData();
+        shooter.setData(data2);
     }
 
     public void updatePos(){
@@ -88,11 +131,7 @@ public class Robot {
         encoderLY.update(data);
         encoderRX.update(data);
         encoderRY.update(data);
-        localizer.update(getLeft_X_Dist(), getLeft_Y_Dist(), getRight_X_Dist(), getRight_Y_Dist());
-    }
-
-    public double getShooterAngle(){
-        return shooter.getShooterAngle(data);
+        localizer.update(getLeft_X_Dist(), getLeft_Y_Dist(), getRight_X_Dist(), getRight_Y_Dist(), getRawLeft_X_Dist(), getRawLeft_Y_Dist(), getRawRight_X_Dist(), getRawRight_Y_Dist());
     }
 
     public double getLeft_X_Dist(){
@@ -109,6 +148,22 @@ public class Robot {
 
     public double getRight_Y_Dist(){
         return encoderRY.getDist();
+    }
+
+    public double getRawLeft_X_Dist(){
+        return -encoderLX.distance;
+    }
+
+    public double getRawRight_X_Dist(){
+        return -encoderRX.distance;
+    }
+
+    public double getRawLeft_Y_Dist(){
+        return encoderLY.distance;
+    }
+
+    public double getRawRight_Y_Dist(){
+        return encoderRY.distance;
     }
 
     public Pose2d getPos(){
@@ -136,6 +191,10 @@ public class Robot {
         // and named "imu".
         imu = hardwareMap.get(BNO055IMU.class, "imu");
         imu.initialize(parameters);
+    }
+
+    public void startGyro(){
+        imu.startAccelerationIntegration(new Position(), new Velocity(), 1000);
     }
 
     public void GoTo(Pose2d pose, Pose2d speedLimits){

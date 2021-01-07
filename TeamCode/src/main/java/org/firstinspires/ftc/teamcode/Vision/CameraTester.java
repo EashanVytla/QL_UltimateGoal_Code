@@ -1,14 +1,14 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Vision;
 
 import android.graphics.Bitmap;
 
 import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.vuforia.Rectangle;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.hardware.camera.WebcamName;
-import org.firstinspires.ftc.robotcore.external.stream.CameraStreamSource;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
@@ -21,11 +21,11 @@ import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
 import org.openftc.easyopencv.OpenCvPipeline;
 
-import static org.firstinspires.ftc.teamcode.VisionConstants.FOUR_RING_THRESHOLD;
-import static org.firstinspires.ftc.teamcode.VisionConstants.ONE_RING_THRESHOLD;
-import static org.firstinspires.ftc.teamcode.VisionConstants.REGION_HEIGHT;
-import static org.firstinspires.ftc.teamcode.VisionConstants.REGION_TOPLEFT_ANCHOR_POINT;
-import static org.firstinspires.ftc.teamcode.VisionConstants.REGION_WIDTH;
+import static org.firstinspires.ftc.teamcode.Vision.VisionConstants.FOUR_RING_THRESHOLD;
+import static org.firstinspires.ftc.teamcode.Vision.VisionConstants.ONE_RING_THRESHOLD;
+import static org.firstinspires.ftc.teamcode.Vision.VisionConstants.REGION_HEIGHT;
+import static org.firstinspires.ftc.teamcode.Vision.VisionConstants.REGION_TOPLEFT_ANCHOR_POINT;
+import static org.firstinspires.ftc.teamcode.Vision.VisionConstants.REGION_WIDTH;
 
 @TeleOp
 public class CameraTester extends LinearOpMode
@@ -82,7 +82,7 @@ public class CameraTester extends LinearOpMode
              */
             FtcDashboard.getInstance().sendImage(pipeline.getImage());
             telemetry.addData("Analysis", pipeline.getAnalysis());
-            telemetry.update();
+
 
             //The "if" statement below will stop streaming from the camera when the "A" button on gamepad 1 is pressed.
             if(gamepad1.a)
@@ -110,7 +110,9 @@ public class CameraTester extends LinearOpMode
                 //webcam.closeCameraDevice();
             }
 
-            sleep(100);
+            telemetry.update();
+
+            //sleep(100);
         }
     }
 
@@ -125,11 +127,11 @@ public class CameraTester extends LinearOpMode
                 REGION_TOPLEFT_ANCHOR_POINT.y);
         Point upper_region_pointB = new Point(
                 REGION_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH,
-                REGION_TOPLEFT_ANCHOR_POINT.y + (REGION_HEIGHT * (2/3)));
+                REGION_TOPLEFT_ANCHOR_POINT.y + (REGION_HEIGHT * (2.0/3.0)));
 
         Point lower_region_pointA = new Point(
                 REGION_TOPLEFT_ANCHOR_POINT.x,
-                REGION_TOPLEFT_ANCHOR_POINT.y + (REGION_HEIGHT * (2/3)));
+                REGION_TOPLEFT_ANCHOR_POINT.y + (REGION_HEIGHT * (2.0/3.0)));
         Point lower_region_pointB = new Point(
                 REGION_TOPLEFT_ANCHOR_POINT.x + REGION_WIDTH,
                 REGION_TOPLEFT_ANCHOR_POINT.y + REGION_HEIGHT);
@@ -141,6 +143,9 @@ public class CameraTester extends LinearOpMode
         int avgUpper;
         int avgLower;
         private Bitmap image;
+
+        FtcDashboard dashboard = FtcDashboard.getInstance();
+        Telemetry dashboardTelemetry = dashboard.getTelemetry();
 
         private volatile int ringCase = 0;
 
@@ -242,6 +247,11 @@ public class CameraTester extends LinearOpMode
             //if the average is greater than 150 -> ringcase = 4
             //if the average is greater than 135 and less than 150 -> ringcase = 1
             //if the average is lower than 135 -> ringcase = 0
+
+            dashboardTelemetry.addData("Average Lower", avgLower);
+            dashboardTelemetry.addData("Average Upper", avgUpper);
+            dashboardTelemetry.update();
+
             if(avgLower > ONE_RING_THRESHOLD){
                 ringCase = 0;
             }else if(avgLower < ONE_RING_THRESHOLD){

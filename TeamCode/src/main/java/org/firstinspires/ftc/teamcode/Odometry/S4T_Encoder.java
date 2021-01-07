@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Odometry;
 
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
@@ -8,7 +8,7 @@ import org.openftc.revextensions2.RevBulkData;
 
 public class S4T_Encoder {
     ExpansionHubMotor encoder;
-    float distance;
+    public float distance;
     boolean reverse = false;
 
     public S4T_Encoder(HardwareMap hardwareMap, String name){

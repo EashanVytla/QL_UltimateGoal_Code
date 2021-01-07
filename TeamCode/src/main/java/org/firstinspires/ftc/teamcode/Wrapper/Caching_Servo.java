@@ -1,11 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Wrapper;
 
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Caching_Servo {
     Servo servo;
-    double prev_pos = 0.0;
+    double prev_pos = -1.0;
 
     double query = -2.0;
 

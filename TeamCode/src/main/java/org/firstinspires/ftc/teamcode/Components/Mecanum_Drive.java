@@ -1,9 +1,11 @@
-package org.firstinspires.ftc.teamcode;
+package org.firstinspires.ftc.teamcode.Components;
 
 
+import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Gamepad;
@@ -12,11 +14,18 @@ import com.qualcomm.robotcore.util.Range;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Math.Vector2;
+import org.firstinspires.ftc.teamcode.Wrapper.Caching_Motor;
 
 import java.util.Arrays;
 
-
+@Config
 public class Mecanum_Drive{
+    //todo: REMOVE THIS
+    public static double x = 0;
+    public static double y = 0;
+    public static double angle = 0;
+    public Pose2d target_pos = new Pose2d(x, y, Math.toRadians(angle));
+
     Caching_Motor[] motors = new Caching_Motor[4];
 
     Telemetry telemetry;
@@ -25,13 +34,13 @@ public class Mecanum_Drive{
     PIDFController PID_Y;
     PIDFController PID_Z;
 
-    float kp = 0.06f;
-    float ki = 0;
-    float kd = 0.0125f;
+    public static double kp = 0.21;
+    public static double ki = 0;
+    public static double kd = 0.025;
 
-    float kpr = 0.86f;
-    float kir = 0;
-    float kdr = 0.06f;
+    public static double kpr = 4;
+    public static double kir = 0;
+    public static double kdr = 0.175;
     int counter;
 
     private double scalePower(double speed, double min, double max){
@@ -62,10 +71,10 @@ public class Mecanum_Drive{
         motors[2].motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         motors[3].motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        /*motors[0].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        motors[0].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motors[1].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         motors[2].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        motors[3].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);*/
+        motors[3].motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         PID_X = new PIDFController(new PIDCoefficients(kp, ki, kd));
         PID_Y = new PIDFController(new PIDCoefficients(kp, ki, kd));
@@ -146,37 +155,14 @@ public class Mecanum_Drive{
             target_heading = -((2 * Math.PI) - targetPos.getHeading());
         }
 
-        telemetry.addData("Target heading: ", target_heading);
-        telemetry.addData("Current heading: ", heading);
+        telemetry.addData("Target Pos: ", targetPos);
+        telemetry.addData("Current Pos: ", currentPos);
 
         PID_X.setTargetPosition(targetPos.getX());
         PID_Y.setTargetPosition(targetPos.getY());
         PID_Z.setTargetPosition(target_heading);
 
         setPowerCentic(PID_X.update(currentPos.getX()), -PID_Y.update(currentPos.getY()), PID_Z.update(heading), currentPos.getHeading());
-    }
-
-    public void driveWithHeading(double x, double y, double targetHeading, double currentHeading, double FCcurrentHeading, double speed){
-        PID_Z.setOutputBounds(-speed, speed);
-
-        double heading = 0;
-        double target_heading = targetHeading;
-
-        if(currentHeading <= Math.PI){
-            heading = currentHeading;
-        }else{
-            heading = -((2 * Math.PI ) - currentHeading);
-        }
-
-        if(Math.abs(target_heading - heading) >= Math.toRadians(180.0)){
-            target_heading = -((2 * Math.PI) - target_heading);
-        }
-
-        telemetry.addData("Target heading: ", target_heading);
-        telemetry.addData("Current heading: ", heading);
-
-        PID_Z.setTargetPosition(target_heading);
-
-        setPowerCentic(x, y, PID_Z.update(heading), FCcurrentHeading);
+        //setPower(0, 0, 0);
     }
 }
