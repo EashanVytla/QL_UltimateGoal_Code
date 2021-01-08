@@ -8,7 +8,7 @@ import org.openftc.revextensions2.RevBulkData;
 
 public class S4T_Encoder {
     ExpansionHubMotor encoder;
-    float distance;
+    public float distance;
     boolean reverse = false;
 
     public S4T_Encoder(HardwareMap hardwareMap, String name){

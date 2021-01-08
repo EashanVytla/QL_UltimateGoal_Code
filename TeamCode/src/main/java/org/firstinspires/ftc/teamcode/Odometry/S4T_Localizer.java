@@ -1,7 +1,11 @@
 package org.firstinspires.ftc.teamcode.Odometry;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
+import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.ftccommon.FtcEventLoop;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -10,26 +14,39 @@ import org.firstinspires.ftc.teamcode.PurePusuit.RCOffset;
 
 @Config
 public class S4T_Localizer {
-    public static double TRACK_WIDTH1 = 13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
-    public static double TRACK_WIDTH2 = 6.8514614115633455971196003213002;//6.8542971111369223086049488009311;
+    public static double TRACK_WIDTH1 = 2742.6375568310863736372894523169;//2742.1772557701833430093304257463;//13.653342515840303278727731562382;//13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
+    public static double TRACK_WIDTH2 = 6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
     private double EPILSON = 0.00001;
     private Pose2d mypose = new Pose2d(0, 0, 0);
     double prevheading = 0;
+
     double prevx = 0;
     double prevy = 0;
+
     double prevely = 0;
     double prevery = 0;
     double prevelx = 0;
     double preverx = 0;
+
+    double prevelyRaw = 0;
+    double preveryRaw = 0;
+    double prevelxRaw = 0;
+    double preverxRaw = 0;
+
     double heading = 0;
     Telemetry telemetry;
-    float k_strafe = 0.8f;
-    float k_vert = 1;
+    public static double k_strafe = 1;
+    public static double k_vert = 1;
 
     float CaseSwitchEPLSN = 0.3f;
+    FtcDashboard dashboard = FtcDashboard.getInstance();
+    Telemetry dashboardTelemetry = dashboard.getTelemetry();
+
+    private Vector2d OFFSET_FROM_CENTER = new Vector2d(-48, -55);
 
     public S4T_Localizer(Telemetry telemetry){
         this.telemetry = telemetry;
+
     }
 
     enum State{
@@ -41,7 +58,7 @@ public class S4T_Localizer {
     double wf = 1;
     double ws = 1;
 
-    public void update(double elx, double ely, double erx, double ery){
+    public void update(double elx, double ely, double erx, double ery, double elxRaw, double elyRaw, double erxRaw, double eryRaw){
         double y = (ely + ery)/2;
         double x = (elx + erx)/2;
         double dy = y - prevy;
@@ -55,13 +72,26 @@ public class S4T_Localizer {
         double dElx = elx - prevelx;
         double dErx = erx - preverx;
 
+        double dElyRaw = elyRaw - prevelyRaw;
+        double dEryRaw = eryRaw - preveryRaw;
+        double dElxRaw = elxRaw - prevelxRaw;
+        double dErxRaw = erxRaw - preverxRaw;
+
         prevelx = elx;
         prevely = ely;
         preverx = erx;
         prevery = ery;
 
-        double dthetastrafe = (dErx - dElx) / TRACK_WIDTH2;
-        double dthetavert = (dEry - dEly) / TRACK_WIDTH1;
+        prevelxRaw = elxRaw;
+        prevelyRaw = elyRaw;
+        preverxRaw = erxRaw;
+        preveryRaw = eryRaw;
+
+        //double dthetastrafe = (dErx - dElx) / TRACK_WIDTH2;
+        //double dthetavert = (dEry - dEly) / TRACK_WIDTH1;
+
+        double dthetastrafe = (dErxRaw - dElxRaw) / TRACK_WIDTH2;
+        double dthetavert = (dEryRaw - dElyRaw) / TRACK_WIDTH1;
 
         double dtheta = weightedTheta(dx, dy, dthetavert, dthetastrafe);
         //double dtheta = nonweightedTheta(dx, dy, dthetavert, dthetastrafe);
@@ -75,12 +105,36 @@ public class S4T_Localizer {
         mypose = mypose.plus(new Pose2d(myVec.x, myVec.y, dtheta));
         mypose = new Pose2d(mypose.getX(), mypose.getY(), (Math.toRadians(360) - heading) % Math.toRadians(360));
 
-        telemetry.addData("Vertical Heading: ", Math.toDegrees(-(ery - ely)/ TRACK_WIDTH1) % (360));
-        telemetry.addData("Strafe Heading: ", Math.toDegrees(-(erx - elx)/ TRACK_WIDTH2) % (360));
+        /*double vertHeading = ((ely - ery)/ TRACK_WIDTH1) % 2 * Math.PI;
+        vertHeading = angleWrap(vertHeading);
+
+        double strafeHeading = ((elx - erx)/ TRACK_WIDTH2) % 2 * Math.PI;
+        strafeHeading = angleWrap(strafeHeading);
+
+        telemetry.addData("Vertical Heading: ", Math.toDegrees(vertHeading));
+        telemetry.addData("Strafe Heading: ", Math.toDegrees(strafeHeading));*/
+
+        telemetry.addData("Vertical Heading", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
+        telemetry.addData("Strafe Heading", Math.toDegrees(-(erx - elx)/TRACK_WIDTH2) % (360));
+
+        TelemetryPacket packet = new TelemetryPacket();
+        Canvas fieldOverlay = packet.fieldOverlay();
+
+        DashboardUtil.drawRobot(fieldOverlay, new Pose2d(mypose.getY() + OFFSET_FROM_CENTER.getY(), -mypose.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - mypose.getHeading()));
+        dashboard.sendTelemetryPacket(packet);
+    }
+
+    public double angleWrap(double angle){
+        return (-(2 * Math.PI) - angle) % (2 * Math.PI);
     }
 
     public double weightedTheta(double dx, double dy, double dthetavert, double dthetastrafe){
         determineWeights(dx, dy);
+
+        //The trash version
+        /*double total = wf + ws;
+        wf /= total;
+        ws /= total;
 
         telemetry.addData("Case: ", OdometryCase);
         if(ws > wf){
@@ -89,8 +143,36 @@ public class S4T_Localizer {
         }else{
             OdometryCase = State.VERTICAL;
             return dthetavert;
+        }*/
+
+        //The GOATED version
+        if(Math.abs(wf) <= 0.01){
+            wf = 0;
         }
-        //return ((wf * dthetavert) + (ws * dthetastrafe)) / (wf + ws);
+
+        if(Math.abs(ws) <= 0.01){
+            ws = 0;
+        }
+
+        //todo: take this out!!!!
+        wf = 1;
+        ws = 0;
+
+
+        double value = 0;
+        double total = wf + ws;
+        if(total != 0){
+            wf /= total;
+            ws /= total;
+            value = (wf * dthetavert) + (ws * dthetastrafe);
+        }else{
+            value = dthetavert;
+        }
+
+        telemetry.addData("Weight Forward", wf);
+        telemetry.addData("Weight strafe", ws);
+
+        return value;
     }
 
     public double nonweightedTheta(double dx, double dy, double dthetavert, double dthetastrafe){
@@ -111,19 +193,27 @@ public class S4T_Localizer {
 
         double highest = 0;
 
-        if(Math.abs(dx) > Math.abs(dy)){
+        /*if(Math.abs(dx) > Math.abs(dy)){
             highest = dx;
         }else{
             highest = dy;
-        }
+        }*/
 
-        highest /= 8;
+        //highest /= 8;
 
         //Todo: Test is weights and decision is actually working
         //Todo: If they are not working, then try getting rid of the highest logic, and just dividing by 8
-        if(highest != 0){
+        double total = dx + dy;
+        /*if(highest != 0){
             dx /= highest;
             dy /= highest;
+        }*/
+
+        if(total != 0){
+            dx /= total;
+            dy /= total;
+            dx *= 8;
+            dy *= 8;
         }
 
         //If dx is higher, wf is lower and vice versa
@@ -138,9 +228,9 @@ public class S4T_Localizer {
         }
         //ws = 0;
 
-        telemetry.addData("weight forward: ", wf);
+        /*telemetry.addData("weight forward: ", wf);
         telemetry.addData("weight strafe: ", ws);
-        telemetry.addData("weight total", wf + ws);
+        telemetry.addData("weight total", wf + ws);*/
     }
 
     public State determineCase(double dx, double dy, double dthethavert, double dthetastrafe){

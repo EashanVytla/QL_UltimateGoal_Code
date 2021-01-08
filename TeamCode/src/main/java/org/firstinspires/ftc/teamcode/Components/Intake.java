@@ -3,7 +3,9 @@ package org.firstinspires.ftc.teamcode.Components;
 import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
+import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Wrapper.Caching_Motor;
+import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 public class Intake {
     private Caching_Motor intake;
@@ -23,17 +25,17 @@ public class Intake {
         intake.write();
     }
 
-    public void operate(Gamepad gamepad1, Gamepad gamepad2){
+    public void operate(GamepadEx gamepad1, GamepadEx gamepad2, Telemetry telemetry){
         //a = start intake
         //y = outake
         //if y let go then whatever a command is doing
 
 
-        if(gamepad1.right_bumper && !prevRB){
+        if(gamepad1.gamepad.right_bumper && !prevRB){
             intakeToggle = !intakeToggle;
         }
 
-        if(gamepad1.left_bumper){
+        if(gamepad1.gamepad.left_bumper){
             intake.setPower(1.0);
         }else if(intakeToggle){
             intake.setPower(-1.0);
@@ -41,8 +43,6 @@ public class Intake {
             intake.setPower(0.0);
         }
 
-        prevRB = gamepad1.right_bumper;
-
-        //intake.setPower(gamepad2.right_trigger - gamepad2.left_trigger);
+        prevRB = gamepad1.gamepad.right_bumper;
     }
 }
