@@ -41,13 +41,13 @@ public class Track_Width_Tuner extends LinearOpMode {
             robot.updatePos();
 
             if(running){
-                robot.drive.setPower(0, 0, 0.4);
-                robot.drive.write();
-                //robot.GoTo(0, 0, 14 * Math.PI, 1.0, 1.0, 0.3);
+                //robot.drive.setPower(0, 0, 0.4);
+                //robot.drive.write();
+                robot.GoTo(0, 0, 14 * Math.PI, 1.0, 1.0, 0.3);
             }else if(running2){
-                robot.drive.setPower(0, 0, -0.4);
-                robot.drive.write();
-                //robot.GoTo(0, 0, -14 * Math.PI, 1.0, 1.0, 0.3);
+                //robot.drive.setPower(0, 0, -0.4);
+                //robot.drive.write();
+                robot.GoTo(0, 0, -14 * Math.PI, 1.0, 1.0, 0.3);
             }else{
                 robot.drive.setPower(0, 0, 0);
                 robot.drive.write();
