@@ -10,8 +10,8 @@ import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
 public class Servo_Tester extends LinearOpMode {
     Robot robot;
     Caching_Servo servo;
-    private double pos = 0;
-    final String name = "flicker";
+    private double pos = 0.875;
+    final String name = "push_slide";
 
     @Override
     public void runOpMode(){

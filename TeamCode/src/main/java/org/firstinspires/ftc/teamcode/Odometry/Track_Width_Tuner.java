@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 
 import org.firstinspires.ftc.teamcode.Components.Robot;
 import org.firstinspires.ftc.teamcode.OpModes.LinearTeleOp;
+import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 @TeleOp(name = "Track Width Tuner")
 public class Track_Width_Tuner extends LinearOpMode {
@@ -14,10 +15,15 @@ public class Track_Width_Tuner extends LinearOpMode {
     double maxMove = 1;
     Robot robot = null;
     boolean running = false;
+    boolean running2 = false;
+
+    GamepadEx gamepad1ex;
 
     @Override
     public void runOpMode() throws InterruptedException {
         robot = new Robot(hardwareMap, telemetry);
+
+        gamepad1ex = new GamepadEx(gamepad1);
 
         waitForStart();
 
@@ -25,22 +31,29 @@ public class Track_Width_Tuner extends LinearOpMode {
         {
             robot.updateBulkData();
 
-            if(gamepad1.a){
-                running = true;
+            if(gamepad1ex.isPress(GamepadEx.Control.a)){
+                running = !running;
             }
 
-            if(gamepad1.b){
-                running = false;
+            if(gamepad1ex.isPress(GamepadEx.Control.b)){
+                running2 = !running2;
             }
             robot.updatePos();
 
             if(running){
-                robot.drive.setPower(0, 0, 0.2);
+                robot.drive.setPower(0, 0, 0.4);
                 robot.drive.write();
+                //robot.GoTo(0, 0, 14 * Math.PI, 1.0, 1.0, 0.3);
+            }else if(running2){
+                robot.drive.setPower(0, 0, -0.4);
+                robot.drive.write();
+                //robot.GoTo(0, 0, -14 * Math.PI, 1.0, 1.0, 0.3);
             }else{
                 robot.drive.setPower(0, 0, 0);
                 robot.drive.write();
             }
+
+            gamepad1ex.loop();
 
             telemetry.addData("Pos: ", robot.getPos());
             telemetry.addData("Right X: ", robot.getRight_X_Dist());

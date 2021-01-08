@@ -16,6 +16,7 @@ import org.firstinspires.ftc.teamcode.PurePusuit.RCOffset;
 public class S4T_Localizer {
     public static double TRACK_WIDTH1 = 2739.9319227985241529292184283395;//2742.1772557701833430093304257463;//13.653342515840303278727731562382;//13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
     public static double TRACK_WIDTH2 = 6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
+    public static double AUX_WIDTH = 3.4254424928680174;
     private double EPILSON = 0.00001;
     private Pose2d mypose = new Pose2d(0, 0, 0);
     double prevheading = 0;
@@ -57,12 +58,15 @@ public class S4T_Localizer {
 
     double wf = 1;
     double ws = 1;
+    double dtheta = 0;
 
     public void update(double elx, double ely, double erx, double ery, double elxRaw, double elyRaw, double erxRaw, double eryRaw){
         double y = (ely + ery)/2;
-        double x = (elx + erx)/2;
+        //double x = (elx + erx)/2;
+        double x = erx;
         double dy = y - prevy;
-        double dx = x - prevx;
+        //double dx = x - prevx;
+        double dx = (erx - prevx) - (AUX_WIDTH * dtheta);
 
         prevx = x;
         prevy = y;
@@ -93,7 +97,7 @@ public class S4T_Localizer {
         double dthetastrafe = (dErxRaw - dElxRaw) / TRACK_WIDTH2;
         double dthetavert = (dEryRaw - dElyRaw) / TRACK_WIDTH1;
 
-        double dtheta = weightedTheta(dx, dy, dthetavert, dthetastrafe);
+        dtheta = weightedTheta(dx, dy, dthetavert, dthetastrafe);
         //double dtheta = nonweightedTheta(dx, dy, dthetavert, dthetastrafe);
 
         heading += dtheta;
