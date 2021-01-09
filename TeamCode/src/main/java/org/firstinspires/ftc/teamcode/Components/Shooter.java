@@ -224,6 +224,7 @@ public class Shooter {
 
         telemetry.addData("Shooter Angle Required", shooterTargetAngle);
         telemetry.addData("State", mRobotState);
+        telemetry.addData("Raw Tick Shooter" , data.getMotorCurrentPosition(encoder));
 
         if(gamepad2.isPress(GamepadEx.Control.left_trigger)){
             mStateTime.reset();
