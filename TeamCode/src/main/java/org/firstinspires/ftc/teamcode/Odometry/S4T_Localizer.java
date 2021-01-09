@@ -187,6 +187,10 @@ public class S4T_Localizer {
     private double prevdx = 0;
     private double prevdy = 0;
 
+    public void setHeading(double heading){
+        this.heading = heading;
+    }
+
     public void determineWeights(double dx, double dy){
         //wf = 1;
         //ws = 0;
