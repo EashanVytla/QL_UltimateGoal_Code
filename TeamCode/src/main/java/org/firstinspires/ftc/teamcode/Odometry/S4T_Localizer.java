@@ -213,21 +213,21 @@ public class S4T_Localizer {
         double mydy = (dy + prevdy)/2;
 
         if(total != 0){
-            dx /= total;
-            dy /= total;
-            dx *= 5.5;
-            dy *= 5.5;
+            mydx /= total;
+            mydy /= total;
+            mydx *= 5.5;
+            mydy *= 5.5;
         }
 
         //If dx is higher, wf is lower and vice versa
-        if(dx != 0) {
-            wf = Math.pow(Math.E, -k_vert * Math.abs(dx));
+        if(mydx != 0) {
+            wf = Math.pow(Math.E, -k_vert * Math.abs(mydx));
         }
         //wf = 1;
 
         //If dy is high, ws is lower and vice versa
-        if(dy != 0) {
-            ws = Math.pow(Math.E, -k_strafe * Math.abs(dy));
+        if(mydy != 0) {
+            ws = Math.pow(Math.E, -k_strafe * Math.abs(mydy));
         }
         //ws = 0;
 
