@@ -17,11 +17,11 @@ public class S4T_Localizer {
     public static double TRACK_WIDTH1 = 2739.9319227985241529292184283395;//2742.1772557701833430093304257463;//13.653342515840303278727731562382;//13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
 
     //todo: This is theoretical trackwidth from old trackwidth... PLEASE TUNE
-    public static double TRACK_WIDTH2 = 1364.9830396551142705987003171713;//6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
+    public static double TRACK_WIDTH2 = 1365.6289892000079285649071316179;//1369.1303979480296259518225744121;//1364.9830396551142705987003171713;//6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
 
     public static double AUX_WIDTH = 3.4254424928680174;
     private double EPILSON = 0.00001;
-    private Pose2d mypose = new Pose2d(0, 0, 0);
+    public Pose2d mypose = new Pose2d(0, 0, 0);
     double prevheading = 0;
 
     double prevx = 0;
@@ -124,11 +124,12 @@ public class S4T_Localizer {
         telemetry.addData("Vertical Heading", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
         telemetry.addData("Strafe Heading", Math.toDegrees(-(erxRaw - elxRaw)/TRACK_WIDTH2) % (360));
 
-        TelemetryPacket packet = new TelemetryPacket();
-        Canvas fieldOverlay = packet.fieldOverlay();
+        //TelemetryPacket packet = new TelemetryPacket();
+        //Canvas fieldOverlay = packet.fieldOverlay();
 
-        DashboardUtil.drawRobot(fieldOverlay, new Pose2d(mypose.getY() + OFFSET_FROM_CENTER.getY(), -mypose.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - mypose.getHeading()));
-        dashboard.sendTelemetryPacket(packet);
+        //DashboardUtil.drawRobot(fieldOverlay, new Pose2d(mypose.getY() + OFFSET_FROM_CENTER.getY(), -mypose.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - mypose.getHeading()));
+        //dashboard.sendTelemetryPacket(packet);
+        dashboardTelemetry.update();
     }
 
     public double angleWrap(double angle){
@@ -176,10 +177,14 @@ public class S4T_Localizer {
             value = dthetavert;
         }
 
-        telemetry.addData("Weight Forward", wf);
-        telemetry.addData("Weight strafe", ws);
+        dashboardTelemetry.addData("Weight Forward", wf);
+        dashboardTelemetry.addData("Weight strafe", ws);
 
         return value;
+    }
+
+    public void setHeading(double heading){
+        this.heading = heading;
     }
 
     public double nonweightedTheta(double dx, double dy, double dthetavert, double dthetastrafe){

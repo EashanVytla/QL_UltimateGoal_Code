@@ -5,8 +5,10 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Components.Robot;
 import org.firstinspires.ftc.teamcode.Components.Shooter;
+import org.firstinspires.ftc.teamcode.PurePusuit.RobotMovement;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
 @TeleOp(name = "TeleOp")
@@ -21,7 +23,8 @@ public class LinearTeleOp extends LinearOpMode {
 
     enum Drive_State{
         Driving,
-        AutoAllign
+        AutoAllign,
+        PowerShots
     }
 
     Drive_State mDriveState = Drive_State.Driving;
@@ -42,11 +45,14 @@ public class LinearTeleOp extends LinearOpMode {
 
         gamepad1ex = new GamepadEx(gamepad1);
         gamepad2ex = new GamepadEx(gamepad2);
+        int power_shots = 0;
+
+        timer.startTime();
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
-        timer.startTime();
+        timer.reset();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
@@ -70,11 +76,26 @@ public class LinearTeleOp extends LinearOpMode {
                         currentPoseSnapShot = robot.getPos();
                     }
 
+                    if(gamepad1ex.isPress(GamepadEx.Control.dpad_right)){
+                        timer.reset();
+                        mDriveState = Drive_State.PowerShots;
+                    }
+
+                    if(gamepad1ex.isPress(GamepadEx.Control.right_trigger)){
+                        robot.setAngle(Math.PI);
+                    }
+
                     break;
                 case AutoAllign:
-                    if(Math.abs(gamepad1ex.gamepad.left_stick_x) >= 0.3 || Math.abs(gamepad1ex.gamepad.right_stick_x) >= 0.3){
+                    /*if(Math.abs(gamepad1ex.gamepad.left_stick_x) >= 0.3 || Math.abs(gamepad1ex.gamepad.right_stick_x) >= 0.3){
                         robot.shooter.reset = true;
+                        robot.shooter.PROTO_AlignSlides = false;
                         mDriveState = Drive_State.Driving;
+                    }
+
+                    if(gamepad1ex.isPress(GamepadEx.Control.dpad_right)){
+                        timer.reset();
+                        mDriveState = Drive_State.PowerShots;
                     }
 
                     //Angle Based Auto Align Code
@@ -83,11 +104,13 @@ public class LinearTeleOp extends LinearOpMode {
 
                     if(Math.abs(robot.getPos().getHeading() - angle) <= Math.toRadians(0.5)){
                         robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
-                        robot.shooter.mStateTime.reset();
-                        robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
+                        //robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
                         mDriveState = Drive_State.Driving;
-                        robot.shooter.PROTO_AlignSlides = false;
-                    }else if(timer.time() >= 0.25){
+                    }else{
+                        robot.shooter.mStateTime.reset();
+                    }
+
+                    if(timer.time() >= 0.25){
                         robot.shooter.PROTO_AlignSlides = true;
                         robot.shooter.powerShotAngle = false;
                         robot.shooter.reset = false;
@@ -95,16 +118,69 @@ public class LinearTeleOp extends LinearOpMode {
                     robot.shooter.shooter.setPower(1.0);
                     robot.shooter.flicker.setPosition(robot.shooter.flickPosDown);
 
-                    robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));
+                    robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));*/
 
                     //Position Based Auto Align Code
                     //Pose2d testPos = new Pose2d(-13, 48, Math.toRadians(180));
-                    //Pose2d testPos = new Pose2d(robot.getPos().getX(), robot.getPos().getY(), Math.PI);
-                    /*if(testPos.vec().distTo(robot.getPos().vec()) <= 0.5){
+                    Pose2d testPos = new Pose2d(robot.getPos().getX(), robot.getPos().getY(), Math.PI);
+                    if(testPos.vec().distTo(robot.getPos().vec()) <= 0.5){
                         robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
-                    }*/
-                    //robot.GoTo(testPos, new Pose2d(1.0, 1.0, 1.0));
+                    }
+                    robot.GoTo(testPos, new Pose2d(0.01, 0.01, 1.0));
 
+                    break;
+                case PowerShots:
+                    robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
+                    robot.shooter.setShooterAngle(Math.toRadians(25.0), robot.shooter.getShooterAngle(), 1.0);
+
+                    if(Math.abs(gamepad1ex.gamepad.left_stick_x) >= 0.3 || Math.abs(gamepad1ex.gamepad.right_stick_x) >= 0.3){
+                        mDriveState = Drive_State.Driving;
+                    }
+
+                    Pose2d POWER_SHOTS_1 = new Pose2d(Positions.POWER_SHOTS_1.x, Positions.POWER_SHOTS_1.y, Positions.POWER_SHOTS_HEADING);
+                    Pose2d POWER_SHOTS_2 = new Pose2d(Positions.POWER_SHOTS_2.x, Positions.POWER_SHOTS_2.y, Positions.POWER_SHOTS_HEADING);
+                    Pose2d POWER_SHOTS_3 = new Pose2d(Positions.POWER_SHOTS_3.x, Positions.POWER_SHOTS_3.y, Positions.POWER_SHOTS_HEADING);
+
+                    double velo = robot.shooter.shooter.motor.getVelocity(AngleUnit.RADIANS);
+
+                    switch (power_shots){
+                        case 0:
+                            robot.GoTo(POWER_SHOTS_1, new Pose2d(1.0, 1.0, 1.0));
+                            if(robot.getPos().vec().distTo(POWER_SHOTS_1.vec()) <= 0.8 && Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(0.5) && velo >= 5.3){
+                                if(timer.time() >= 2.0){
+                                    power_shots = 1;
+                                }else if(timer.time() >= 1.0){
+                                    robot.shooter.powerShot(0);
+                                }
+                            }else{
+                                timer.reset();
+                            }
+                            break;
+                        case 1:
+                            robot.GoTo(POWER_SHOTS_2, new Pose2d(1.0, 1.0, 1.0));
+                            if(robot.getPos().vec().distTo(POWER_SHOTS_2.vec()) <= 0.8 && Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(0.5) && velo >= 5.3){
+                                if(timer.time() >= 1.0){
+                                    power_shots = 2;
+                                }
+                                robot.shooter.powerShot(1);
+                            }else{
+                                timer.reset();
+                            }
+                            break;
+                        case 2:
+                            robot.GoTo(POWER_SHOTS_3, new Pose2d(1.0, 1.0, 1.0));
+                            if(robot.getPos().vec().distTo(POWER_SHOTS_3.vec()) <= 0.8 && Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(0.5) && velo >= 5.3){
+                                if(timer.time() >= 1.0){
+                                    mDriveState = Drive_State.Driving;
+                                    robot.shooter.pushSlide.setPosition(robot.shooter.pushIdle);
+                                    robot.shooter.shooter.setPower(0.2);
+                                }
+                                robot.shooter.powerShot(2);
+                            }else{
+                                timer.reset();
+                            }
+                            break;
+                    }
                     break;
             }
 

@@ -205,6 +205,10 @@ public class Robot {
         updateGoTo(new Pose2d(x, y, heading), new Pose2d(maxspeed_x, maxspeed_y, maxspeed_z));
     }
 
+    public void setAngle(double heading){
+        localizer.setHeading(heading);
+    }
+
     private void updateGoTo(Pose2d pose, Pose2d speedLimits){
         drive.goToPoint(pose, getPos(), speedLimits.getX(), speedLimits.getY(), speedLimits.getHeading());
         telemetry.addData("Position: ", getPos());
