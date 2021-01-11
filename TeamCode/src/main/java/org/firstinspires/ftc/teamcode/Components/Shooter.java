@@ -287,8 +287,7 @@ public class Shooter {
         }
 
         if(gamepad2.isPress(GamepadEx.Control.b)){
-            encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+            encoder.setMode(DcMotor.RunMode.RESET_ENCODERS);
         }
         telemetry.addData("Offset", offset);
 
@@ -317,6 +316,7 @@ public class Shooter {
             if(reset){
                 setShooterAngle(downPos, currentAngle, 0.5);
                 if(currentAngle <= downPos){
+                    encoder.setMode(DcMotor.RunMode.RESET_ENCODERS);
                     powerShotAngle = false;
                     reset = false;
                 }
