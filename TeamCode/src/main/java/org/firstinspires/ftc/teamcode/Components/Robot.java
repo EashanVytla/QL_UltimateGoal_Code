@@ -35,7 +35,7 @@ public class Robot {
     private BNO055IMU imu;
     // State used for updating telemetry
     private Orientation angles;
-    private S4T_Localizer localizer;
+    public S4T_Localizer localizer;
     private S4T_Encoder encoderLY;
     private S4T_Encoder encoderLX;
     private S4T_Encoder encoderRY;

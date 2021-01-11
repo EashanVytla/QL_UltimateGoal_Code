@@ -87,9 +87,9 @@ public class LinearTeleOp extends LinearOpMode {
 
                     break;
                 case AutoAllign:
-                    /*if(Math.abs(gamepad1ex.gamepad.left_stick_x) >= 0.3 || Math.abs(gamepad1ex.gamepad.right_stick_x) >= 0.3){
-                        robot.shooter.reset = true;
-                        robot.shooter.PROTO_AlignSlides = false;
+                    if(Math.abs(gamepad1ex.gamepad.left_stick_x) >= 0.3 || Math.abs(gamepad1ex.gamepad.right_stick_x) >= 0.3){
+                        //robot.shooter.reset = true;
+                        //robot.shooter.PROTO_AlignSlides = false;
                         mDriveState = Drive_State.Driving;
                     }
 
@@ -99,7 +99,7 @@ public class LinearTeleOp extends LinearOpMode {
                     }
 
                     //Angle Based Auto Align Code
-                    double angle = Math.atan2(robot.ULTIMATE_GOAL_POS.getX() - currentPoseSnapShot.getX(), robot.ULTIMATE_GOAL_POS.getY() - currentPoseSnapShot.getY());
+                    /*double angle = Math.atan2(robot.ULTIMATE_GOAL_POS.getX() - currentPoseSnapShot.getX(), robot.ULTIMATE_GOAL_POS.getY() - currentPoseSnapShot.getY());
                     angle += Math.toRadians(180);
 
                     if(Math.abs(robot.getPos().getHeading() - angle) <= Math.toRadians(0.5)){
@@ -123,9 +123,9 @@ public class LinearTeleOp extends LinearOpMode {
                     //Position Based Auto Align Code
                     //Pose2d testPos = new Pose2d(-13, 48, Math.toRadians(180));
                     Pose2d testPos = new Pose2d(robot.getPos().getX(), robot.getPos().getY(), Math.PI);
-                    if(testPos.vec().distTo(robot.getPos().vec()) <= 0.5){
+                    /*if(testPos.vec().distTo(robot.getPos().vec()) <= 0.5){
                         robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
-                    }
+                    }*/
                     robot.GoTo(testPos, new Pose2d(0.01, 0.01, 1.0));
 
                     break;

@@ -17,7 +17,7 @@ public class S4T_Localizer {
     public static double TRACK_WIDTH1 = 2739.9319227985241529292184283395;//2742.1772557701833430093304257463;//13.653342515840303278727731562382;//13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
 
     //todo: This is theoretical trackwidth from old trackwidth... PLEASE TUNE
-    public static double TRACK_WIDTH2 = 1364.9830396551142705987003171713;//6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
+    public static double TRACK_WIDTH2 = 1377.9830396551142705987003171713;//6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
 
     public static double AUX_WIDTH = 3.4254424928680174;
     private double EPILSON = 0.00001;
@@ -40,17 +40,21 @@ public class S4T_Localizer {
     double heading = 0;
     Telemetry telemetry;
     public static double k_strafe = 0.8;
-    public static double k_vert = 1;
+    public static double k_vert = 1.0;
 
     float CaseSwitchEPLSN = 0.3f;
     FtcDashboard dashboard = FtcDashboard.getInstance();
-    Telemetry dashboardTelemetry = dashboard.getTelemetry();
+
+    public static TelemetryPacket packet;
+    Canvas fieldOverlay;
 
     private Vector2d OFFSET_FROM_CENTER = new Vector2d(-48, -55);
 
     public S4T_Localizer(Telemetry telemetry){
         this.telemetry = telemetry;
 
+        packet = new TelemetryPacket();
+        fieldOverlay = packet.fieldOverlay();
     }
 
     enum State{
@@ -62,8 +66,19 @@ public class S4T_Localizer {
     double wf = 1;
     double ws = 1;
     double dtheta = 0;
+    Pose2d dashboardPos = new Pose2d(0, 0, 0);
+
+    public void setK_strafe(double value){
+        k_strafe = value;
+    }
+
+    public void setK_vert(double value){
+        k_vert = value;
+    }
 
     public void update(double elx, double ely, double erx, double ery, double elxRaw, double elyRaw, double erxRaw, double eryRaw){
+        packet = new TelemetryPacket();
+        fieldOverlay = packet.fieldOverlay();
         double y = (ely + ery)/2;
         double x = (elx + erx)/2;
         //double x = erx;
@@ -112,23 +127,15 @@ public class S4T_Localizer {
         mypose = mypose.plus(new Pose2d(myVec.x, myVec.y, dtheta));
         mypose = new Pose2d(mypose.getX(), mypose.getY(), (Math.toRadians(360) - heading) % Math.toRadians(360));
 
-        /*double vertHeading = ((ely - ery)/ TRACK_WIDTH1);
-        vertHeading = angleWrap(vertHeading);
-
-        double strafeHeading = ((elx - erx)/ TRACK_WIDTH2);
-        strafeHeading = angleWrap(strafeHeading);*/
-
-        //telemetry.addData("Vertical Heading: ", Math.toDegrees(vertHeading));
-        //telemetry.addData("Strafe Heading: ", Math.toDegrees(strafeHeading));
+        dashboardPos = new Pose2d(mypose.getY() + OFFSET_FROM_CENTER.getY(), -mypose.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - mypose.getHeading());
 
         telemetry.addData("Vertical Heading", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
         telemetry.addData("Strafe Heading", Math.toDegrees(-(erxRaw - elxRaw)/TRACK_WIDTH2) % (360));
 
-        TelemetryPacket packet = new TelemetryPacket();
-        Canvas fieldOverlay = packet.fieldOverlay();
-
-        DashboardUtil.drawRobot(fieldOverlay, new Pose2d(mypose.getY() + OFFSET_FROM_CENTER.getY(), -mypose.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - mypose.getHeading()));
+        DashboardUtil.drawRobot(fieldOverlay, dashboardPos);
         packet.put("pos", mypose);
+        packet.put("Vertical Heading: ", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
+        packet.put("Strafe Heading: ", Math.toDegrees(-(erxRaw - elxRaw)/TRACK_WIDTH2) % (360));
         dashboard.sendTelemetryPacket(packet);
     }
 
@@ -191,6 +198,8 @@ public class S4T_Localizer {
         this.heading = heading;
     }
 
+    public static double normalizationFactor = 8;
+
     public void determineWeights(double dx, double dy){
         //wf = 1;
         //ws = 0;
@@ -213,15 +222,26 @@ public class S4T_Localizer {
             dy /= highest;
         }*/
 
+        //dy *= 0.49818137023672532471239330234681;
+
         double mydx = (dx + prevdx)/2;
         double mydy = (dy + prevdy)/2;
 
         if(total != 0){
             mydx /= total;
             mydy /= total;
-            mydx *= 5.5;
-            mydy *= 5.5;
+            mydx *= normalizationFactor;
+            mydy *= normalizationFactor;
         }
+
+        Vector2d vec = new Vector2d(dashboardPos.getX() + 15, dashboardPos.getY());
+        vec.rotated(heading);
+        vec = vec.rotated(Math.atan2(mydy, mydx));
+
+        fieldOverlay.strokeLine(dashboardPos.getX(), dashboardPos.getY(), vec.getX(), vec.getY());
+
+        packet.put("dx", dx);
+        packet.put("dy", dy);
 
         //If dx is higher, wf is lower and vice versa
         if(mydx != 0) {
@@ -234,6 +254,9 @@ public class S4T_Localizer {
             ws = Math.pow(Math.E, -k_strafe * Math.abs(mydy));
         }
         //ws = 0;
+
+        packet.put("ws", ws);
+        packet.put("wf", wf);
 
         /*telemetry.addData("weight forward: ", wf);
         telemetry.addData("weight strafe: ", ws);

@@ -16,6 +16,7 @@ import org.firstinspires.ftc.robotcore.external.State;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.Odometry.S4T_Localizer;
 import org.firstinspires.ftc.teamcode.OpModes.LinearTeleOp;
 import org.firstinspires.ftc.teamcode.Wrapper.Caching_Motor;
 import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
@@ -78,7 +79,7 @@ public class Shooter {
     public ShootState mRobotState = ShootState.IDLE;
 
     public Shooter(HardwareMap map, Telemetry telemetry){
-        downPos = Math.toRadians(20.5);
+        downPos = Math.toRadians(20.25);
 
         rightSlide = new Caching_Motor(map, "right_slide");
         leftSlide = new Caching_Motor(map, "left_slide");
@@ -224,6 +225,7 @@ public class Shooter {
 
         telemetry.addData("Shooter Angle Required", shooterTargetAngle);
         telemetry.addData("State", mRobotState);
+        S4T_Localizer.packet.put("Raw Tick Shooter" , data.getMotorCurrentPosition(encoder));
         telemetry.addData("Raw Tick Shooter" , data.getMotorCurrentPosition(encoder));
 
         if(gamepad2.isPress(GamepadEx.Control.left_trigger)){
@@ -285,7 +287,8 @@ public class Shooter {
         }
 
         if(gamepad2.isPress(GamepadEx.Control.b)){
-            offset = Math.toRadians(20) - currentAngle;
+            encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+            encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
         telemetry.addData("Offset", offset);
 

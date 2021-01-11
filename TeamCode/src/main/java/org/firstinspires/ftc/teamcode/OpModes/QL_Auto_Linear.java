@@ -67,6 +67,9 @@ public class QL_Auto_Linear extends LinearOpMode {
 
         boolean slidesGood = false;
 
+        robot.localizer.setK_strafe(Positions.k_strafe_auto);
+        robot.localizer.setK_vert(Positions.k_vert_auto);
+
         waitForStart();
         time.reset();
 
@@ -397,6 +400,8 @@ public class QL_Auto_Linear extends LinearOpMode {
 
 @Config
 class Positions {
+    public static double k_strafe_auto = 1.0;
+    public static double k_vert_auto = 0.6;
     public static Point CLEAR_STACK = new Point(8, 24);
     public static Point ZONE_1 = new Point(7.464, 57.245);
     public static Point ZONE_2 = new Point(-11.923, 79.501);
