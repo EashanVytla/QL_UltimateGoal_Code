@@ -169,8 +169,8 @@ public class Shooter {
     }
 
     public void slideSetPower(double power){
-        rightSlide.setPower(Range.clip(power + 0.05, -1, 1));
-        leftSlide.setPower(Range.clip(power + 0.05, -1, 1));
+        rightSlide.setPower(Range.clip(power + 0.08, -1, 1));
+        leftSlide.setPower(Range.clip(power + 0.08, -1, 1));
         telemetry.addData("Slide Power", power);
     }
 
