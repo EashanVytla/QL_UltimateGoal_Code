@@ -295,10 +295,15 @@ public class Shooter {
 
         if(PROTO_AlignSlides){
             reset = false;
-            if(Math.abs(currentAngle - (powerShotAngle ? Math.toRadians(20.9) : Math.toRadians(shooterTargetAngle))) < Math.toRadians(0.05) && Math.abs(gamepad2.gamepad.left_stick_y) >= 0.15){
-                PROTO_AlignSlides = false;
-                powerShotAngle = false;
+            if(Math.abs(currentAngle - (powerShotAngle ? Math.toRadians(20.9) : Math.toRadians(shooterTargetAngle))) < Math.toRadians(0.05) || Math.abs(gamepad2.gamepad.left_stick_y) >= 0.15){
+                if(mStateTime.time() >= 0.5){
+                    PROTO_AlignSlides = false;
+                    powerShotAngle = false;
+                }else{
+                    setShooterAngle(powerShotAngle ? Math.toRadians(20.9) : Math.toRadians(SlidesTunerAngle), currentAngle, 1.0);
+                }
             }else{
+                mStateTime.reset();
                 //setShooterAngle(powerShotAngle ? Math.toRadians(20.9) : Math.toRadians(shooterTargetAngle), currentAngle, 1.0);
                 setShooterAngle(powerShotAngle ? Math.toRadians(20.9) : Math.toRadians(SlidesTunerAngle), currentAngle, 1.0);
             }
