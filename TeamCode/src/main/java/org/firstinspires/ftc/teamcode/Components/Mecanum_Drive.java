@@ -106,7 +106,7 @@ public class Mecanum_Drive{
         Arrays.sort(motorPowers);
 
         //Verifying highest motor power != 0 to avoid a divide by 0 error
-        if(Math.abs(motorPowers[3]) > 1){
+        if(motorPowers[3] != 0){
             //Normalizing the values to be within 0-1
             frontLeftMotorPower /= Math.abs(motorPowers[3]);
             frontRightMotorPower /= Math.abs(motorPowers[3]);
