@@ -294,7 +294,7 @@ public class Shooter {
 
         if(PROTO_AlignSlides){
             reset = false;
-            if(Math.abs(currentAngle - (powerShotAngle ? Math.toRadians(20.9) : Math.toRadians(shooterTargetAngle))) < Math.toRadians(0.05) || Math.abs(gamepad2.gamepad.left_stick_y) >= 0.15){
+            if(Math.abs(currentAngle - (powerShotAngle ? Math.toRadians(20.9) : Math.toRadians(SlidesTunerAngle))) < Math.toRadians(0.1) || Math.abs(gamepad2.gamepad.left_stick_y) >= 0.15){
                 if(mStateTime.time() >= 0.5){
                     PROTO_AlignSlides = false;
                     powerShotAngle = false;
