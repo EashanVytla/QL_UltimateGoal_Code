@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.OpModes;
 
+import com.acmerobotics.dashboard.FtcDashboard;
+import com.acmerobotics.dashboard.canvas.Canvas;
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -8,6 +11,8 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.teamcode.Components.Robot;
 import org.firstinspires.ftc.teamcode.Components.Shooter;
+import org.firstinspires.ftc.teamcode.Math.Vector2;
+import org.firstinspires.ftc.teamcode.Odometry.DashboardUtil;
 import org.firstinspires.ftc.teamcode.PurePusuit.RobotMovement;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
@@ -20,6 +25,10 @@ public class LinearTeleOp extends LinearOpMode {
     //private boolean prevx = false;
     GamepadEx gamepad1ex;
     GamepadEx gamepad2ex;
+    FtcDashboard dashboard = FtcDashboard.getInstance();
+
+    public TelemetryPacket packet;
+    Canvas fieldOverlay;
 
     enum Drive_State{
         Driving,
@@ -32,6 +41,9 @@ public class LinearTeleOp extends LinearOpMode {
 
     @Override
     public void runOpMode() {
+        packet = new TelemetryPacket();
+        fieldOverlay = packet.fieldOverlay();
+
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -56,6 +68,9 @@ public class LinearTeleOp extends LinearOpMode {
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive()) {
+            packet = new TelemetryPacket();
+            fieldOverlay = packet.fieldOverlay();
+
             robot.updateBulkData();
 
             double distFromGoal = robot.getPos().vec().distTo(robot.ULTIMATE_GOAL_POS);
@@ -87,7 +102,7 @@ public class LinearTeleOp extends LinearOpMode {
 
                     break;
                 case AutoAllign:
-                    if(Math.abs(gamepad1ex.gamepad.left_stick_x) >= 0.3 || Math.abs(gamepad1ex.gamepad.right_stick_x) >= 0.3){
+                    if(Math.abs(gamepad1ex.gamepad.left_stick_x) >= 0.3 || Math.abs(gamepad1ex.gamepad.right_stick_x) >= 0.3 || Math.abs(gamepad1ex.gamepad.left_stick_y) >= 0.3 || Math.abs(gamepad1ex.gamepad.right_stick_y) >= 0.3){
                         //robot.shooter.reset = true;
                         //robot.shooter.PROTO_AlignSlides = false;
                         mDriveState = Drive_State.Driving;
@@ -189,7 +204,7 @@ public class LinearTeleOp extends LinearOpMode {
             robot.updatePos();
             robot.drive.write();
 
-            robot.shooter.operate(gamepad1ex, gamepad2ex, distFromGoal);
+            robot.shooter.operate(gamepad1ex, gamepad2ex, distFromGoal, packet);
             robot.shooter.write();
 
             robot.wobbleGoal.operate(gamepad2ex);
@@ -208,6 +223,7 @@ public class LinearTeleOp extends LinearOpMode {
 
             gamepad1ex.loop();
             gamepad2ex.loop();
+            dashboard.sendTelemetryPacket(packet);
         }
     }
 }

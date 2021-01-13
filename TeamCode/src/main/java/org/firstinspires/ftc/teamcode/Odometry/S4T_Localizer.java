@@ -43,18 +43,12 @@ public class S4T_Localizer {
     public static double k_vert = 1.0;
 
     float CaseSwitchEPLSN = 0.3f;
-    FtcDashboard dashboard = FtcDashboard.getInstance();
 
-    public static TelemetryPacket packet;
-    Canvas fieldOverlay;
 
     private Vector2d OFFSET_FROM_CENTER = new Vector2d(-48, -55);
 
     public S4T_Localizer(Telemetry telemetry){
         this.telemetry = telemetry;
-
-        packet = new TelemetryPacket();
-        fieldOverlay = packet.fieldOverlay();
     }
 
     enum State{
@@ -77,8 +71,7 @@ public class S4T_Localizer {
     }
 
     public void update(double elx, double ely, double erx, double ery, double elxRaw, double elyRaw, double erxRaw, double eryRaw){
-        packet = new TelemetryPacket();
-        fieldOverlay = packet.fieldOverlay();
+
         double y = (ely + ery)/2;
         double x = (elx + erx)/2;
         //double x = erx;
@@ -132,11 +125,11 @@ public class S4T_Localizer {
         telemetry.addData("Vertical Heading", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
         telemetry.addData("Strafe Heading", Math.toDegrees(-(erxRaw - elxRaw)/TRACK_WIDTH2) % (360));
 
-        DashboardUtil.drawRobot(fieldOverlay, dashboardPos);
+        /*DashboardUtil.drawRobot(fieldOverlay, dashboardPos);
         packet.put("pos", mypose);
         packet.put("Vertical Heading: ", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
         packet.put("Strafe Heading: ", Math.toDegrees(-(erxRaw - elxRaw)/TRACK_WIDTH2) % (360));
-        dashboard.sendTelemetryPacket(packet);
+        dashboard.sendTelemetryPacket(packet);*/
     }
 
     public double angleWrap(double angle){
@@ -238,10 +231,10 @@ public class S4T_Localizer {
         vec.rotated(heading);
         vec = vec.rotated(Math.atan2(mydy, mydx));
 
-        fieldOverlay.strokeLine(dashboardPos.getX(), dashboardPos.getY(), vec.getX(), vec.getY());
+        //fieldOverlay.strokeLine(dashboardPos.getX(), dashboardPos.getY(), vec.getX(), vec.getY());
 
-        packet.put("dx", dx);
-        packet.put("dy", dy);
+        //packet.put("dx", dx);
+        //packet.put("dy", dy);
 
         //If dx is higher, wf is lower and vice versa
         if(mydx != 0) {
@@ -255,8 +248,8 @@ public class S4T_Localizer {
         }
         //ws = 0;
 
-        packet.put("ws", ws);
-        packet.put("wf", wf);
+        //packet.put("ws", ws);
+        //packet.put("wf", wf);
 
         /*telemetry.addData("weight forward: ", wf);
         telemetry.addData("weight strafe: ", ws);
