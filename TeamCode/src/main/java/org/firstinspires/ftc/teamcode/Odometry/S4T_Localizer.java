@@ -39,7 +39,7 @@ public class S4T_Localizer {
 
     double heading = 0;
     Telemetry telemetry;
-    public static double k_strafe = 0.8;
+    public static double k_strafe = 0.2;
     public static double k_vert = 1.0;
 
     float CaseSwitchEPLSN = 0.3f;
@@ -238,13 +238,13 @@ public class S4T_Localizer {
 
         //If dx is higher, wf is lower and vice versa
         if(mydx != 0) {
-            wf = Math.pow(Math.E, -k_vert * Math.abs(mydx));
+            wf = Math.pow(Math.E, -k_strafe * Math.abs(mydx));
         }
         //wf = 1;
 
         //If dy is high, ws is lower and vice versa
         if(mydy != 0) {
-            ws = Math.pow(Math.E, -k_strafe * Math.abs(mydy));
+            ws = Math.pow(Math.E, -k_vert * Math.abs(mydy));
         }
         //ws = 0;
 
