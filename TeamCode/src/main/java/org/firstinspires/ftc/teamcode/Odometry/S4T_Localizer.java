@@ -14,14 +14,16 @@ import org.firstinspires.ftc.teamcode.PurePusuit.RCOffset;
 
 @Config
 public class S4T_Localizer {
-    public static double TRACK_WIDTH1 = 2739.9319227985241529292184283395;//2742.1772557701833430093304257463;//13.653342515840303278727731562382;//13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
+    //WORKED FOR VERY LONG TIME: 2739.9319227985241529292184283395;
+    public static double TRACK_WIDTH1 = 2743.9424860098757;//2737.9424860098754612321073812974;//2747.2530501807513383745870814547;//2744.9453035059188560059382668858;//2739.9319227985241529292184283395;//2742.1772557701833430093304257463;//13.653342515840303278727731562382;//13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
 
     //todo: This is theoretical trackwidth from old trackwidth... PLEASE TUNE
-    public static double TRACK_WIDTH2 = 1377.9830396551142705987003171713;//6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
+    public static double TRACK_WIDTH2 = 1384.0383147856;//1375.0191308424297533752712736568;//1375.2578632570675963789245993019;//1371.1198347366783176489336214542;//1362.4458903381700218495294563504;//1367.9367358748404109335559461868//6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
 
     public static double AUX_WIDTH = 3.4254424928680174;
     private double EPILSON = 0.00001;
-    private Pose2d mypose = new Pose2d(0, 0, 0);
+    private Pose2d myposeTicks = new Pose2d(0, 0, 0);
+    private Pose2d myposeIn = new Pose2d(0, 0, 0);
     double prevheading = 0;
 
     double prevx = 0;
@@ -39,8 +41,9 @@ public class S4T_Localizer {
 
     double heading = 0;
     Telemetry telemetry;
-    public static double k_strafe = 0.2;
-    public static double k_vert = 1.0;
+    public static double k_strafe = 1.0;
+    public static double k_vert = 0.75;
+    public double TICKS_TO_INCHES = 200.33577083;
 
     float CaseSwitchEPLSN = 0.3f;
 
@@ -57,23 +60,15 @@ public class S4T_Localizer {
     }
     State OdometryCase = State.VERTICAL;
 
-    double wf = 1;
-    double ws = 1;
+    public double wf = 1;
+    public double ws = 1;
     double dtheta = 0;
-    Pose2d dashboardPos = new Pose2d(0, 0, 0);
+    public Pose2d dashboardPos = new Pose2d(0, 0, 0);
 
-    public void setK_strafe(double value){
-        k_strafe = value;
-    }
 
-    public void setK_vert(double value){
-        k_vert = value;
-    }
-
-    public void update(double elx, double ely, double erx, double ery, double elxRaw, double elyRaw, double erxRaw, double eryRaw){
-
-        double y = (ely + ery)/2;
-        double x = (elx + erx)/2;
+    public void update(double elxRaw, double elyRaw, double erxRaw, double eryRaw){
+        double y = (elyRaw + eryRaw)/2;
+        double x = (elxRaw + erxRaw)/2;
         //double x = erx;
         double dy = y - prevy;
         double dx = x - prevx;
@@ -82,20 +77,15 @@ public class S4T_Localizer {
         prevx = x;
         prevy = y;
 
-        double dEly = ely - prevely;
-        double dEry = ery - prevery;
-        double dElx = elx - prevelx;
-        double dErx = erx - preverx;
-
         double dElyRaw = elyRaw - prevelyRaw;
         double dEryRaw = eryRaw - preveryRaw;
         double dElxRaw = elxRaw - prevelxRaw;
         double dErxRaw = erxRaw - preverxRaw;
 
-        prevelx = elx;
-        prevely = ely;
-        preverx = erx;
-        prevery = ery;
+        prevelx = elxRaw;
+        prevely = elyRaw;
+        preverx = erxRaw;
+        prevery = eryRaw;
 
         prevelxRaw = elxRaw;
         prevelyRaw = elyRaw;
@@ -117,10 +107,12 @@ public class S4T_Localizer {
         Vector2 myVec = ConstantVelo(dy, dx, prevheading, dtheta);
         prevheading = heading;
 
-        mypose = mypose.plus(new Pose2d(myVec.x, myVec.y, dtheta));
-        mypose = new Pose2d(mypose.getX(), mypose.getY(), (Math.toRadians(360) - heading) % Math.toRadians(360));
+        myposeTicks = myposeTicks.plus(new Pose2d(myVec.x, myVec.y, dtheta));
+        myposeTicks = new Pose2d(myposeTicks.getX(), myposeTicks.getY(), (Math.toRadians(360) - heading) % Math.toRadians(360));
 
-        dashboardPos = new Pose2d(mypose.getY() + OFFSET_FROM_CENTER.getY(), -mypose.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - mypose.getHeading());
+        myposeIn = new Pose2d(myposeTicks.getX() / TICKS_TO_INCHES, myposeTicks.getY() / TICKS_TO_INCHES, myposeTicks.getHeading());
+
+        dashboardPos = new Pose2d(myposeIn.getY() + OFFSET_FROM_CENTER.getY(), -myposeIn.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - myposeIn.getHeading());
 
         telemetry.addData("Vertical Heading", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
         telemetry.addData("Strafe Heading", Math.toDegrees(-(erxRaw - elxRaw)/TRACK_WIDTH2) % (360));
@@ -157,11 +149,19 @@ public class S4T_Localizer {
 //        wf = 1;
 //        ws = 0;
 
+        /*if(wf <= 0.075){
+            wf = 0;
+        }
+
+        if(ws <= 0.075){
+            ws = 0;
+        }*/
+
 
         double value = 0;
         double total = wf + ws;
         if(total != 0){
-            value = ((wf * dthetavert) + (ws * dthetastrafe))/total;
+            value = ((wf * dthetavert) + (ws * -dthetastrafe))/total;
         }else{
             value = dthetavert;
         }
@@ -271,7 +271,7 @@ public class S4T_Localizer {
     }
 
     public Pose2d getPose(){
-        return mypose;
+        return myposeIn;
     }
 
     private Vector2 circleUpdate(RCOffset offset){

@@ -13,6 +13,7 @@ import org.firstinspires.ftc.teamcode.Components.Robot;
 import org.firstinspires.ftc.teamcode.Components.Shooter;
 import org.firstinspires.ftc.teamcode.Math.Vector2;
 import org.firstinspires.ftc.teamcode.Odometry.DashboardUtil;
+import org.firstinspires.ftc.teamcode.Odometry.S4T_Localizer;
 import org.firstinspires.ftc.teamcode.PurePusuit.RobotMovement;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 
@@ -79,7 +80,7 @@ public class LinearTeleOp extends LinearOpMode {
 
             switch (mDriveState){
                 case Driving:
-                    if(gamepad1ex.isPress(GamepadEx.Control.x)){
+                    if(gamepad1ex.isPress(GamepadEx.Control.left_stick_button)){
                         xToggle = !xToggle;
                     }
 
@@ -96,15 +97,13 @@ public class LinearTeleOp extends LinearOpMode {
                         mDriveState = Drive_State.PowerShots;
                     }
 
-                    if(gamepad1ex.isPress(GamepadEx.Control.right_trigger)){
+                    if(gamepad1ex.isPress(GamepadEx.Control.a)){
                         robot.setAngle(Math.PI);
                     }
 
                     break;
                 case AutoAllign:
                     if(Math.abs(gamepad1ex.gamepad.left_stick_x) >= 0.3 || Math.abs(gamepad1ex.gamepad.right_stick_x) >= 0.3 || Math.abs(gamepad1ex.gamepad.left_stick_y) >= 0.3 || Math.abs(gamepad1ex.gamepad.right_stick_y) >= 0.3){
-                        //robot.shooter.reset = true;
-                        //robot.shooter.PROTO_AlignSlides = false;
                         mDriveState = Drive_State.Driving;
                     }
 
@@ -136,12 +135,33 @@ public class LinearTeleOp extends LinearOpMode {
                     robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));*/
 
                     //Position Based Auto Align Code
-                    //Pose2d testPos = new Pose2d(-13, 48, Math.toRadians(180));
-                    Pose2d testPos = new Pose2d(robot.getPos().getX(), robot.getPos().getY(), Math.PI);
-                    /*if(testPos.vec().distTo(robot.getPos().vec()) <= 0.5){
-                        robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
+                    Pose2d testPos = new Pose2d(robot.getPos().getX(), robot.getPos().getY(), Math.toRadians(180));
+                    //Pose2d testPos = new Pose2d(-10.636, 47.790, Math.PI);
+                    /*if(testPos.vec().distTo(robot.getPos().vec()) <= 1.0 && Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(0.5)){
+                        //robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
+
+                        //robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
+                    }else{
+                        robot.shooter.mStateTime.reset();
                     }*/
-                    robot.GoTo(testPos, new Pose2d(0.01, 0.01, 1.0));
+
+                    /*if(timer.time() >= 0.15){
+                        if(gamepad2ex.isPress(GamepadEx.Control.dpad_down)){
+                            robot.shooter.PROTO_AlignSlides = false;
+                            robot.shooter.powerShotAngle = false;
+                            robot.shooter.reset = true;
+                            mDriveState = Drive_State.Driving;
+                        }else{
+                            robot.shooter.PROTO_AlignSlides = true;
+                            robot.shooter.powerShotAngle = false;
+                            robot.shooter.reset = false;
+                        }
+                    }*/
+
+                    //robot.shooter.shooter.setPower(1.0);
+                    //robot.shooter.flicker.setPosition(robot.shooter.flickPosDown);
+
+                    robot.GoTo(testPos, new Pose2d(1.0, 1.0, 1.0));
 
                     break;
                 case PowerShots:
@@ -223,6 +243,20 @@ public class LinearTeleOp extends LinearOpMode {
 
             gamepad1ex.loop();
             gamepad2ex.loop();
+
+            packet.put("Pose", robot.getPos());
+            packet.put("Vertical Heading: ", Math.toDegrees(-(robot.getRawLeft_Y_Dist() - robot.getRawRight_Y_Dist())/ S4T_Localizer.TRACK_WIDTH1) % (360));
+            packet.put("Strafe Heading: ", Math.toDegrees(-(robot.getRawLeft_X_Dist() - robot.getRawRight_X_Dist())/S4T_Localizer.TRACK_WIDTH2) % (360));
+            packet.put("wf", robot.localizer.wf);
+            packet.put("ws", robot.localizer.ws);
+            packet.put("LX", robot.getRawLeft_X_Dist());
+            packet.put("RX", robot.getRawRight_X_Dist());
+            packet.put("LY", robot.getRawLeft_Y_Dist());
+            packet.put("RY", robot.getRawRight_Y_Dist());
+
+            packet.put("gamepad x", gamepad1ex.gamepad.left_stick_x);
+
+            DashboardUtil.drawRobot(fieldOverlay, robot.localizer.dashboardPos);
             dashboard.sendTelemetryPacket(packet);
         }
     }

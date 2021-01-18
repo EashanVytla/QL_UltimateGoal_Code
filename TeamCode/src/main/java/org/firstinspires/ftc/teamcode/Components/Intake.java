@@ -11,7 +11,6 @@ import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
 public class Intake {
     private Caching_Motor intake;
     private boolean intakeToggle = false;
-    private  boolean prevRB = false;
 
 
     public Intake(HardwareMap map){
@@ -33,7 +32,7 @@ public class Intake {
         //if y let go then whatever a command is doing
 
 
-        if(gamepad1.gamepad.right_bumper && !prevRB){
+        if(gamepad1.isPress(GamepadEx.Control.right_bumper)){
             intakeToggle = !intakeToggle;
         }
 
@@ -44,7 +43,5 @@ public class Intake {
         }else{
             intake.setPower(0.0);
         }
-
-        prevRB = gamepad1.gamepad.right_bumper;
     }
 }

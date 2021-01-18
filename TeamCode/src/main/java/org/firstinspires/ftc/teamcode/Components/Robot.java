@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.Components;
 
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -54,7 +55,6 @@ public class Robot {
 
     //OpenCvCamera webcam;
     //RingDetectionPipeline detector;
-
 
     public Robot(HardwareMap map, Telemetry telemetry){
         robotS = null;
@@ -131,15 +131,15 @@ public class Robot {
         encoderLY.update(data);
         encoderRX.update(data);
         encoderRY.update(data);
-        localizer.update(getLeft_X_Dist(), getLeft_Y_Dist(), getRight_X_Dist(), getRight_Y_Dist(), getRawLeft_X_Dist(), getRawLeft_Y_Dist(), getRawRight_X_Dist(), getRawRight_Y_Dist());
+        localizer.update(getRawLeft_X_Dist(), getRawLeft_Y_Dist(), getRawRight_X_Dist(), getRawRight_Y_Dist());
     }
 
     public double getLeft_X_Dist(){
-        return -encoderLX.getDist();
+        return encoderLX.getDist();
     }
 
     public double getRight_X_Dist(){
-        return -encoderRX.getDist();
+        return encoderRX.getDist();
     }
 
     public double getLeft_Y_Dist(){
@@ -151,11 +151,11 @@ public class Robot {
     }
 
     public double getRawLeft_X_Dist(){
-        return -encoderLX.distance;
+        return encoderLX.distance;
     }
 
     public double getRawRight_X_Dist(){
-        return -encoderRX.distance;
+        return encoderRX.distance;
     }
 
     public double getRawLeft_Y_Dist(){
