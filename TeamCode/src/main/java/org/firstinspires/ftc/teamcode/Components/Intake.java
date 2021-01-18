@@ -38,12 +38,8 @@ public class Intake {
             intakeToggle = !intakeToggle;
         }
 
-        if(gamepad1.isPress(GamepadEx.Control.right_trigger)){
-            if(timer.time() >= 0.3){
-                intakeToggle = false;
-            }
-        }else{
-            timer.reset();
+        if(gamepad1.isPress(GamepadEx.Control.left_trigger)){
+            intakeToggle = false;
         }
 
         if(gamepad1.gamepad.left_bumper){
