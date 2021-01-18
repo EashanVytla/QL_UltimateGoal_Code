@@ -295,6 +295,18 @@ public class Shooter {
             reset = true;
         }
 
+        if(gamepad1.isPress(GamepadEx.Control.dpad_down)){
+            PROTO_AlignSlides = false;
+            powerShotAngle = false;
+            reset = true;
+        }
+
+        if(gamepad1.isPress(GamepadEx.Control.right_bumper)){
+            PROTO_AlignSlides = false;
+            powerShotAngle = false;
+            reset = true;
+        }
+
         if(gamepad2.isPress(GamepadEx.Control.start)){
             powerShot(powerShotToggle);
             powerShotToggle += 1;
