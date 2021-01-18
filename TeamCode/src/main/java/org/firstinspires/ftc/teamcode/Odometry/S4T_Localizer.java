@@ -149,13 +149,13 @@ public class S4T_Localizer {
 //        wf = 1;
 //        ws = 0;
 
-        /*if(wf <= 0.075){
+        if(wf <= 0.075){
             wf = 0;
         }
 
         if(ws <= 0.075){
             ws = 0;
-        }*/
+        }
 
 
         double value = 0;
