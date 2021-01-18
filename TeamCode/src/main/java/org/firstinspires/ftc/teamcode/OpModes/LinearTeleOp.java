@@ -135,8 +135,8 @@ public class LinearTeleOp extends LinearOpMode {
                     robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));*/
 
                     //Position Based Auto Align Code
-                    Pose2d testPos = new Pose2d(robot.getPos().getX(), robot.getPos().getY(), Math.toRadians(180));
-                    //Pose2d testPos = new Pose2d(-10.636, 47.790, Math.PI);
+                    //Pose2d testPos = new Pose2d(robot.getPos().getX(), robot.getPos().getY(), Math.toRadians(180));
+                    Pose2d testPos = new Pose2d(-10.636, 43.790, Math.PI);
                     /*if(testPos.vec().distTo(robot.getPos().vec()) <= 1.0 && Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(0.5)){
                         //robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
 

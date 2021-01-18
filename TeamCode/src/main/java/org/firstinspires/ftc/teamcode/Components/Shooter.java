@@ -338,7 +338,6 @@ public class Shooter {
 
         telemetry.addData("Power Shot", powerShots);
 
-
         if(PROTO_AlignSlides){
             reset = false;
             if(Math.abs(currentAngle - (powerShotAngle ? Math.toRadians(23.86) : Math.toRadians(SlidesTunerAngle))) < Math.toRadians(0.3) || Math.abs(gamepad2.gamepad.left_stick_y) >= 0.15){
