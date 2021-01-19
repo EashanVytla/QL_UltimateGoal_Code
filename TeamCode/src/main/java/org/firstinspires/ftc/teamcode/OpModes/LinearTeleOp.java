@@ -80,22 +80,22 @@ public class LinearTeleOp extends LinearOpMode {
 
             switch (mDriveState){
                 case Driving:
-                    if(gamepad1ex.isPress(GamepadEx.Control.left_stick_button)){
+                    if(gamepad1ex.isPress(GamepadEx.Control.y)){
                         xToggle = !xToggle;
                     }
 
                     robot.drive.driveCentric(gamepad1, xToggle ? 0.5 : 1.0, xToggle ? 0.3 : 1.0, robot.getPos().getHeading() + Math.toRadians(90));
 
-                    if(gamepad1ex.isPress(GamepadEx.Control.right_stick_button)){
+                    if(gamepad1ex.isPress(GamepadEx.Control.right_stick_button) || gamepad1ex.isPress(GamepadEx.Control.right_trigger)){
                         timer.reset();
                         mDriveState = Drive_State.AutoAllign;
                         currentPoseSnapShot = robot.getPos();
                     }
 
-                    if(gamepad1ex.isPress(GamepadEx.Control.dpad_right)){
+                    /*if(gamepad1ex.isPress(GamepadEx.Control.dpad_right)){
                         timer.reset();
                         mDriveState = Drive_State.PowerShots;
-                    }
+                    }*/
 
                     if(gamepad1ex.isPress(GamepadEx.Control.a)){
                         robot.setAngle(Math.PI);

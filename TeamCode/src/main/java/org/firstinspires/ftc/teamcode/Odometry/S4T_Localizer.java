@@ -22,8 +22,7 @@ public class S4T_Localizer {
 
     public static double AUX_WIDTH = 3.4254424928680174;
     private double EPILSON = 0.00001;
-    private Pose2d myposeTicks = new Pose2d(0, 0, 0);
-    private Pose2d myposeIn = new Pose2d(0, 0, 0);
+    private Pose2d mypose = new Pose2d(0, 0, 0);
     double prevheading = 0;
 
     double prevx = 0;
@@ -41,9 +40,13 @@ public class S4T_Localizer {
 
     double heading = 0;
     Telemetry telemetry;
-    public static double k_strafe = 1.0;
-    public static double k_vert = 0.75;
-    public double TICKS_TO_INCHES = 200.33577083;
+    public static double k_strafe = 0.5;
+    public static double k_vert = 1.0;
+    public double TICKS_TO_INCHES_VERT = 200.33577083;
+    public double TICKS_TO_INCHES_STRAFE = 199.54861111111111111111111111111;
+
+    public static double clipping_strafe = 0;
+    public static double clipping_vert = 0;
 
     float CaseSwitchEPLSN = 0.3f;
 
@@ -64,11 +67,12 @@ public class S4T_Localizer {
     public double ws = 1;
     double dtheta = 0;
     public Pose2d dashboardPos = new Pose2d(0, 0, 0);
+    Pose2d pos2 = new Pose2d(0, 0, 0);
 
 
     public void update(double elxRaw, double elyRaw, double erxRaw, double eryRaw){
-        double y = (elyRaw + eryRaw)/2;
-        double x = (elxRaw + erxRaw)/2;
+        double y = ((elyRaw + eryRaw)/2) / TICKS_TO_INCHES_VERT;
+        double x = ((elxRaw + erxRaw)/2) / TICKS_TO_INCHES_STRAFE;
         //double x = erx;
         double dy = y - prevy;
         double dx = x - prevx;
@@ -105,17 +109,19 @@ public class S4T_Localizer {
         heading %= 2 * Math.PI;
 
         Vector2 myVec = ConstantVelo(dy, dx, prevheading, dtheta);
+        Vector2 myVec2 = circleUpdate(dEryRaw, dx, dy, dtheta);
         prevheading = heading;
 
-        myposeTicks = myposeTicks.plus(new Pose2d(myVec.x, myVec.y, dtheta));
-        myposeTicks = new Pose2d(myposeTicks.getX(), myposeTicks.getY(), (Math.toRadians(360) - heading) % Math.toRadians(360));
+        mypose = mypose.plus(new Pose2d(myVec.x, myVec.y, dtheta));
+        pos2 = pos2.plus(new Pose2d(myVec2.x, myVec2.y, dtheta));
+        mypose = new Pose2d(mypose.getX(), mypose.getY(), (Math.toRadians(360) - heading) % Math.toRadians(360));
 
-        myposeIn = new Pose2d(myposeTicks.getX() / TICKS_TO_INCHES, myposeTicks.getY() / TICKS_TO_INCHES, myposeTicks.getHeading());
-
-        dashboardPos = new Pose2d(myposeIn.getY() + OFFSET_FROM_CENTER.getY(), -myposeIn.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - myposeIn.getHeading());
+        dashboardPos = new Pose2d(mypose.getY() + OFFSET_FROM_CENTER.getY(), -mypose.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - mypose.getHeading());
 
         telemetry.addData("Vertical Heading", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
         telemetry.addData("Strafe Heading", Math.toDegrees(-(erxRaw - elxRaw)/TRACK_WIDTH2) % (360));
+
+        telemetry.addData("Pose CIRCLE:", pos2);
 
         /*DashboardUtil.drawRobot(fieldOverlay, dashboardPos);
         packet.put("pos", mypose);
@@ -149,11 +155,11 @@ public class S4T_Localizer {
 //        wf = 1;
 //        ws = 0;
 
-        if(wf <= 0.075){
+        if(wf <= clipping_vert){
             wf = 0;
         }
 
-        if(ws <= 0.075){
+        if(ws <= clipping_strafe){
             ws = 0;
         }
 
@@ -163,7 +169,7 @@ public class S4T_Localizer {
         if(total != 0){
             value = ((wf * dthetavert) + (ws * -dthetastrafe))/total;
         }else{
-            value = dthetavert;
+            value = (dthetavert - dthetastrafe)/2;
         }
 
         telemetry.addData("Weight Forward", wf);
@@ -271,24 +277,24 @@ public class S4T_Localizer {
     }
 
     public Pose2d getPose(){
-        return myposeIn;
+        return mypose;
     }
 
-    private Vector2 circleUpdate(RCOffset offset){
-        if(offset.dtheta <= EPILSON){
-            double sineTerm = 1.0 - offset.dtheta * offset.dtheta / 6.0;
-            double cosTerm = offset.dtheta / 2.0;
+    private Vector2 circleUpdate(double dr, double dx, double dy, double dtheta){
+        if(dtheta <= EPILSON){
+            double sineTerm = 1.0 - dtheta * dtheta / 6.0;
+            double cosTerm = dtheta / 2.0;
 
             return new Vector2(
-                    sineTerm * offset.x - cosTerm * offset.y,
-                    cosTerm * offset.x + sineTerm * offset.y
+                    sineTerm * dx - cosTerm * dy,
+                    cosTerm * dx + sineTerm * dy
             );
         }else{
-            double radius = (TRACK_WIDTH1/2) + (offset.right/offset.dtheta);
-            double strafe_radius = offset.y/offset.dtheta;
+            double radius = (TRACK_WIDTH1/2) + (dr/dtheta);
+            double strafe_radius = dy/dtheta;
             return new Vector2(
-                    (radius * (1 - Math.cos(offset.dtheta))) + (strafe_radius * Math.sin(offset.dtheta)),
-                    (Math.sin(offset.dtheta) * radius) + (strafe_radius * (1 - Math.cos(offset.dtheta)))
+                    (radius * (1 - Math.cos(dtheta))) + (strafe_radius * Math.sin(dtheta)),
+                    (Math.sin(dtheta) * radius) + (strafe_radius * (1 - Math.cos(dtheta)))
             );
         }
     }

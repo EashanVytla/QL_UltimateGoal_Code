@@ -239,7 +239,6 @@ public class Shooter {
     }
 
     public boolean powerShotAngle = false;
-    public boolean powerShots;
     private double resetTime = 0;
 
     public void operate(GamepadEx gamepad1, GamepadEx gamepad2, double distFromGoal, TelemetryPacket packet){
@@ -278,15 +277,26 @@ public class Shooter {
 
         if(gamepad2.isPress(GamepadEx.Control.dpad_up)){
             PROTO_AlignSlides = true;
-            powerShots = false;
+            powerShotAngle = false;
             reset = false;
             mStateTime.reset();
             //desiredAngle += 1;
         }
 
-        if(gamepad2.isPress(GamepadEx.Control.dpad_right)){
+        if(gamepad1.isPress(GamepadEx.Control.dpad_right)){
+            flickerToggle = !flickerToggle;
+            if (flickerToggle) {
+                flicker.setPosition(flickPosDown);
+                shooter.setPower(1.0);
+            }else{
+                flicker.setPosition(flickPosUp);
+                shooter.setPower(shooterff);
+            }
+
             PROTO_AlignSlides = true;
             powerShotAngle = true;
+            reset = false;
+            mStateTime.reset();
         }
 
         if(gamepad2.isPress(GamepadEx.Control.dpad_down)){
@@ -307,7 +317,7 @@ public class Shooter {
             reset = true;
         }
 
-        if(gamepad2.isPress(GamepadEx.Control.start)){
+        if(gamepad2.isPress(GamepadEx.Control.start) || gamepad1.isPress(GamepadEx.Control.b)){
             powerShot(powerShotToggle);
             powerShotToggle += 1;
             powerShotToggle %= 4;
@@ -326,7 +336,7 @@ public class Shooter {
             }
 
             PROTO_AlignSlides = true;
-            powerShots = false;
+            powerShotAngle = false;
             reset = false;
             mStateTime.reset();
         }
@@ -336,12 +346,11 @@ public class Shooter {
             encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         }
 
-        telemetry.addData("Power Shot", powerShots);
-
         if(PROTO_AlignSlides){
             reset = false;
             if(Math.abs(currentAngle - (powerShotAngle ? Math.toRadians(23.86) : Math.toRadians(SlidesTunerAngle))) < Math.toRadians(0.3) || Math.abs(gamepad2.gamepad.left_stick_y) >= 0.15){
                 if(mStateTime.time() - resetTime >= 0.5){
+                    slideSetPower(0.0);
                     PROTO_AlignSlides = false;
                     powerShotAngle = false;
                 }else{
@@ -353,7 +362,7 @@ public class Shooter {
                 if(mStateTime.time() >= 0.15){
                     setShooterAngle(powerShotAngle ? Math.toRadians(23.86) : Math.toRadians(SlidesTunerAngle), currentAngle, 1.0);
                 }else{
-                    if(getShooterAngle() <= Math.toRadians(22)){
+                    if(getShooterAngle() <= Math.toRadians(20.5)){
                         encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
                         encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
                     }
@@ -382,7 +391,7 @@ public class Shooter {
                     reset();
                 }
             }else{
-                if(!powerShots){
+                if(!powerShotAngle){
                     slideSetPower(gamepad2.gamepad.left_stick_y * 0.25);
                 }
             }
