@@ -45,8 +45,8 @@ public class S4T_Localizer {
     public double TICKS_TO_INCHES_VERT = 200.33577083;
     public double TICKS_TO_INCHES_STRAFE = 199.54861111111111111111111111111;
 
-    public static double clipping_strafe = 0;
-    public static double clipping_vert = 0;
+    public static double clipping_strafe = 0.075;
+    public static double clipping_vert = 0.075;
 
     float CaseSwitchEPLSN = 0.3f;
 
@@ -67,8 +67,7 @@ public class S4T_Localizer {
     public double ws = 1;
     double dtheta = 0;
     public Pose2d dashboardPos = new Pose2d(0, 0, 0);
-    Pose2d pos2 = new Pose2d(0, 0, 0);
-
+    double heading2 = 0;
 
     public void update(double elxRaw, double elyRaw, double erxRaw, double eryRaw){
         double y = ((elyRaw + eryRaw)/2) / TICKS_TO_INCHES_VERT;
@@ -103,6 +102,9 @@ public class S4T_Localizer {
         double dthetavert = (dEryRaw - dElyRaw) / TRACK_WIDTH1;
 
         dtheta = weightedTheta(dx, dy, dthetavert, dthetastrafe);
+        double dtheta2 = nonweightedTheta(dx, dy, dthetavert, dthetastrafe);
+        heading %= 2 * Math.PI;
+        telemetry.addData("Non-Weighted Heading", Math.toDegrees(heading2));
         //double dtheta = nonweightedTheta(dx, dy, dthetavert, dthetastrafe);
 
         heading += dtheta;
@@ -113,7 +115,6 @@ public class S4T_Localizer {
         prevheading = heading;
 
         mypose = mypose.plus(new Pose2d(myVec.x, myVec.y, dtheta));
-        pos2 = pos2.plus(new Pose2d(myVec2.x, myVec2.y, dtheta));
         mypose = new Pose2d(mypose.getX(), mypose.getY(), (Math.toRadians(360) - heading) % Math.toRadians(360));
 
         dashboardPos = new Pose2d(mypose.getY() + OFFSET_FROM_CENTER.getY(), -mypose.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - mypose.getHeading());
@@ -121,7 +122,6 @@ public class S4T_Localizer {
         telemetry.addData("Vertical Heading", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
         telemetry.addData("Strafe Heading", Math.toDegrees(-(erxRaw - elxRaw)/TRACK_WIDTH2) % (360));
 
-        telemetry.addData("Pose CIRCLE:", pos2);
 
         /*DashboardUtil.drawRobot(fieldOverlay, dashboardPos);
         packet.put("pos", mypose);
@@ -265,7 +265,7 @@ public class S4T_Localizer {
     }
 
     public State determineCase(double dx, double dy, double dthethavert, double dthetastrafe){
-        if(dthethavert >= Math.toRadians(0.01) || dthetastrafe >= Math.toRadians(0.01)){
+        if((dthethavert/2) >= Math.toRadians(0.01) || dthetastrafe >= Math.toRadians(0.01)){
             return State.VERTICAL;
         }else{
             if(Math.abs(dx) > Math.abs(dy)){

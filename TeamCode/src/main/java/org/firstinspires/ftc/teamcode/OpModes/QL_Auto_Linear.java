@@ -6,6 +6,7 @@ import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -92,7 +93,7 @@ public class QL_Auto_Linear extends LinearOpMode {
             ArrayList<CurvePoint> allPoints = new ArrayList<>();
 
             if(stage <= 4) {
-                robot.shooter.setShooterAngle(Math.toRadians(23.86), robot.shooter.getShooterAngle(), 1.0);
+                robot.shooter.setShooterAngle(Math.toRadians(23.96), robot.shooter.getShooterAngle(), 1.0);
             }
 
             switch (stage){
@@ -118,13 +119,17 @@ public class QL_Auto_Linear extends LinearOpMode {
                     allPoints.add(new CurvePoint(0, 5, 1, 1, 15, 0));
                     allPoints.add(new CurvePoint(CLEAR_STACK, 1, 1, 15));
                     if(ring_case == 0){
-                        allPoints.add(new CurvePoint(ZONE_1, 1, 1, 15));
-
-                        if(robot.getPos().vec().distTo(ZONE_1.vec()) <= 0.8){
+                        if(robot.getPos().vec().distTo(ZONE_1.vec()) <= 35){
+                            allPoints.add(new CurvePoint(ZONE_1, 0.1, 1, 15));
+                        }else{
+                            allPoints.add(new CurvePoint(ZONE_1, 1.0, 1, 15));
+                        }
+                        if(robot.getPos().vec().distTo(ZONE_1.vec()) <= 2){
                             robot.drive.setPower(0, 0, 0);
                             robot.drive.write();
-                            robot.wobbleGoal.kick();
-                            if(time.time() >= 0.75){
+
+                            if(time.time() >= 0.25){
+                                robot.wobbleGoal.kick();
                                 RobotMovement.resetIndex();
                                 stage = 2;
                             }
@@ -132,13 +137,17 @@ public class QL_Auto_Linear extends LinearOpMode {
                             time.reset();
                         }
                     }else if(ring_case == 1){
-                        allPoints.add(new CurvePoint(ZONE_2, 1, 1, 15));
-
-                        if(robot.getPos().vec().distTo(ZONE_2.vec()) <= 0.8){
+                        if(robot.getPos().vec().distTo(ZONE_2.vec()) <= 35){
+                            allPoints.add(new CurvePoint(ZONE_2, 0.1, 1, 15));
+                        }else{
+                            allPoints.add(new CurvePoint(ZONE_2, 1.0, 1, 15));
+                        }
+                        if(robot.getPos().vec().distTo(ZONE_2.vec()) <= 2){
                             robot.drive.setPower(0, 0, 0);
                             robot.drive.write();
-                            robot.wobbleGoal.kick();
-                            if(time.time() >= 0.75){
+
+                            if(time.time() >= 0.25){
+                                robot.wobbleGoal.kick();
                                 RobotMovement.resetIndex();
                                 stage = 2;
                             }
@@ -146,13 +155,19 @@ public class QL_Auto_Linear extends LinearOpMode {
                             time.reset();
                         }
                     }else{
-                        allPoints.add(new CurvePoint(ZONE_3, 1, 1, 15));
+                        if(robot.getPos().vec().distTo(ZONE_3.vec()) <= 35){
+                            allPoints.add(new CurvePoint(ZONE_3, 0.1, 1, 15));
+                        }else{
+                            allPoints.add(new CurvePoint(ZONE_3, 1.0, 1, 15));
+                        }
 
-                        if(robot.getPos().vec().distTo(ZONE_3.vec()) <= 0.8){
+
+                        if(robot.getPos().vec().distTo(ZONE_3.vec()) <= 2){
                             robot.drive.setPower(0, 0, 0);
                             robot.drive.write();
-                            robot.wobbleGoal.kick();
-                            if(time.time() >= 0.75){
+
+                            if(time.time() >= 0.25){
+                                robot.wobbleGoal.kick();
                                 RobotMovement.resetIndex();
                                 stage = 2;
                             }
@@ -183,8 +198,8 @@ public class QL_Auto_Linear extends LinearOpMode {
                     switch (power_shots){
                         case 0:
                             robot.GoTo(POWER_SHOTS_1, new Pose2d(1.0, 1.0, 1.0));
-                            if(robot.getPos().vec().distTo(POWER_SHOTS_1.vec()) <= 0.8 && Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(0.5) && velo >= 4.5){
-                                if(time.time() >= 1.0){
+                            if(robot.getPos().vec().distTo(POWER_SHOTS_1.vec()) <= 1.0 && Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(1.0) && velo >= 4.5){
+                                if(time.time() >= 0.75){
                                     power_shots = 1;
                                 }else if(time.time() >= 0.5){
                                     robot.shooter.powerShot(0);
@@ -195,8 +210,8 @@ public class QL_Auto_Linear extends LinearOpMode {
                             break;
                         case 1:
                             robot.GoTo(POWER_SHOTS_2, new Pose2d(1.0, 1.0, 1.0));
-                            if(robot.getPos().vec().distTo(POWER_SHOTS_2.vec()) <= 0.8 && Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(0.5) && velo >= 4.5){
-                                if(time.time() >= 0.5){
+                            if(robot.getPos().vec().distTo(POWER_SHOTS_2.vec()) <= 1.0 && Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(1.0) && velo >= 4.5){
+                                if(time.time() >= 0.25){
                                     power_shots = 2;
                                 }
                                 robot.shooter.powerShot(1);
@@ -206,8 +221,8 @@ public class QL_Auto_Linear extends LinearOpMode {
                             break;
                         case 2:
                             robot.GoTo(POWER_SHOTS_3, new Pose2d(1.0, 1.0, 1.0));
-                            if(robot.getPos().vec().distTo(POWER_SHOTS_3.vec()) <= 0.8 && Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(0.5) && velo >= 4.5){
-                                if(time.time() >= 0.5){
+                            if(robot.getPos().vec().distTo(POWER_SHOTS_3.vec()) <= 1.0 && Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(1.0) && velo >= 4.5){
+                                if(time.time() >= 0.25){
                                     RobotMovement.resetIndex();
                                     stage = 4;
                                     robot.shooter.pushSlide.setPosition(robot.shooter.pushIdle);
@@ -222,10 +237,10 @@ public class QL_Auto_Linear extends LinearOpMode {
 
                     break;
                 case 4:
-                    if(robot.getPos().vec().distTo(WOBBLE_GOAL_2.vec()) <= 1.0 && Math.abs(robot.getPos().getHeading() - WOBBLE_GOAL_2.getHeading()) <= Math.toRadians(0.5)){
+                    if(robot.getPos().vec().distTo(WOBBLE_GOAL_2.vec()) <= 0.8 && Math.abs(robot.getPos().getHeading() - WOBBLE_GOAL_2.getHeading()) <= Math.toRadians(0.8)){
                         robot.drive.setPower(0, 0, 0);
                         robot.drive.write();
-                        if(time.time() >= 1.0){
+                        if(time.time() >= 0.5){
                             RobotMovement.resetIndex();
                             robot.wobbleGoal.autoLift();
                             stage = 5;
@@ -235,7 +250,7 @@ public class QL_Auto_Linear extends LinearOpMode {
                     }else{
                         robot.shooter.pushSlide.setPosition(robot.shooter.pushIdle);
                         robot.shooter.shooter.setPower(0.2);
-                        robot.GoTo(WOBBLE_GOAL_2, new Pose2d(0.3, 0.3, 1.0));
+                        robot.GoTo(WOBBLE_GOAL_2, new Pose2d(0.4, 0.4, 1.0));
                         robot.wobbleGoal.down();
                         time.reset();
                     }
@@ -246,39 +261,30 @@ public class QL_Auto_Linear extends LinearOpMode {
                     if(ring_case == 0){
                         allPoints.add(new CurvePoint(ZONE_1_b, 1, 1, 15));
 
-                        if(robot.getPos().vec().distTo(ZONE_1_b.vec()) <= 0.8){
-                            robot.drive.setPower(0, 0, 0);
-                            robot.drive.write();
-                            RobotMovement.resetIndex();
-                            stage = 6;
-                        }else if(robot.getPos().vec().distTo(ZONE_1_b.vec()) <= 4){
+                        if(robot.getPos().vec().distTo(ZONE_1_b.vec()) <= 4){
                             robot.wobbleGoal.down();
                             robot.wobbleGoal.kick();
+                            RobotMovement.resetIndex();
+                            stage = 6;
                         }
                     }else if(ring_case == 1){
                         allPoints.add(new CurvePoint(ZONE_2_b, 1, 1, 15));
 
-                        if(robot.getPos().vec().distTo(ZONE_2_b.vec()) <= 0.8){
-                            robot.drive.setPower(0, 0, 0);
-                            robot.drive.write();
-                            RobotMovement.resetIndex();
-                            stage = 6;
-                        }else if(robot.getPos().vec().distTo(ZONE_2_b.vec()) <= 4){
+                        if(robot.getPos().vec().distTo(ZONE_2_b.vec()) <= 4){
                             robot.wobbleGoal.down();
                             robot.wobbleGoal.kick();
+                            RobotMovement.resetIndex();
+                            stage = 6;
                         }
                     }else{
                         allPoints.add(new CurvePoint(ZONE_3_b, 1, 1, 15));
 
-                        if(robot.getPos().vec().distTo(ZONE_3_b.vec()) <= 0.8){
-                            robot.drive.setPower(0, 0, 0);
-                            robot.drive.write();
+                        if(robot.getPos().vec().distTo(ZONE_3_b.vec()) <= 4){
+                            robot.wobbleGoal.down();
+                            robot.wobbleGoal.kick();
                             RobotMovement.resetIndex();
                             time.reset();
                             stage = 6;
-                        }else if(robot.getPos().vec().distTo(ZONE_3_b.vec()) <= 4){
-                            robot.wobbleGoal.down();
-                            robot.wobbleGoal.kick();
                         }
                     }
                     break;
@@ -287,51 +293,54 @@ public class QL_Auto_Linear extends LinearOpMode {
                         stage = 7;
                     }
 
-                    if(intakeCase < 2) {
-                        robot.shooter.reset();
+                    if(intakeCase < 1){
+                        robot.shooter.reset(20.1);
                     }
 
                     switch (intakeCase){
                         case 0:
                             robot.GoTo(PREPARE_INTAKE, new Pose2d(1, 1, 1));
-                            if(robot.getPos().vec().distTo(PREPARE_INTAKE.vec()) <= 0.5 && Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(0.5)){
+                            if(robot.getPos().vec().distTo(PREPARE_INTAKE.vec()) <= 4){
                                 time.reset();
                                 intakeCase++;
                             }
                             break;
                         case 1:
                             robot.intake.setPower(-1.0);
-                            robot.GoTo(INTAKE_STACK_1, new Pose2d(1, 0.15, 1));
+                            robot.GoTo(INTAKE_STACK_1, new Pose2d(1, 0.2, 1));
                             if(robot.getPos().vec().distTo(INTAKE_STACK_1.vec()) <= 1.0){
-                                if(time.time() >= 1.0){
+                                robot.shooter.encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                robot.shooter.encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+                                if(time.time() >= 0.5){
                                     time.reset();
                                     intakeCase++;
                                 }
                             }else{
+                                robot.shooter.slideSetPower(0.0);
                                 time.reset();
                             }
                             break;
                         case 2:
                             currentAngle = robot.shooter.getShooterAngle();
-                            targetAngle = Math.toRadians(26.2);
+                            targetAngle = Math.toRadians(25.7);
 
                             robot.drive.setPower(0, 0, 0);
                             robot.drive.write();
                             robot.intake.setPower(0.0);
 
-                            if(time.time() >= 3.0){
+                            if(time.time() >= 2.0){
                                 robot.shooter.reset();
-                                if(time.time() >= 4){
+                                if(time.time() >= 2.5){
                                     time.reset();
                                     intakeCase++;
                                 }
-                            }else if(time.time() >= 2.0){
-                                robot.shooter.setShooterAngle(targetAngle, currentAngle, 1.0);
-                                robot.shooter.pushSlide.setPosition(robot.shooter.pushForward);
                             }else if(time.time() >= 1.0){
                                 robot.shooter.setShooterAngle(targetAngle, currentAngle, 1.0);
+                                robot.shooter.pushSlide.setPosition(robot.shooter.pushForward);
+                            }else if(time.time() >= 0.75){
+                                robot.shooter.setShooterAngle(targetAngle, currentAngle, 1.0);
                                 robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
-                            }else if(time.time() >= 0.5){
+                            }else if(time.time() >= 0.25){
                                 robot.shooter.setShooterAngle(targetAngle, currentAngle, 1.0);
                             }else{
                                 robot.shooter.shooter.setPower(1);
@@ -340,37 +349,41 @@ public class QL_Auto_Linear extends LinearOpMode {
                             break;
                         case 3:
                             robot.shooter.reset();
-                            robot.intake.setPower(-1.0);
-                            robot.GoTo(INTAKE_STACK_2, new Pose2d(1, 0.15, 1));
+                            robot.GoTo(INTAKE_STACK_2, new Pose2d(1, 0.2, 1));
                             if(robot.getPos().vec().distTo(INTAKE_STACK_2.vec()) <= 1.0){
-                                if(time.time() >= 1.0){
+                                robot.shooter.encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+                                robot.shooter.encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+                                if(time.time() >= 0.5){
                                     time.reset();
                                     intakeCase++;
                                 }
                             }else{
+                                robot.intake.setPower(-1.0);
                                 time.reset();
                             }
-
                             break;
                         case 4:
                             currentAngle = robot.shooter.getShooterAngle();
-                            targetAngle = Math.toRadians(26.2);
+                            targetAngle = Math.toRadians(25.3);
 
                             robot.drive.setPower(0, 0, 0);
                             robot.drive.write();
                             robot.intake.setPower(0.0);
 
-                            if(time.time() >= 3.0){
+                            if(time.time() >= 2.0){
                                 robot.shooter.reset();
-                                RobotMovement.resetIndex();
-                                stage = 7;
-                            }else if(time.time() >= 2.0){
-                                robot.shooter.setShooterAngle(targetAngle, currentAngle, 1.0);
-                                robot.shooter.pushSlide.setPosition(robot.shooter.pushForward);
+                                if(time.time() >= 2.5){
+                                    RobotMovement.resetIndex();
+                                    stage = 7;
+                                }
                             }else if(time.time() >= 1.0){
                                 robot.shooter.setShooterAngle(targetAngle, currentAngle, 1.0);
+                                robot.shooter.pushSlide.setPosition(robot.shooter.pushForward);
+                            }else if(time.time() >= 0.75){
+                                robot.shooter.setShooterAngle(targetAngle, currentAngle, 1.0);
                                 robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
-                            }else if(time.time() >= 0.5){
+                            }else if(time.time() >= 0.25){
                                 robot.shooter.setShooterAngle(targetAngle, currentAngle, 1.0);
                             }else{
                                 robot.shooter.shooter.setPower(1);
@@ -426,9 +439,9 @@ class Positions {
     public static Point POWER_SHOTS_2 = new Point(-35.505, 46.955);
     public static Point POWER_SHOTS_3 = new Point(-43.005, 46.955);
     public static Point WOBBLE_GOAL_2 = new Point(-30, 32);
-    public static Point PREPARE_INTAKE = new Point(-15, 51);
-    public static Point INTAKE_STACK_1 = new Point(-15, 33);
-    public static Point INTAKE_STACK_2 = new Point(-15, 27);
+    public static Point PREPARE_INTAKE = new Point(-12, 51);
+    public static Point INTAKE_STACK_1 = new Point(-12, 37);
+    public static Point INTAKE_STACK_2 = new Point(-12, 25);
     public static Point PARK = new Point(-12, 67);
     public static Point CLEAR_STACK_2 = new Point(-40, 49);
 

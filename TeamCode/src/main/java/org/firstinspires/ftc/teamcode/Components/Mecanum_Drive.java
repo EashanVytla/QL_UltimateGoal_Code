@@ -34,11 +34,11 @@ public class Mecanum_Drive{
     PIDFController PID_Y;
     PIDFController PID_Z;
 
-    public static double kp = 0.18;
+    public static double kp = 0.17;
     public static double ki = 0;
-    public static double kd = 0.03;
+    public static double kd = 0.025;
 
-    public static double kpr = 3;
+    public static double kpr = 3.25;
     public static double kir = 0;
     public static double kdr = 0.175;
     int counter;
