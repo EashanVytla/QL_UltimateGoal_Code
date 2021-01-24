@@ -1,5 +1,7 @@
 package org.firstinspires.ftc.teamcode.Components;
 
+import android.graphics.Bitmap;
+
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
@@ -19,6 +21,7 @@ import org.firstinspires.ftc.teamcode.Odometry.S4T_Encoder;
 import org.firstinspires.ftc.teamcode.Odometry.S4T_Localizer;
 import org.firstinspires.ftc.teamcode.Vision.CameraTester;
 import org.firstinspires.ftc.teamcode.Vision.RingDetectionPipeline;
+import org.firstinspires.ftc.teamcode.Vision.RingDetectionPipelineV2;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -53,8 +56,9 @@ public class Robot {
     public Shooter shooter;
     public Intake intake;
 
-    //OpenCvCamera webcam;
-    //RingDetectionPipeline detector;
+    OpenCvCamera webcam;
+    RingDetectionPipelineV2 detector;
+    Pose2d startPos = new Pose2d(0, 0, 0);
 
     public Robot(HardwareMap map, Telemetry telemetry){
         robotS = null;
@@ -77,21 +81,27 @@ public class Robot {
 
         localizer = new S4T_Localizer(telemetry);
         intake = new Intake(hardwareMap);
+    }
 
-        //int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        //webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+    public void setStartPose(Pose2d startPos){
+        this.startPos = startPos;
+    }
 
-        //detector = new RingDetectionPipeline();
-        //webcam.setPipeline(detector);
+    public void initializeWebcam(){
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
-        /*webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        detector = new RingDetectionPipelineV2();
+        webcam.setPipeline(detector);
+
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
             public void onOpened()
             {
                 webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
             }
-        });*/
+        });
     }
 
     public RevBulkData getData(){
@@ -103,8 +113,7 @@ public class Robot {
     }
 
     public int getRingStackCase(){
-        //return detector.getAnalysis();
-        return 0;
+        return detector.getAnalysis();
     }
 
     public static Robot getInstance(HardwareMap map, Telemetry telemetry){
@@ -167,11 +176,23 @@ public class Robot {
     }
 
     public Pose2d getPos(){
-        return new Pose2d(localizer.getPose().getX(), localizer.getPose().getY(), localizer.getPose().getHeading());
+        return new Pose2d(localizer.getPose().getX() + startPos.getX(), localizer.getPose().getY() + startPos.getY(), localizer.getPose().getHeading() + startPos.getHeading());
+    }
+
+    public Pose2d getStartPos(){
+        return startPos;
     }
 
     public double angleWrap(double angle){
         return (angle + (2 * Math.PI)) % (2 * Math.PI);
+    }
+
+    public Bitmap getWebcamImage(){
+        return detector.getImage();
+    }
+
+    public void stopWebcam(){
+        webcam.stopStreaming();
     }
 
     public void initGyro(){

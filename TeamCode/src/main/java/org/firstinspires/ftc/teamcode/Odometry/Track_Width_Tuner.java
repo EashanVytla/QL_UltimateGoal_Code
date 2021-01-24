@@ -23,6 +23,8 @@ public class Track_Width_Tuner extends LinearOpMode {
     public void runOpMode() throws InterruptedException {
         robot = new Robot(hardwareMap, telemetry);
 
+        robot.localizer.reset();
+
         gamepad1ex = new GamepadEx(gamepad1);
 
         waitForStart();

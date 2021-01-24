@@ -18,11 +18,11 @@ public class S4T_Localizer {
     public static double TRACK_WIDTH1 = 2743.9424860098757;//2737.9424860098754612321073812974;//2747.2530501807513383745870814547;//2744.9453035059188560059382668858;//2739.9319227985241529292184283395;//2742.1772557701833430093304257463;//13.653342515840303278727731562382;//13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
 
     //todo: This is theoretical trackwidth from old trackwidth... PLEASE TUNE
-    public static double TRACK_WIDTH2 = 1384.0383147856;//1375.0191308424297533752712736568;//1375.2578632570675963789245993019;//1371.1198347366783176489336214542;//1362.4458903381700218495294563504;//1367.9367358748404109335559461868//6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
+    public static double TRACK_WIDTH2 = 1366.4406794097765947773284388111;//1384.0383147856;//1375.0191308424297533752712736568;//1375.2578632570675963789245993019;//1371.1198347366783176489336214542;//1362.4458903381700218495294563504;//1367.9367358748404109335559461868//6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
 
     public static double AUX_WIDTH = 3.4254424928680174;
     private double EPILSON = 0.00001;
-    private Pose2d mypose = new Pose2d(0, 0, 0);
+    private static Pose2d mypose = new Pose2d(0, 0, 0);
     double prevheading = 0;
 
     double prevx = 0;
@@ -38,7 +38,7 @@ public class S4T_Localizer {
     double prevelxRaw = 0;
     double preverxRaw = 0;
 
-    double heading = 0;
+    public static double heading = 0;
     Telemetry telemetry;
     public static double k_strafe = 0.5;
     public static double k_vert = 1.0;
@@ -130,6 +130,11 @@ public class S4T_Localizer {
         dashboard.sendTelemetryPacket(packet);*/
     }
 
+    public void reset(){
+        mypose = new Pose2d(0, 0, 0);
+        heading = 0;
+    }
+
     public double angleWrap(double angle){
         return (-(2 * Math.PI) - angle) % (2 * Math.PI);
     }
@@ -169,7 +174,8 @@ public class S4T_Localizer {
         if(total != 0){
             value = ((wf * dthetavert) + (ws * -dthetastrafe))/total;
         }else{
-            value = (dthetavert - dthetastrafe)/2;
+            //value = (dthetavert - dthetastrafe)/2;
+            value = dthetavert;
         }
 
         telemetry.addData("Weight Forward", wf);

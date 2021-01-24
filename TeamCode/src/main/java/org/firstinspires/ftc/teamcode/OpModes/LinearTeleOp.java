@@ -56,9 +56,14 @@ public class LinearTeleOp extends LinearOpMode {
         robot.shooter.init();
         robot.wobbleGoal.init();
 
+        robot.intake.dropIntake();
+        robot.intake.write();
+
         gamepad1ex = new GamepadEx(gamepad1);
         gamepad2ex = new GamepadEx(gamepad2);
         int power_shots = 0;
+
+        boolean positionAutoAllign = false;
 
         timer.startTime();
 
@@ -92,18 +97,40 @@ public class LinearTeleOp extends LinearOpMode {
                         currentPoseSnapShot = robot.getPos();
                     }
 
+                    if(gamepad1ex.isPress(GamepadEx.Control.dpad_up)){
+                        positionAutoAllign = !positionAutoAllign;
+                    }
+
+
                     /*if(gamepad1ex.isPress(GamepadEx.Control.dpad_right)){
                         timer.reset();
                         mDriveState = Drive_State.PowerShots;
                     }*/
 
-                    if(gamepad1ex.isPress(GamepadEx.Control.a)){
+                    if(gamepad1ex.isPress(GamepadEx.Control.x)){
                         robot.setAngle(Math.PI);
+                    }
+
+                    if(gamepad1ex.gamepad.share){
+                        robot.localizer.reset();
+                    }
+
+                    if(gamepad1ex.isPress(GamepadEx.Control.right_bumper)){
+                        xToggle = false;
+                    }
+
+                    if(gamepad1ex.isPress(GamepadEx.Control.left_trigger)){
+                        xToggle = false;
                     }
 
                     break;
                 case AutoAllign:
-                    if(Math.abs(gamepad1ex.gamepad.left_stick_x) >= 0.3 || Math.abs(gamepad1ex.gamepad.right_stick_x) >= 0.3 || Math.abs(gamepad1ex.gamepad.left_stick_y) >= 0.3 || Math.abs(gamepad1ex.gamepad.right_stick_y) >= 0.3){
+                    if(gamepad1ex.isPress(GamepadEx.Control.dpad_up)){
+                        positionAutoAllign = !positionAutoAllign;
+                    }
+
+                    if(Math.abs(gamepad1ex.gamepad.left_stick_x) >= 0.15 || Math.abs(gamepad1ex.gamepad.right_stick_x) >= 0.15 || Math.abs(gamepad1ex.gamepad.left_stick_y) >= 0.15 || Math.abs(gamepad1ex.gamepad.right_stick_y) >= 0.15){
+                        //xToggle = true;
                         mDriveState = Drive_State.Driving;
                     }
 
@@ -112,56 +139,23 @@ public class LinearTeleOp extends LinearOpMode {
                         mDriveState = Drive_State.PowerShots;
                     }
 
-                    //Angle Based Auto Align Code
-                    /*double angle = Math.atan2(robot.ULTIMATE_GOAL_POS.getX() - currentPoseSnapShot.getX(), robot.ULTIMATE_GOAL_POS.getY() - currentPoseSnapShot.getY());
-                    angle += Math.toRadians(180);
-
-                    if(Math.abs(robot.getPos().getHeading() - angle) <= Math.toRadians(0.5)){
-                        robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
-                        //robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
-                        mDriveState = Drive_State.Driving;
-                    }else{
-                        robot.shooter.mStateTime.reset();
-                    }
-
-                    if(timer.time() >= 0.25){
-                        robot.shooter.PROTO_AlignSlides = true;
-                        robot.shooter.powerShotAngle = false;
-                        robot.shooter.reset = false;
-                    }
-                    robot.shooter.shooter.setPower(1.0);
-                    robot.shooter.flicker.setPosition(robot.shooter.flickPosDown);
-
-                    robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));*/
-
-                    //Position Based Auto Align Code
-                    //Pose2d testPos = new Pose2d(robot.getPos().getX(), robot.getPos().getY(), Math.toRadians(180));
-                    Pose2d testPos = new Pose2d(-10.636, 43.790, Math.PI);
-                    /*if(testPos.vec().distTo(robot.getPos().vec()) <= 1.0 && Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(0.5)){
-                        //robot.shooter.stopper.setPosition(robot.shooter.stopPosUp);
-
-                        //robot.shooter.mRobotState = Shooter.ShootState.PREPARE;
-                    }else{
-                        robot.shooter.mStateTime.reset();
-                    }*/
-
-                    /*if(timer.time() >= 0.15){
-                        if(gamepad2ex.isPress(GamepadEx.Control.dpad_down)){
-                            robot.shooter.PROTO_AlignSlides = false;
-                            robot.shooter.powerShotAngle = false;
-                            robot.shooter.reset = true;
-                            mDriveState = Drive_State.Driving;
+                    if(!positionAutoAllign){
+                        double angle = Math.atan2(robot.ULTIMATE_GOAL_POS.getX() - currentPoseSnapShot.getX(), robot.ULTIMATE_GOAL_POS.getY() - currentPoseSnapShot.getY());
+                        angle += Math.toRadians(180);
+                        if(distFromGoal < 106 && distFromGoal > 28){
+                            robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));
                         }else{
-                            robot.shooter.PROTO_AlignSlides = true;
-                            robot.shooter.powerShotAngle = false;
-                            robot.shooter.reset = false;
+                            if(distFromGoal < 106 && distFromGoal > 28){
+                                robot.shooter.kickOutEnabled = true;
+                                robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));
+                            }else{
+                                robot.shooter.kickOutEnabled = false;
+                                robot.GoTo(new Pose2d(-11, 40, Math.PI), new Pose2d(1.0, 1.0, 1.0));
+                            }
                         }
-                    }*/
-
-                    //robot.shooter.shooter.setPower(1.0);
-                    //robot.shooter.flicker.setPosition(robot.shooter.flickPosDown);
-
-                    robot.GoTo(testPos, new Pose2d(1.0, 1.0, 1.0));
+                    }else{
+                        robot.GoTo(new Pose2d(-11, 40, Math.PI), new Pose2d(1.0, 1.0, 1.0));
+                    }
 
                     break;
                 case PowerShots:
@@ -219,8 +213,6 @@ public class LinearTeleOp extends LinearOpMode {
                     break;
             }
 
-            telemetry.addData("Is Rest? ", gamepad1ex.gamepad.atRest());
-
             robot.updatePos();
             robot.drive.write();
 
@@ -233,12 +225,13 @@ public class LinearTeleOp extends LinearOpMode {
             robot.intake.operate(gamepad1ex, gamepad2ex, telemetry);
             robot.intake.write();
 
+            telemetry.addData("AUTO-ALIGN MODE", positionAutoAllign ? "POSITION BASED" : "FULL FIELD");
             telemetry.addData("State: ", mDriveState);
             telemetry.addData("Pos: ", robot.getPos());
-            telemetry.addData("Right X: ", robot.getRight_X_Dist());
+            /*telemetry.addData("Right X: ", robot.getRight_X_Dist());
             telemetry.addData("Left X: ", robot.getLeft_X_Dist());
             telemetry.addData("Right Y: ", robot.getRight_Y_Dist());
-            telemetry.addData("Left Y: ", robot.getLeft_Y_Dist());
+            telemetry.addData("Left Y: ", robot.getLeft_Y_Dist());*/
             telemetry.update();
 
             gamepad1ex.loop();
