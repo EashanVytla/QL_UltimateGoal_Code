@@ -1,5 +1,8 @@
 package org.firstinspires.ftc.teamcode.Components;
 
+import android.graphics.Bitmap;
+
+import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.bosch.BNO055IMU;
@@ -18,6 +21,7 @@ import org.firstinspires.ftc.teamcode.Odometry.S4T_Encoder;
 import org.firstinspires.ftc.teamcode.Odometry.S4T_Localizer;
 import org.firstinspires.ftc.teamcode.Vision.CameraTester;
 import org.firstinspires.ftc.teamcode.Vision.RingDetectionPipeline;
+import org.firstinspires.ftc.teamcode.Vision.RingDetectionPipelineV2;
 import org.openftc.easyopencv.OpenCvCamera;
 import org.openftc.easyopencv.OpenCvCameraFactory;
 import org.openftc.easyopencv.OpenCvCameraRotation;
@@ -35,7 +39,7 @@ public class Robot {
     private BNO055IMU imu;
     // State used for updating telemetry
     private Orientation angles;
-    private S4T_Localizer localizer;
+    public S4T_Localizer localizer;
     private S4T_Encoder encoderLY;
     private S4T_Encoder encoderLX;
     private S4T_Encoder encoderRY;
@@ -52,9 +56,9 @@ public class Robot {
     public Shooter shooter;
     public Intake intake;
 
-    //OpenCvCamera webcam;
-    //RingDetectionPipeline detector;
-
+    OpenCvCamera webcam;
+    RingDetectionPipelineV2 detector;
+    Pose2d startPos = new Pose2d(0, 0, 0);
 
     public Robot(HardwareMap map, Telemetry telemetry){
         robotS = null;
@@ -77,21 +81,27 @@ public class Robot {
 
         localizer = new S4T_Localizer(telemetry);
         intake = new Intake(hardwareMap);
+    }
 
-        //int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
-        //webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
+    public void setStartPose(Pose2d startPos){
+        this.startPos = startPos;
+    }
 
-        //detector = new RingDetectionPipeline();
-        //webcam.setPipeline(detector);
+    public void initializeWebcam(){
+        int cameraMonitorViewId = hardwareMap.appContext.getResources().getIdentifier("cameraMonitorViewId", "id", hardwareMap.appContext.getPackageName());
+        webcam = OpenCvCameraFactory.getInstance().createWebcam(hardwareMap.get(WebcamName.class, "Webcam 1"), cameraMonitorViewId);
 
-        /*webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
+        detector = new RingDetectionPipelineV2();
+        webcam.setPipeline(detector);
+
+        webcam.openCameraDeviceAsync(new OpenCvCamera.AsyncCameraOpenListener()
         {
             @Override
             public void onOpened()
             {
                 webcam.startStreaming(320, 240, OpenCvCameraRotation.UPRIGHT);
             }
-        });*/
+        });
     }
 
     public RevBulkData getData(){
@@ -103,8 +113,7 @@ public class Robot {
     }
 
     public int getRingStackCase(){
-        //return detector.getAnalysis();
-        return 0;
+        return detector.getAnalysis();
     }
 
     public static Robot getInstance(HardwareMap map, Telemetry telemetry){
@@ -131,15 +140,15 @@ public class Robot {
         encoderLY.update(data);
         encoderRX.update(data);
         encoderRY.update(data);
-        localizer.update(getLeft_X_Dist(), getLeft_Y_Dist(), getRight_X_Dist(), getRight_Y_Dist(), getRawLeft_X_Dist(), getRawLeft_Y_Dist(), getRawRight_X_Dist(), getRawRight_Y_Dist());
+        localizer.update(getRawLeft_X_Dist(), getRawLeft_Y_Dist(), getRawRight_X_Dist(), getRawRight_Y_Dist());
     }
 
     public double getLeft_X_Dist(){
-        return -encoderLX.getDist();
+        return encoderLX.getDist();
     }
 
     public double getRight_X_Dist(){
-        return -encoderRX.getDist();
+        return encoderRX.getDist();
     }
 
     public double getLeft_Y_Dist(){
@@ -151,11 +160,11 @@ public class Robot {
     }
 
     public double getRawLeft_X_Dist(){
-        return -encoderLX.distance;
+        return encoderLX.distance;
     }
 
     public double getRawRight_X_Dist(){
-        return -encoderRX.distance;
+        return encoderRX.distance;
     }
 
     public double getRawLeft_Y_Dist(){
@@ -167,11 +176,23 @@ public class Robot {
     }
 
     public Pose2d getPos(){
-        return new Pose2d(localizer.getPose().getX(), localizer.getPose().getY(), localizer.getPose().getHeading());
+        return new Pose2d(localizer.getPose().getX() + startPos.getX(), localizer.getPose().getY() + startPos.getY(), localizer.getPose().getHeading() + startPos.getHeading());
+    }
+
+    public Pose2d getStartPos(){
+        return startPos;
     }
 
     public double angleWrap(double angle){
         return (angle + (2 * Math.PI)) % (2 * Math.PI);
+    }
+
+    public Bitmap getWebcamImage(){
+        return detector.getImage();
+    }
+
+    public void stopWebcam(){
+        webcam.stopStreaming();
     }
 
     public void initGyro(){
@@ -203,6 +224,10 @@ public class Robot {
 
     public void GoTo(double x, double y, double heading, double maxspeed_x, double maxspeed_y, double maxspeed_z){
         updateGoTo(new Pose2d(x, y, heading), new Pose2d(maxspeed_x, maxspeed_y, maxspeed_z));
+    }
+
+    public void setAngle(double heading){
+        localizer.setHeading(heading);
     }
 
     private void updateGoTo(Pose2d pose, Pose2d speedLimits){

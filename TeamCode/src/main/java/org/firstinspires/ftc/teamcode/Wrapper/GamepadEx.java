@@ -182,6 +182,6 @@ public class GamepadEx {
         start_prev = start;
         right_trigger_prev = right_trigger;
         left_trigger_prev = left_trigger;
-        touchpad_prev = gamepad.left_stick_button;
+        touchpad_prev = gamepad.touchpad;
     }
 }

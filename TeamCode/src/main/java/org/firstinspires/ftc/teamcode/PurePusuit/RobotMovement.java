@@ -32,7 +32,7 @@ public class RobotMovement {
 
             telemetry.addData("PURE PURESUIT POS", robot.getPos());
 
-            robot.GoTo(followMe.x, followMe.y, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).heading, followMe.moveSpeed, followMe.moveSpeed, followMe.turnSpeed);
+            robot.GoTo(followMe.x, followMe.y, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).heading, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).moveSpeed, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).moveSpeed, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).turnSpeed);
         }catch(Exception e){
             System.out.println("Error: " + e);
         }
