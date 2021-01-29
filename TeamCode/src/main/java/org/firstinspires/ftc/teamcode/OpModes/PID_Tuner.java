@@ -25,7 +25,7 @@ public class PID_Tuner extends LinearOpMode {
     GamepadEx gamepadEx;
     public boolean PID = false;
 
-    PIDFController controller = new PIDFController(new PIDCoefficients(Shooter.kp_Flywheel, Shooter.ki_Flywheel, Shooter.kd_Flywheel));
+    //PIDFController controller = new PIDFController(new PIDCoefficients(Shooter.kp_Flywheel, Shooter.ki_Flywheel, Shooter.kd_Flywheel));
 
     @Override
     public void runOpMode(){
@@ -57,8 +57,8 @@ public class PID_Tuner extends LinearOpMode {
             }
 
             if(PID){
-                controller.setTargetPosition(5.2);
-                robot.shooter.shooter.setPower(controller.update(velo));
+                //controller.setTargetPosition(5.2);
+                //robot.shooter.shooter.setPower(controller.update(velo));
                 robot.shooter.shooter.write();
             }else{
                 robot.shooter.shooter.setPower(0.0);

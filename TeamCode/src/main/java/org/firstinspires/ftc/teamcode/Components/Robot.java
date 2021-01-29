@@ -29,7 +29,7 @@ import org.openftc.revextensions2.ExpansionHubEx;
 import org.openftc.revextensions2.RevBulkData;
 
 public class Robot {
-    public final Vector2d ULTIMATE_GOAL_POS = new Vector2d(-12, 130);
+    public final Vector2d ULTIMATE_GOAL_POS = new Vector2d(-12, 130.5);
     public Mecanum_Drive drive;
     public static Robot robotS = null;
     public ExpansionHubEx hub1;
