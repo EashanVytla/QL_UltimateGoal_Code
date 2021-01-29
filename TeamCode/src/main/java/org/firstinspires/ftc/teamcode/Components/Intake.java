@@ -23,6 +23,7 @@ public class Intake {
         intake = new Caching_Motor(map, "intake");
         intake_holder = new Caching_Servo(map, "intake_holder");
         intake.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intake.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         timer.startTime();
     }
 
