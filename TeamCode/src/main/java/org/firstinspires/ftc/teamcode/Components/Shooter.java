@@ -33,7 +33,7 @@ public class Shooter {
     public static double ki_shooter = 0;
     public static double kd_shooter = 1.0;
 
-    public static double SlidesTunerAngle = 25.7;
+    public static double SlidesTunerAngle = 26.4;
 
     public Caching_Servo pushSlide;
     public Caching_Servo stopper;
