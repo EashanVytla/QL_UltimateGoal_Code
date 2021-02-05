@@ -49,7 +49,7 @@ public class ContourTester extends LinearOpMode
          * of a frame from the camera. Note that switching pipelines on-the-fly
          * (while a streaming session is in flight) *IS* supported.
          */
-        SamplePipeline pipeline = new SamplePipeline();
+        RingDetectionPipelineV2 pipeline = new RingDetectionPipelineV2();
         webcam.setPipeline(pipeline);
 
         /*
@@ -118,107 +118,6 @@ public class ContourTester extends LinearOpMode
             telemetry.update();
 
             //sleep(100);
-        }
-    }
-
-    class SamplePipeline extends OpenCvPipeline
-    {
-        public boolean viewportPaused;
-
-        Mat HSVMat = new Mat();
-        Mat HMat = new Mat();
-        Mat thresholdMat = new Mat();
-        Mat contoursOnFrameMat = new Mat();
-        List<MatOfPoint> contoursList = new ArrayList<>();
-        int numContoursFound = 0;
-
-        private Bitmap image;
-
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        Telemetry dashboardTelemetry = dashboard.getTelemetry();
-
-        private volatile int ringCase = 0;
-
-        @Override
-        public Mat processFrame(Mat input)
-        {
-            contoursList.clear();
-
-            Imgproc.GaussianBlur(input, input, new Size(5, 5), 0);
-
-            //FOR RINGS:
-            Imgproc.cvtColor(input, HSVMat, Imgproc.COLOR_RGB2HSV);
-
-            //FOR RINGS:
-            Core.inRange(HSVMat, new Scalar(15, 155, 149), new Scalar(28, 255, 255), thresholdMat);
-
-            //Imgproc.threshold(yCbCrChan2MatRing, thresholdMatRing, 50, 255, Imgproc.THRESH_BINARY_INV);
-
-            Imgproc.findContours(thresholdMat, contoursList, new Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-            numContoursFound = contoursList.size();
-            input.copyTo(contoursOnFrameMat);
-            //Imgproc.drawContours(contoursOnFrameMat, contoursList, -1, new Scalar(0, 0, 255), 2, 8);
-
-
-            /////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-            //FOR RINGS:
-            Core.inRange(HSVMat, new Scalar(2, 255, 170), new Scalar(32, 255, 255), thresholdMat);
-
-            //Core.extractChannel(HSVMat, HMat, 0);
-
-            //Imgproc.threshold(HMat, thresholdMat, 32, 255, Imgproc.THRESH_BINARY_INV);
-
-            Imgproc.findContours(thresholdMat, contoursList, new Mat(), Imgproc.RETR_TREE, Imgproc.CHAIN_APPROX_SIMPLE);
-            numContoursFound = contoursList.size();
-            input.copyTo(contoursOnFrameMat);
-            //Imgproc.drawContours(contoursOnFrameMat, contoursList, -1, new Scalar(0, 0, 255), 2, 8);
-
-            for (MatOfPoint contour : contoursList) {
-                Rect rect = Imgproc.boundingRect(contour);
-
-                // Show chosen result
-                if(rect.area() >= 1000) {
-                    Imgproc.rectangle(contoursOnFrameMat, rect.tl(), rect.br(), new Scalar(255, 0, 0), 2);
-                    Imgproc.putText(contoursOnFrameMat, String.valueOf(rect.area()), rect.tl(), 0, 0.5, new Scalar(255, 255, 255));
-                }else if(rect.area() >= 500){
-                    Imgproc.rectangle(contoursOnFrameMat, rect.tl(), rect.br(), new Scalar(255, 0, 0), 2);
-                    Imgproc.putText(contoursOnFrameMat, String.valueOf(rect.area()), rect.tl(), 0, 0.5, new Scalar(255, 255, 255));
-                }
-            }
-
-            image = Bitmap.createBitmap(contoursOnFrameMat.cols(), contoursOnFrameMat.rows(), Bitmap.Config.ARGB_8888);
-            Utils.matToBitmap(contoursOnFrameMat, image);
-
-
-            return input;
-        }
-
-        public Bitmap getImage(){
-            if(image != null){
-                return image;
-            }
-            return Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888);
-        }
-
-        @Override
-        public void onViewportTapped()
-        {
-            viewportPaused = !viewportPaused;
-
-            if(viewportPaused)
-            {
-                webcam.pauseViewport();
-            }
-            else
-            {
-                webcam.resumeViewport();
-            }
-        }
-
-        public int getAnalysis()
-        {
-            return ringCase;
         }
     }
 }

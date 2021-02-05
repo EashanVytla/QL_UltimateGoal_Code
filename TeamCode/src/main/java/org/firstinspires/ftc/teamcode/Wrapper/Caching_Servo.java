@@ -4,7 +4,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 
 public class Caching_Servo {
-    Servo servo;
+    public Servo servo;
     double prev_pos = -1.0;
 
     double query = -2.0;

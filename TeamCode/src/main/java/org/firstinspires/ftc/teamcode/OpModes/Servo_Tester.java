@@ -10,8 +10,9 @@ import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
 public class Servo_Tester extends LinearOpMode {
     Robot robot;
     Caching_Servo servo;
-    private double pos = 0.859;
-    final String name = "stopper";
+
+    private double pos = 0.0;
+    final String name = "intake_holder";
 
     @Override
     public void runOpMode(){

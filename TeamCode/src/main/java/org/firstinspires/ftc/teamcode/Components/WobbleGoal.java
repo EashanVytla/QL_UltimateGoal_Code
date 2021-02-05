@@ -69,7 +69,7 @@ public class WobbleGoal {
     }
 
     public void operate(GamepadEx gamepad){
-        if(gamepad.isPress(GamepadEx.Control.a)){
+        if(gamepad.isPress(GamepadEx.Control.left_stick_button)){
             grabberToggle = !grabberToggle;
 
             if(grabberToggle){
@@ -79,7 +79,7 @@ public class WobbleGoal {
             }
         }
 
-        if(gamepad.isPress(GamepadEx.Control.dpad_left)){
+        if(gamepad.isPress(GamepadEx.Control.right_stick_button)){
             if(grabberLiftToggle == 0){
                 down();
             }else if(grabberLiftToggle == 1){
