@@ -150,7 +150,7 @@ public class Shooter {
         return y;
     }
 
-    public void setShooterAngle(double targetAngle, double currentAngle, double maxPower){
+    public void setShooterAngle(double targetAngle, double currentAngle, double maxPower) {
         slidesController.setTargetPosition(targetAngle);
         double power = slidesController.update(currentAngle);
         telemetry.addData("PID Power", power);
