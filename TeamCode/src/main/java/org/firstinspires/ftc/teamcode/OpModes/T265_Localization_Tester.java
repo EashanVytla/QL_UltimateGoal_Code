@@ -8,6 +8,7 @@ import com.arcrobotics.ftclib.geometry.Pose2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Transform2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
+import com.google.gson.internal.$Gson$Preconditions;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.spartronics4915.lib.T265Camera;
@@ -48,15 +49,11 @@ public class T265_Localization_Tester extends OpMode
         if(slamra == null){
             try{
                 slamra = new T265Camera(new Transform2d(), 0.1, hardwareMap.appContext);
+                slamra.start();
             }catch (Exception e){
                 telemetry.addData("LOL","Couldn't find the camera... Trying again...");
             }
         }
-    }
-
-    @Override
-    public void start() {
-        slamra.start();
     }
 
     @Override
