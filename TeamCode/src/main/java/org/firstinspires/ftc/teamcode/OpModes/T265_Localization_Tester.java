@@ -28,21 +28,30 @@ public class T265_Localization_Tester extends OpMode
 
     @Override
     public void init() {
-        if(slamra == null){
-            slamra = new T265Camera(new Transform2d(), 0.1, hardwareMap.appContext);
-        }
-
         gamepadEx = new GamepadEx(gamepad1);
 
+        if(slamra == null){
+            try{
+                slamra = new T265Camera(new Transform2d(), 0.1, hardwareMap.appContext);
+            }catch (Exception e){
+                telemetry.addData("LOL","Couldn't find the camera... Trying again...");
+            }
+        }
 
         //slamra.setPose(new Pose2d(0, 0, new Rotation2d(0, 0)));
-
 
         robot = new Robot(hardwareMap, telemetry);
     }
 
     @Override
     public void init_loop() {
+        if(slamra == null){
+            try{
+                slamra = new T265Camera(new Transform2d(), 0.1, hardwareMap.appContext);
+            }catch (Exception e){
+                telemetry.addData("LOL","Couldn't find the camera... Trying again...");
+            }
+        }
     }
 
     @Override
@@ -52,6 +61,14 @@ public class T265_Localization_Tester extends OpMode
 
     @Override
     public void loop() {
+        while(slamra == null){
+            try{
+                slamra = new T265Camera(new Transform2d(), 0.1, hardwareMap.appContext);
+            }catch (Exception e){
+                telemetry.addData("LOL","Couldn't find the camera... Trying again...");
+            }
+        }
+
         robot.updateBulkData();
         final int robotRadius = 9; // inches
 
