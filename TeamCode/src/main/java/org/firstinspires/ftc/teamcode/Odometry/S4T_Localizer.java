@@ -50,6 +50,8 @@ public class S4T_Localizer {
 
     float CaseSwitchEPLSN = 0.3f;
 
+    
+
 
     public Vector2d OFFSET_FROM_CENTER = new Vector2d(-48, -55);
 

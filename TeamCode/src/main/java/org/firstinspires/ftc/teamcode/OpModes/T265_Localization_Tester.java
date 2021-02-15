@@ -26,6 +26,7 @@ public class T265_Localization_Tester extends OpMode
     private final FtcDashboard dashboard = FtcDashboard.getInstance();
     private Robot robot;
     private GamepadEx gamepadEx;
+    private final double odoCovariance = 0.01;
 
     @Override
     public void init() {
@@ -33,13 +34,15 @@ public class T265_Localization_Tester extends OpMode
 
         if(slamra == null){
             try{
-                slamra = new T265Camera(new Transform2d(), 0.1, hardwareMap.appContext);
+                slamra = new T265Camera(new Transform2d(), odoCovariance, hardwareMap.appContext);
+                slamra.start();
             }catch (Exception e){
+                slamra = null;
                 telemetry.addData("LOL","Couldn't find the camera... Trying again...");
             }
         }
 
-        //slamra.setPose(new Pose2d(0, 0, new Rotation2d(0, 0)));
+        slamra.setPose(new Pose2d(0, 0, new Rotation2d(0, 0)));
 
         robot = new Robot(hardwareMap, telemetry);
     }
@@ -48,39 +51,59 @@ public class T265_Localization_Tester extends OpMode
     public void init_loop() {
         if(slamra == null){
             try{
-                slamra = new T265Camera(new Transform2d(), 0.1, hardwareMap.appContext);
+                slamra = new T265Camera(new Transform2d(), odoCovariance, hardwareMap.appContext);
                 slamra.start();
             }catch (Exception e){
-                telemetry.addData("LOL","Couldn't find the camera... Trying again...");
+                slamra = null;
+                telemetry.addData("ERROR","Couldn't find the camera... Trying again...");
             }
         }
     }
 
+    Translation2d translation = new Translation2d(0, 0);
+    Rotation2d rotation = new Rotation2d(0, 0);
+
+    private final int robotRadius = 9; // inches
+
     @Override
     public void loop() {
-        while(slamra == null){
-            try{
-                slamra = new T265Camera(new Transform2d(), 0.1, hardwareMap.appContext);
-            }catch (Exception e){
-                telemetry.addData("LOL","Couldn't find the camera... Trying again...");
-            }
-        }
-
-        robot.updateBulkData();
-        final int robotRadius = 9; // inches
-
-        slamra.sendOdometry(robot.getVelocityXMetersPerSecond(), robot.getVelocityYMetersPerSecond());
-
         TelemetryPacket packet = new TelemetryPacket();
         Canvas field = packet.fieldOverlay();
 
-        T265Camera.CameraUpdate up = slamra.getLastReceivedCameraUpdate();
-        if (up == null) return;
+        if(gamepad1.share){
+            robot.localizer.reset();
+        }
 
-        Translation2d translation = new Translation2d(up.pose.getTranslation().getX() * 39.37, up.pose.getTranslation().getY() * 39.37);
-        Rotation2d rotation = up.pose.getRotation();
+        if(slamra == null){
+            telemetry.addData("IT IS NULL", "IT IS NULL");
+            try{
+                slamra = new T265Camera(new Transform2d(), odoCovariance, hardwareMap.appContext);
+                slamra.start();
+            }catch (Exception e){
+                slamra = null;
+                telemetry.addData("ERROR","Couldn't find the camera... Trying again...");
+            }
+        }else{
+            robot.updateBulkData();
+            gamepadEx.loop();
+
+            //slamra.sendOdometry(robot.getVelocityYMetersPerSecond(), robot.getVelocityXMetersPerSecond());
+            packet.put("X velocity", robot.getVelocityXMetersPerSecond());
+            packet.put("Y velocity", robot.getVelocityYMetersPerSecond());
+
+            T265Camera.CameraUpdate up = slamra.getLastReceivedCameraUpdate();
+            if (up == null) return;
+
+            if(gamepad1.a){
+                slamra.setPose(up.pose);
+            }
+
+            translation = new Translation2d(up.pose.getTranslation().getX() * 39.37, up.pose.getTranslation().getY() * 39.37);
+            rotation = up.pose.getRotation();
+        }
 
         packet.put("Pose", "(" + Math.round(translation.getX() * 100)/100.0 + ", " + Math.round(translation.getY() * 100)/100.0 + ", " + Math.round(rotation.getDegrees() * 100)/100.0 + ")");
+        telemetry.addData("Pose", "(" + Math.round(translation.getX() * 100)/100.0 + ", " + Math.round(translation.getY() * 100)/100.0 + ", " + Math.round(rotation.getDegrees() * 100)/100.0 + ")");
 
         packet.put("start", gamepadEx.isPress(GamepadEx.Control.a));
         field.strokeCircle(translation.getX() + robot.localizer.OFFSET_FROM_CENTER.getY(), translation.getY() + robot.localizer.OFFSET_FROM_CENTER.getX(), robotRadius);
@@ -89,17 +112,22 @@ public class T265_Localization_Tester extends OpMode
         double x2 = translation.getX() + arrowX, y2 = translation.getY() + arrowY;
         field.strokeLine(x1 + robot.localizer.OFFSET_FROM_CENTER.getY(), y1 + robot.localizer.OFFSET_FROM_CENTER.getX(), x2 + robot.localizer.OFFSET_FROM_CENTER.getY(), y2 + robot.localizer.OFFSET_FROM_CENTER.getX());
 
+        packet.put("Odo Position", robot.getPos());
         dashboard.sendTelemetryPacket(packet);
 
         robot.drive.driveCentric(gamepad1, move_power, turn_power, robot.getPos().getHeading() + (Math.PI/2));
         robot.drive.write();
 
         robot.updatePos();
+        telemetry.addData("Odo Position", robot.getPos());
+
     }
 
     @Override
     public void stop() {
-        slamra.stop();
+        /*if(slamra != null){
+            slamra.stop();
+        }*/
     }
 
 }
