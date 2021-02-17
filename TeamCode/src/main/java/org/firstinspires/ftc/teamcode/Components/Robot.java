@@ -7,6 +7,7 @@ import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.bosch.JustLoggingAccelerationIntegrator;
+import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
@@ -81,6 +82,20 @@ public class Robot {
 
         localizer = new S4T_Localizer(telemetry);
         intake = new Intake(hardwareMap);
+    }
+
+    public double getVelocityXMetersPerSecond(){
+        double LX_velo = data.getMotorVelocity(hardwareMap.get(DcMotor.class, "front_left"));
+        double RX_velo = data.getMotorVelocity(hardwareMap.get(DcMotor.class, "back_right"));
+        double avg = (LX_velo + RX_velo)/2;
+        return (avg/localizer.TICKS_TO_INCHES_STRAFE)/39.37;
+    }
+
+    public double getVelocityYMetersPerSecond(){
+        double LY_velo = data.getMotorVelocity(hardwareMap.get(DcMotor.class, "back_left"));
+        double RY_velo = data.getMotorVelocity(hardwareMap.get(DcMotor.class, "front_right"));
+        double avg = (LY_velo + RY_velo)/2;
+        return (avg/localizer.TICKS_TO_INCHES_VERT)/39.37;
     }
 
     public void setStartPose(Pose2d startPos){
