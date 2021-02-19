@@ -250,6 +250,7 @@ public class LinearTeleOp extends LinearOpMode {
             gamepad2ex.loop();
 
             packet.put("Pose", robot.getPos());
+            packet.put("Kalman Filtered Pos", robot.localizer.getKalmanFilteredPos());
             packet.put("Vertical Heading: ", Math.toDegrees(-(robot.getRawLeft_Y_Dist() - robot.getRawRight_Y_Dist())/ S4T_Localizer.TRACK_WIDTH1) % (360));
             packet.put("Strafe Heading: ", Math.toDegrees(-(robot.getRawLeft_X_Dist() - robot.getRawRight_X_Dist())/S4T_Localizer.TRACK_WIDTH2) % (360));
             packet.put("wf", robot.localizer.wf);

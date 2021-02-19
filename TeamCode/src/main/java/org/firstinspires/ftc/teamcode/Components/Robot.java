@@ -80,7 +80,7 @@ public class Robot {
         wobbleGoal = new WobbleGoal(map, telemetry, 0.5);
         shooter = new Shooter(map, telemetry);
 
-        localizer = new S4T_Localizer(telemetry);
+        localizer = new S4T_Localizer(telemetry, hardwareMap);
         intake = new Intake(hardwareMap);
     }
 
@@ -96,6 +96,20 @@ public class Robot {
         double RY_velo = data.getMotorVelocity(hardwareMap.get(DcMotor.class, "front_right"));
         double avg = (LY_velo + RY_velo)/2;
         return (avg/localizer.TICKS_TO_INCHES_VERT)/39.37;
+    }
+
+    public double getVelocityX(){
+        double LX_velo = data.getMotorVelocity(hardwareMap.get(DcMotor.class, "front_left"));
+        double RX_velo = data.getMotorVelocity(hardwareMap.get(DcMotor.class, "back_right"));
+        double avg = (LX_velo + RX_velo)/2;
+        return (avg/localizer.TICKS_TO_INCHES_STRAFE);
+    }
+
+    public double getVelocityY(){
+        double LY_velo = data.getMotorVelocity(hardwareMap.get(DcMotor.class, "back_left"));
+        double RY_velo = data.getMotorVelocity(hardwareMap.get(DcMotor.class, "front_right"));
+        double avg = (LY_velo + RY_velo)/2;
+        return (avg/localizer.TICKS_TO_INCHES_VERT);
     }
 
     public void setStartPose(Pose2d startPos){
@@ -155,7 +169,7 @@ public class Robot {
         encoderLY.update(data);
         encoderRX.update(data);
         encoderRY.update(data);
-        localizer.update(getRawLeft_X_Dist(), getRawLeft_Y_Dist(), getRawRight_X_Dist(), getRawRight_Y_Dist());
+        localizer.update(getRawLeft_X_Dist(), getRawLeft_Y_Dist(), getRawRight_X_Dist(), getRawRight_Y_Dist(), getVelocityX(), getVelocityY());
     }
 
     public double getLeft_X_Dist(){

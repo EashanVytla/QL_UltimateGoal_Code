@@ -26,7 +26,7 @@ public class S4T_Tester extends OpMode {
 
         encoderRY.reverse = true;
         encoderRX.reverse = true;
-        localizer = new S4T_Localizer(telemetry);
+        localizer = new S4T_Localizer(telemetry, hardwareMap);
     }
 
     double mydecx;

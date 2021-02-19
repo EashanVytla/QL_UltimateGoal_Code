@@ -1,13 +1,22 @@
 package org.firstinspires.ftc.teamcode.Odometry;
 
+import android.os.SystemClock;
+
 import com.acmerobotics.dashboard.FtcDashboard;
 import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
+import com.arcrobotics.ftclib.geometry.Rotation2d;
+import com.arcrobotics.ftclib.geometry.Transform2d;
+import com.arcrobotics.ftclib.geometry.Translation2d;
 import com.qualcomm.ftccommon.FtcEventLoop;
+import com.qualcomm.robotcore.hardware.HardwareMap;
+import com.qualcomm.robotcore.util.Hardware;
+import com.spartronics4915.lib.T265Camera;
 
+import org.ejml.simple.SimpleMatrix;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Math.Vector2;
 import org.firstinspires.ftc.teamcode.PurePusuit.RCOffset;
@@ -50,13 +59,58 @@ public class S4T_Localizer {
 
     float CaseSwitchEPLSN = 0.3f;
 
-    
-
-
     public Vector2d OFFSET_FROM_CENTER = new Vector2d(-48, -55);
 
-    public S4T_Localizer(Telemetry telemetry){
+    KalmanFilter filter;
+    private static T265Camera slamra;
+    private double odoCovariance = 0.01;
+    HardwareMap hardwareMap;
+    private Pose2d kalmanFilteredPos = new Pose2d(0, 0, 0);
+
+    public S4T_Localizer(Telemetry telemetry, HardwareMap hardwareMap){
         this.telemetry = telemetry;
+        filter = new KalmanFilter(telemetry);
+        this.hardwareMap = hardwareMap;
+
+        if(slamra == null){
+            try{
+                slamra = new T265Camera(new Transform2d(), odoCovariance, hardwareMap.appContext);
+                slamra.start();
+            }catch (Exception e){
+                slamra = null;
+                telemetry.addData("LOL","Couldn't find the camera... Trying again...");
+            }
+        }
+
+        slamra.setPose(new com.arcrobotics.ftclib.geometry.Pose2d(0, 0, new Rotation2d(0, 0)));
+    }
+
+    public Pose2d getT265Pose(){
+        Translation2d translation = new Translation2d(0, 0);
+        Rotation2d rotation = new Rotation2d(0, 0);
+
+        if(slamra == null){
+            telemetry.addData("IT IS NULL", "IT IS NULL");
+            try{
+                slamra = new T265Camera(new Transform2d(), odoCovariance, hardwareMap.appContext);
+                slamra.start();
+            }catch (Exception e){
+                slamra = null;
+                telemetry.addData("ERROR","Couldn't find the camera... Trying again...");
+            }
+        }else{
+            T265Camera.CameraUpdate up = slamra.getLastReceivedCameraUpdate();
+            if (up == null) return new Pose2d(0, 0, 0);
+
+            translation = new Translation2d(up.pose.getTranslation().getX() * 39.37, up.pose.getTranslation().getY() * 39.37);
+            rotation = up.pose.getRotation();
+        }
+
+        return new Pose2d(translation.getX(), translation.getY(), rotation.getRadians());
+    }
+
+    public Pose2d getKalmanFilteredPos(){
+        return kalmanFilteredPos;
     }
 
     enum State{
@@ -70,8 +124,13 @@ public class S4T_Localizer {
     double dtheta = 0;
     public Pose2d dashboardPos = new Pose2d(0, 0, 0);
     double heading2 = 0;
+    Pose2d prevT265Pos = new Pose2d(0, 0, 0);
+    private long prevTime = 0;
 
-    public void update(double elxRaw, double elyRaw, double erxRaw, double eryRaw){
+    public void update(double elxRaw, double elyRaw, double erxRaw, double eryRaw, double xVelo, double yVelo){
+        long dt = SystemClock.uptimeMillis() - prevTime;
+        prevTime = SystemClock.uptimeMillis();
+
         double y = ((elyRaw + eryRaw)/2) / TICKS_TO_INCHES_VERT;
         double x = ((elxRaw + erxRaw)/2) / TICKS_TO_INCHES_STRAFE;
         //double x = erx;
@@ -104,7 +163,6 @@ public class S4T_Localizer {
         double dthetavert = (dEryRaw - dElyRaw) / TRACK_WIDTH1;
 
         dtheta = weightedTheta(dx, dy, dthetavert, dthetastrafe);
-        double dtheta2 = nonweightedTheta(dx, dy, dthetavert, dthetastrafe);
         heading %= 2 * Math.PI;
         telemetry.addData("Non-Weighted Heading", Math.toDegrees(heading2));
         //double dtheta = nonweightedTheta(dx, dy, dthetavert, dthetastrafe);
@@ -113,16 +171,33 @@ public class S4T_Localizer {
         heading %= 2 * Math.PI;
 
         Vector2 myVec = ConstantVelo(dy, dx, prevheading, dtheta);
-        Vector2 myVec2 = circleUpdate(dEryRaw, dx, dy, dtheta);
         prevheading = heading;
 
         mypose = mypose.plus(new Pose2d(myVec.x, myVec.y, dtheta));
         mypose = new Pose2d(mypose.getX(), mypose.getY(), (Math.toRadians(360) - heading) % Math.toRadians(360));
 
+        Pose2d t265_pos = new Pose2d(getT265Pose().getY(), -getT265Pose().getX(), (2 * Math.PI) - getT265Pose().getHeading());
+        Pose2d delta_t265_pos = new Pose2d(t265_pos.getX() - prevT265Pos.getX(), t265_pos.getY() - prevT265Pos.getY(), (2 * Math.PI) - ((2 * Math.PI) - (t265_pos.getHeading() - prevT265Pos.getHeading()) % (2 * Math.PI)));
+        telemetry.addData("T265 Pos", t265_pos);
+
+        //CORRECT
+        filter.correct(new SimpleMatrix(3, 1, true, new double[]{delta_t265_pos.getX(), delta_t265_pos.getY(), delta_t265_pos.getHeading()}));
+
+        kalmanFilteredPos = kalmanFilteredPos.plus(filter.getEstimate());
+
+        Vector2 velo = new Vector2(xVelo, yVelo);
+        velo.rotate(kalmanFilteredPos.getHeading());
+
+        //PREDICT
+        filter.predict(new SimpleMatrix(3, 1, true, new double[]{myVec.x, myVec.y, dtheta}), new Pose2d(velo.x, velo.y, dtheta/dt), dt);
+
+        telemetry.addData("Filtered Position", kalmanFilteredPos);
+
         dashboardPos = new Pose2d(mypose.getY() + OFFSET_FROM_CENTER.getY(), -mypose.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - mypose.getHeading());
 
         telemetry.addData("Vertical Heading", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
         telemetry.addData("Strafe Heading", Math.toDegrees(-(erxRaw - elxRaw)/TRACK_WIDTH2) % (360));
+        prevT265Pos = t265_pos;
 
 
         /*DashboardUtil.drawRobot(fieldOverlay, dashboardPos);

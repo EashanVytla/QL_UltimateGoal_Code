@@ -8,4 +8,5 @@ dependencies {
     implementation 'com.acmerobotics.roadrunner:core:0.5.3'
     implementation 'com.acmerobotics.dashboard:dashboard:0.4.0'
     implementation 'com.spartronics4915.lib:ftc265:2.1.8'
+    compile group: 'org.ejml', name: 'ejml-all', version: '0.40'
 }
