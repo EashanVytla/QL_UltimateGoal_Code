@@ -11,7 +11,7 @@ public class Servo_Tester extends LinearOpMode {
     Robot robot;
     Caching_Servo servo;
     private double pos = 0.0;
-    final String name = "intake_holder";
+    final String name = "push_slide";
 
     @Override
     public void runOpMode(){
