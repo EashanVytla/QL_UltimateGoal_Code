@@ -139,7 +139,6 @@ public class LinearTeleOp extends LinearOpMode {
                         mDriveState = Drive_State.Driving;
                     }
 
-/*
                     if(gamepad1ex.isPress(GamepadEx.Control.dpad_left)){
                         timer.reset();
                         power_shots = 0;
@@ -148,20 +147,19 @@ public class LinearTeleOp extends LinearOpMode {
                         mDriveState = Drive_State.PowerShots;
                     }
 
-                    if(!robot.shooter.positionAutoAlign){
+                    if(!robot.shooter.positionAutoAlign) {
                         double angle = Math.atan2(robot.ULTIMATE_GOAL_POS.getX() - robot.getPos().getX(), robot.ULTIMATE_GOAL_POS.getY() - robot.getPos().getY());
-                        angle += Math.toRadians(180);
+                        angle = ((angle * 1.05) + Math.toRadians(180))
+                        ;
                         double myDistFromGoal = distFromGoal - 7.25;
-                        if(myDistFromGoal > 65){
+                        if (myDistFromGoal > 65) {
                             robot.shooter.kickOutEnabled = true;
                             robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));
-                        }else{
+                        } else {
                             robot.shooter.kickOutEnabled = false;
                             robot.GoTo(new Pose2d(-11, 40, Math.PI), new Pose2d(1.0, 1.0, 1.0));
                         }
-
-
-                    */else{
+                    }else{
                         robot.GoTo(new Pose2d(-11, 40, Math.PI), new Pose2d(1.0, 1.0, 1.0));
                     }
 
