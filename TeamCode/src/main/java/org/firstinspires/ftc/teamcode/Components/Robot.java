@@ -161,7 +161,7 @@ public class Robot {
     public void updateBulkData(){
         data = hub1.getBulkInputData();
         data2 = hub2.getBulkInputData();
-        shooter.setData(data2);
+        shooter.setData(data2, data);
     }
 
     public void updatePos(){

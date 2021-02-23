@@ -39,9 +39,10 @@ public class LinearTeleOp extends LinearOpMode {
 
     Drive_State mDriveState = Drive_State.Driving;
     ElapsedTime timer = new ElapsedTime();
+    private boolean first = false;
 
     @Override
-    public void runOpMode() {
+    public void runOpMode(){
         packet = new TelemetryPacket();
         fieldOverlay = packet.fieldOverlay();
 
@@ -65,15 +66,16 @@ public class LinearTeleOp extends LinearOpMode {
 
         timer.startTime();
 
-        robot.setStartPose(new Pose2d(5.104, -5.293, 0));
+        robot.setStartPose(new Pose2d(9.368, -5.198, 0));
 
         // Wait for the game to start (driver presses PLAY)
         waitForStart();
 
         timer.reset();
+        robot.localizer.startTime();
 
         // run until the end of the match (driver presses STOP)
-        while (opModeIsActive()) {
+        while (opModeIsActive() && !isStopRequested()) {
             packet = new TelemetryPacket();
             fieldOverlay = packet.fieldOverlay();
 
@@ -99,7 +101,7 @@ public class LinearTeleOp extends LinearOpMode {
                         currentPoseSnapShot = robot.getPos();
                     }
 
-                    if(gamepad1ex.isPress(GamepadEx.Control.dpad_up)){
+                    if(gamepad1ex.isPress(GamepadEx.Control.dpad_up) || gamepad1ex.isPress(GamepadEx.Control.y)){
                         robot.shooter.positionAutoAlign = !robot.shooter.positionAutoAlign;
                     }
 
@@ -226,6 +228,7 @@ public class LinearTeleOp extends LinearOpMode {
             }
 
             robot.updatePos();
+
             robot.drive.write();
 
             robot.shooter.operate(gamepad1ex, gamepad2ex, distFromGoal, packet);
@@ -250,7 +253,7 @@ public class LinearTeleOp extends LinearOpMode {
             gamepad2ex.loop();
 
             packet.put("Pose", robot.getPos());
-            packet.put("Kalman Filtered Pos", robot.localizer.getKalmanFilteredPos());
+            //packet.put("Kalman Filtered Pos", robot.localizer.getKalmanFilteredPos());
             packet.put("Vertical Heading: ", Math.toDegrees(-(robot.getRawLeft_Y_Dist() - robot.getRawRight_Y_Dist())/ S4T_Localizer.TRACK_WIDTH1) % (360));
             packet.put("Strafe Heading: ", Math.toDegrees(-(robot.getRawLeft_X_Dist() - robot.getRawRight_X_Dist())/S4T_Localizer.TRACK_WIDTH2) % (360));
             packet.put("wf", robot.localizer.wf);
@@ -259,11 +262,17 @@ public class LinearTeleOp extends LinearOpMode {
             packet.put("RX", robot.getRawRight_X_Dist());
             packet.put("LY", robot.getRawLeft_Y_Dist());
             packet.put("RY", robot.getRawRight_Y_Dist());
+            packet.put("omega", robot.localizer.omega);
 
             packet.put("gamepad x", gamepad1ex.gamepad.left_stick_x);
 
             DashboardUtil.drawRobot(fieldOverlay, robot.localizer.dashboardPos);
             dashboard.sendTelemetryPacket(packet);
         }
+
+
+        packet.put("stopped", "stopped");
+        dashboard.sendTelemetryPacket(packet);
+        robot.localizer.stopCamera();
     }
 }

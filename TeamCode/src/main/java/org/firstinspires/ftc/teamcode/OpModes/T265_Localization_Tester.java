@@ -87,7 +87,7 @@ public class T265_Localization_Tester extends OpMode
             robot.updateBulkData();
             gamepadEx.loop();
 
-            //slamra.sendOdometry(robot.getVelocityYMetersPerSecond(), robot.getVelocityXMetersPerSecond());
+            slamra.sendOdometry(robot.getVelocityYMetersPerSecond(), robot.getVelocityXMetersPerSecond());
             packet.put("X velocity", robot.getVelocityXMetersPerSecond());
             packet.put("Y velocity", robot.getVelocityYMetersPerSecond());
 

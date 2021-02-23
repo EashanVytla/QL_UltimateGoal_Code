@@ -24,10 +24,10 @@ import org.firstinspires.ftc.teamcode.PurePusuit.RCOffset;
 @Config
 public class S4T_Localizer {
     //WORKED FOR VERY LONG TIME: 2739.9319227985241529292184283395;
-    public static double TRACK_WIDTH1 = 2748.4333315465458503161338711337;//2743.9424860098757;//2737.9424860098754612321073812974;//2747.2530501807513383745870814547;//2744.9453035059188560059382668858;//2739.9319227985241529292184283395;//2742.1772557701833430093304257463;//13.653342515840303278727731562382;//13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
+    public static double TRACK_WIDTH1 = 2751.221712973584;//2754.2217129735839800225467700795;//2752.5847407743298321228446875276; //2748.4333315465458503161338711337;//2743.9424860098757;//2737.9424860098754612321073812974;//2747.2530501807513383745870814547;//2744.9453035059188560059382668858;//2739.9319227985241529292184283395;//2742.1772557701833430093304257463;//13.653342515840303278727731562382;//13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
 
     //todo: This is theoretical trackwidth from old trackwidth... PLEASE TUNE
-    public static double TRACK_WIDTH2 = 1381.7036384522893574775643917185;//1366.4406794097765947773284388111;//1384.0383147856;//1375.0191308424297533752712736568;//1375.2578632570675963789245993019;//1371.1198347366783176489336214542;//1362.4458903381700218495294563504;//1367.9367358748404109335559461868//6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
+    public static double TRACK_WIDTH2 = 1380.1613856068841242660085798871; //1384.1705400702137351819820900508;//1381.7036384522893574775643917185;//1366.4406794097765947773284388111;//1384.0383147856;//1375.0191308424297533752712736568;//1375.2578632570675963789245993019;//1371.1198347366783176489336214542;//1362.4458903381700218495294563504;//1367.9367358748404109335559461868//6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
 
     public static double AUX_WIDTH = 3.4254424928680174;
     private double EPILSON = 0.00001;
@@ -51,8 +51,8 @@ public class S4T_Localizer {
     Telemetry telemetry;
     public static double k_strafe = 0.5;
     public static double k_vert = 1.0;
-    public double TICKS_TO_INCHES_VERT = 200.33577083;
-    public double TICKS_TO_INCHES_STRAFE = 199.54861111111111111111111111111;
+    public double TICKS_TO_INCHES_VERT = 201.67339734597755609;
+    public double TICKS_TO_INCHES_STRAFE = 198.73420932847222222222222222222;
 
     public static double clipping_strafe = 0.075;
     public static double clipping_vert = 0.075;
@@ -72,17 +72,26 @@ public class S4T_Localizer {
         filter = new KalmanFilter(telemetry);
         this.hardwareMap = hardwareMap;
 
-        if(slamra == null){
+        //todo: uncomment for kalman filter
+        /*if(slamra == null){
             try{
                 slamra = new T265Camera(new Transform2d(), odoCovariance, hardwareMap.appContext);
-                slamra.start();
             }catch (Exception e){
                 slamra = null;
                 telemetry.addData("LOL","Couldn't find the camera... Trying again...");
             }
         }
 
-        slamra.setPose(new com.arcrobotics.ftclib.geometry.Pose2d(0, 0, new Rotation2d(0, 0)));
+        if(!slamra.isStarted()){
+            slamra.start();
+        }
+
+        slamra.setPose(new com.arcrobotics.ftclib.geometry.Pose2d(0, 0, new Rotation2d(0, 0)));*/
+        //todo: uncomment for kalman filter
+    }
+
+    public void stopCamera(){
+        slamra.stop();
     }
 
     public Pose2d getT265Pose(){
@@ -125,12 +134,15 @@ public class S4T_Localizer {
     public Pose2d dashboardPos = new Pose2d(0, 0, 0);
     double heading2 = 0;
     Pose2d prevT265Pos = new Pose2d(0, 0, 0);
-    private long prevTime = 0;
+    private double prevTime = 0;
+
+    public double omega = 0;
+
+    public void startTime(){
+        prevTime = SystemClock.uptimeMillis();
+    }
 
     public void update(double elxRaw, double elyRaw, double erxRaw, double eryRaw, double xVelo, double yVelo){
-        long dt = SystemClock.uptimeMillis() - prevTime;
-        prevTime = SystemClock.uptimeMillis();
-
         double y = ((elyRaw + eryRaw)/2) / TICKS_TO_INCHES_VERT;
         double x = ((elxRaw + erxRaw)/2) / TICKS_TO_INCHES_STRAFE;
         //double x = erx;
@@ -176,29 +188,35 @@ public class S4T_Localizer {
         mypose = mypose.plus(new Pose2d(myVec.x, myVec.y, dtheta));
         mypose = new Pose2d(mypose.getX(), mypose.getY(), (Math.toRadians(360) - heading) % Math.toRadians(360));
 
-        Pose2d t265_pos = new Pose2d(getT265Pose().getY(), -getT265Pose().getX(), (2 * Math.PI) - getT265Pose().getHeading());
-        Pose2d delta_t265_pos = new Pose2d(t265_pos.getX() - prevT265Pos.getX(), t265_pos.getY() - prevT265Pos.getY(), (2 * Math.PI) - ((2 * Math.PI) - (t265_pos.getHeading() - prevT265Pos.getHeading()) % (2 * Math.PI)));
+        //todo: uncomment for Kalman Filter
+        /*Pose2d t265_pos = new Pose2d(getT265Pose().getY(), -getT265Pose().getX(), getT265Pose().getHeading());
+
         telemetry.addData("T265 Pos", t265_pos);
+        telemetry.addData("My Position", mypose);
 
+        double dt = (SystemClock.uptimeMillis() - prevTime)/1000;
+        //Kalman Filter
+        //_____________________________________________________________________________________
         //CORRECT
-        filter.correct(new SimpleMatrix(3, 1, true, new double[]{delta_t265_pos.getX(), delta_t265_pos.getY(), delta_t265_pos.getHeading()}));
+        filter.correct(new SimpleMatrix(3, 1, true, new double[]{t265_pos.getX(), t265_pos.getY(), t265_pos.getHeading()}));
 
-        kalmanFilteredPos = kalmanFilteredPos.plus(filter.getEstimate());
-
-        Vector2 velo = new Vector2(xVelo, yVelo);
-        velo.rotate(kalmanFilteredPos.getHeading());
+        kalmanFilteredPos = filter.getEstimate();
 
         //PREDICT
-        filter.predict(new SimpleMatrix(3, 1, true, new double[]{myVec.x, myVec.y, dtheta}), new Pose2d(velo.x, velo.y, dtheta/dt), dt);
+        omega = slamra.getLastReceivedCameraUpdate().velocity.omegaRadiansPerSecond;
+        telemetry.addData("Omega", omega);
+        filter.predict(new SimpleMatrix(3, 1, true, new double[]{mypose.getX(), mypose.getY(), mypose.getHeading()}), new Pose2d(xVelo, yVelo, omega), dt, kalmanFilteredPos.getHeading());
+        //______________________________________________________________________________________
+        //End of Kalman Filter
+        prevTime = SystemClock.uptimeMillis();
 
-        telemetry.addData("Filtered Position", kalmanFilteredPos);
+        telemetry.addData("Filtered Position", kalmanFilteredPos);*/
+        //todo: uncomment for kalman filter
 
         dashboardPos = new Pose2d(mypose.getY() + OFFSET_FROM_CENTER.getY(), -mypose.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - mypose.getHeading());
 
         telemetry.addData("Vertical Heading", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
         telemetry.addData("Strafe Heading", Math.toDegrees(-(erxRaw - elxRaw)/TRACK_WIDTH2) % (360));
-        prevT265Pos = t265_pos;
-
 
         /*DashboardUtil.drawRobot(fieldOverlay, dashboardPos);
         packet.put("pos", mypose);

@@ -1,37 +1,27 @@
 package org.firstinspires.ftc.teamcode.Components;
 
-import android.transition.Slide;
-
 import com.acmerobotics.dashboard.config.Config;
 import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.control.PIDCoefficients;
 import com.acmerobotics.roadrunner.control.PIDFController;
-import com.qualcomm.hardware.rev.Rev2mDistanceSensor;
+import com.qualcomm.robotcore.hardware.AnalogInput;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
-import com.qualcomm.robotcore.hardware.DistanceSensor;
-import com.qualcomm.robotcore.hardware.Gamepad;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 import com.qualcomm.robotcore.util.Range;
 
-import org.firstinspires.ftc.robotcore.external.State;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.Odometry.S4T_Localizer;
-import org.firstinspires.ftc.teamcode.OpModes.LinearTeleOp;
 import org.firstinspires.ftc.teamcode.Wrapper.Caching_Motor;
 import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
 import org.firstinspires.ftc.teamcode.Wrapper.GamepadEx;
-import org.openftc.revextensions2.ExpansionHubMotor;
 import org.openftc.revextensions2.RevBulkData;
 
 @Config
 public class Shooter {
-    public static double kp_shooter = 32.5;
-    public static double ki_shooter = 0;
-    public static double kd_shooter = 1.0;
+    public static double kp_shooter = 0.01;
+    public static double ki_shooter = 0.0;
+    public static double kd_shooter = 0.0;
 
     public static double SlidesTunerAngle = 26.4;
 
@@ -42,25 +32,24 @@ public class Shooter {
     public Caching_Motor shooter;
     private Telemetry telemetry;
 
-    public final double flickPosDown = 0.1919;//0.22;//.07
-    public final double flickPosUp = 0.0;
+    public final double flickPosDown = 0.19;//0.22;//.07
+    public final double flickPosUp = 0.06;
 
-    public  double stopPosUp = 0.0;
-    public  double stopPosDown = 0.315;
+    public  double stopPosUp = 0.626;
+    public  double stopPosDown = 0.922;
 
-    public final double pushIdle = 0.9327;
-    public final double pushForward = 0.37;//0.346;
+    public final double pushIdle = 0.999;
+    public final double pushForward = 0.31;//0.346;
 
     private boolean rbToggle = false;
-    public boolean PROTO_AlignSlides = false;
+    public boolean PROTO_AlignSlides;
 
-    private Caching_Motor leftSlide;
-    private Caching_Motor rightSlide;
+    public Caching_Motor leftSlide;
+    public Caching_Motor rightSlide;
 
     public ElapsedTime mStateTime;
-    ///private DistanceSensor sensor;
-    public ExpansionHubMotor encoder;
     private RevBulkData data;
+    private RevBulkData data2;
 
     private PIDFController slidesController;
     private boolean flickerToggle = false;
@@ -76,11 +65,10 @@ public class Shooter {
     private boolean yToggle = false;
     public boolean automation = false;
 
-    public double kp_Flywheel = 15;
-    public double ki_Flywheel = 0;
-    public double kd_Flywheel = 0.1;
-
-    PIDFController controller = new PIDFController(new PIDCoefficients(kp_Flywheel, ki_Flywheel, kd_Flywheel));
+    public double kp_Flywheel = 300;
+    public double ki_Flywheel = 25;
+    public double kd_Flywheel = 50;
+    private AnalogInput gyro;
 
     public enum ShootState{
         PREPARE,
@@ -90,6 +78,7 @@ public class Shooter {
     public ShootState mRobotState = ShootState.IDLE;
 
     public Shooter(HardwareMap map, Telemetry telemetry){
+        PROTO_AlignSlides = false;
         downPos = Math.toRadians(20.85);
 
         rightSlide = new Caching_Motor(map, "right_slide");
@@ -103,18 +92,21 @@ public class Shooter {
         mStateTime = new ElapsedTime();
         mStateTime.startTime();
 
-        //sensor = map.get(DistanceSensor.class, "dist");
-        encoder = (ExpansionHubMotor) map.get(DcMotor.class, "left_slide");
-
-        encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        shooter.motor.setVelocityPIDFCoefficients(kp_Flywheel, ki_Flywheel, kd_Flywheel, 0.0);
 
         slidesController = new PIDFController(new PIDCoefficients(kp_shooter, ki_shooter, kd_shooter));
 
+        leftSlide.motor.setMode(DcMotor.RunMode.RESET_ENCODERS);
+        rightSlide.motor.setMode(DcMotor.RunMode.RESET_ENCODERS);
+
         leftSlide.motor.setDirection(DcMotorSimple.Direction.REVERSE);
         leftSlide.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        rightSlide.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         leftSlide.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightSlide.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
+        gyro = map.get(AnalogInput.class, "sangyro");
 
         this.telemetry = telemetry;
     }
@@ -128,10 +120,8 @@ public class Shooter {
         write();
     }
 
-    public void setShooterVelocity(double target_velo, double current_velo){
-        controller.setTargetPosition(target_velo);
-        shooter.setPower(controller.update(current_velo));
-        shooter.write();
+    public void setShooterVelocity(double target_velo){
+        shooter.motor.setVelocity(target_velo);
     }
 
     double offset = 0;
@@ -141,14 +131,18 @@ public class Shooter {
     public double getShooterAngle(){
         //return Math.atan2(sensor.getDistance(DistanceUnit.INCH), 1.6693915023766982548289189220147);
         //return sensor.getDistance(DistanceUnit.MM);
-        if(data != null){
+        /*if(data != null){
             angle = (-(data.getMotorCurrentPosition(encoder)) * (2 * Math.PI)) / 8192.0;
             angle += Math.toRadians(20);
             angle %= 2 * Math.PI;
             return angle;
-        }
+        }*/
 
-        return angle;
+        if(data != null){
+            return data.getMotorCurrentPosition(leftSlide.motor)/* + QL_Auto_Linear.SLIDE_POS_END*/;
+        }else{
+            return leftSlide.motor.getCurrentPosition();
+        }
     }
 
     public void write(){
@@ -161,16 +155,14 @@ public class Shooter {
     }
 
     public double calculateShooterAngle(double dist) {
-        double myDist = Range.clip(dist - 7.25, 65, 120);
-        double y = (2.5486 * Math.pow(10, -9)) * (Math.pow(myDist, 6));
-        y -= 0.00000148331 * (Math.pow(myDist, 5));
-        y += 0.000355865 * (Math.pow(myDist, 4));
-        y -= 0.0450403 * (Math.pow(myDist, 3));
-        y += 3.17236 * (Math.pow(myDist, 2));
-        y -= 118.014 * myDist;
-        y += 1841.77;
+        double myDist = Range.clip(dist - 7.25, 65, 100);
+        double y = 0.0871429 * Math.pow(myDist, 2);
+        y -= 20.4548 * myDist;
+        y += 1973.71;
 
-        return y;
+
+
+        return y + 10;
     }
 
     public void setShooterAngle(double targetAngle, double currentAngle, double maxPower){
@@ -185,18 +177,14 @@ public class Shooter {
         slideSetPower(Range.clip(power, -maxPower, maxPower));
     }
 
-    public void setData(RevBulkData data){
+    public void setData(RevBulkData data, RevBulkData data2){
         this.data = data;
+        this.data2 = data2;
     }
 
     public void slideSetPower(double power){
-        if(getShooterAngle() > Math.toRadians(20.5)){
-            rightSlide.setPower(Range.clip(-power - ff, -1, 1));
-            leftSlide.setPower(Range.clip(-power - ff, -1, 1));
-        }else{
-            rightSlide.setPower(Range.clip(-power, -1, 1));
-            leftSlide.setPower(Range.clip(-power, -1, 1));
-        }
+        rightSlide.setPower(Range.clip(-power - ff, -1, 1));
+        leftSlide.setPower(Range.clip(-power - ff, -1, 1));
 
         telemetry.addData("Slide Power", power);
     }
@@ -205,15 +193,19 @@ public class Shooter {
     public boolean reset = false;
 
     public void powerShot(ElapsedTime time){
+        int counter = 0;
+
         if(time.time() >= 3){
-            pushSlide.setPosition(pushIdle);
+            counter = 4;
         }else if(time.time() >= 2){
-            pushSlide.setPosition(pushForward);
+            counter = 3;
         }else if(time.time() >= 1){
-            pushSlide.setPosition(pushIdle - ((2*(pushIdle - pushForward)/3)));
+            counter = 2;
         }else{
-            pushSlide.setPosition(pushIdle - ((pushIdle - pushForward)/3));
+            counter = 1;
         }
+
+        powerShot(counter);
     }
 
     public void powerShot(int state){
@@ -258,8 +250,6 @@ public class Shooter {
     }
 
     public void resetAuto(){
-        double currentAngle = getShooterAngle();
-        setShooterAngle(downPos, currentAngle, 0.5);
         stopper.setPosition(stopPosDown);
         flicker.setPosition(flickPosUp);
         pushSlide.setPosition(pushIdle);
@@ -274,7 +264,7 @@ public class Shooter {
 
     public void reset(double downPos){
         double currentAngle = getShooterAngle();
-        setShooterAngle(Math.toRadians(downPos), currentAngle, 0.5);
+        setShooterAngle(10, currentAngle, 0.5);
         shooter.setPower(shooterff);
         stopper.setPosition(stopPosDown);
         flicker.setPosition(flickPosUp);
@@ -297,7 +287,7 @@ public class Shooter {
         if(data != null){
             return data.getMotorVelocity(shooter.motor);
         }else{
-            return 0;
+            return shooter.motor.getVelocity();
         }
     }
 
@@ -309,11 +299,8 @@ public class Shooter {
 
         telemetry.addData("Shooter Angle Required", shooterTargetAngle);
         telemetry.addData("State", mRobotState);
-        if(data != null){
-            packet.put("Raw Tick Shooter" , data.getMotorCurrentPosition(encoder));
-        }
 
-        telemetry.addData("Shooter Velocity: ", velo);
+        packet.put("Shooter Velocity: ", velo);
 
         if(gamepad1.isPress(GamepadEx.Control.left_trigger)){
             kickOutEnabled = true;
@@ -356,6 +343,9 @@ public class Shooter {
             if(!flickerToggle){
                 flicker.setPosition(flickPosUp);
                 shooter.setPower(shooterff);
+            }else{
+                flicker.setPosition(flickPosDown);
+                shooter.setPower(shooterPower);
             }
 
             PROTO_AlignSlides = true;
@@ -364,36 +354,13 @@ public class Shooter {
             mStateTime.reset();
         }
 
-        if (flickerToggle) {
-            flicker.setPosition(flickPosDown);
-            shooter.setPower(shooterPower);
-        }
-
-        if(gamepad2.isPress(GamepadEx.Control.dpad_down)){
-            PROTO_AlignSlides = false;
-            powerShotAngle = false;
-            reset = true;
-        }
-
-        if(gamepad1.isPress(GamepadEx.Control.dpad_down)){
-            PROTO_AlignSlides = false;
-            powerShotAngle = false;
-            reset = true;
-        }
-
-        if(gamepad1.isPress(GamepadEx.Control.right_bumper)){
-            PROTO_AlignSlides = false;
-            powerShotAngle = false;
-            reset = true;
-        }
-
         if(gamepad2.isPress(GamepadEx.Control.start) || gamepad1.isPress(GamepadEx.Control.b)){
             powerShot(powerShotToggle);
             powerShotToggle += 1;
             powerShotToggle %= 4;
         }
 
-        telemetry.addData("Current Angle", Math.toDegrees(currentAngle));
+        telemetry.addData("Current Angle", currentAngle);
 
         if(gamepad1.isPress(GamepadEx.Control.right_trigger)){
             flickerToggle = !flickerToggle;
@@ -411,53 +378,22 @@ public class Shooter {
             mStateTime.reset();
         }
 
-        if(gamepad2.isPress(GamepadEx.Control.b)){
-            encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-            encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        if(gamepad1.isPress(GamepadEx.Control.right_bumper)){
+            flickerToggle = false;
+            flicker.setPosition(flickPosUp);
         }
 
-        /*if(flickerToggle || yToggle){
-            setShooterVelocity(5.2, shooter.motor.getVelocity(AngleUnit.RADIANS));
-        }*/
+
+        if(flickerToggle || yToggle){
+            shooter.setPower(1.0);
+        }
 
         if(PROTO_AlignSlides){
             reset = false;
             if(positionAutoAlign){
-                if(Math.abs(currentAngle - (powerShotAngle ? Math.toRadians(25.36) : Math.toRadians(shooterTargetAngle))) < Math.toRadians(0.15) || Math.abs(gamepad2.gamepad.left_stick_y) >= 0.15){
-                    slideSetPower(0.0);
-                    PROTO_AlignSlides = false;
-                    powerShotAngle = false;
-                }else {
-                    resetTime = mStateTime.time();
-                    if (mStateTime.time() >= 0.15) {
-                        setShooterAngle(powerShotAngle ? Math.toRadians(25.36) : Math.toRadians(SlidesTunerAngle), currentAngle, 1.0);
-                    } else {
-                        if (getShooterAngle() <= Math.toRadians(20.5)) {
-                            encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        }
-                    }
-                }
+                setShooterAngle(powerShotAngle ? (25.36) : SlidesTunerAngle, currentAngle, 1.0);
             }else{
-                if(Math.abs(currentAngle - (powerShotAngle ? Math.toRadians(25.36) : Math.toRadians(shooterTargetAngle))) < Math.toRadians(0.15) || Math.abs(gamepad2.gamepad.left_stick_y) >= 0.15){
-                    if(mStateTime.time() - resetTime >= 0.25 && kickOutEnabled){
-                        slideSetPower(0.0);
-                        PROTO_AlignSlides = false;
-                        powerShotAngle = false;
-                    }else{
-                        setShooterAngle(powerShotAngle ? Math.toRadians(25.36) : Math.toRadians(shooterTargetAngle), currentAngle, 1.0);
-                    }
-                }else {
-                    resetTime = mStateTime.time();
-                    if (mStateTime.time() >= 0.15) {
-                        setShooterAngle(powerShotAngle ? Math.toRadians(25.36) : Math.toRadians(shooterTargetAngle), currentAngle, 1.0);
-                    } else {
-                        if (getShooterAngle() <= Math.toRadians(20.5)) {
-                            encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                            encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                        }
-                    }
-                }
+                setShooterAngle(powerShotAngle ? (25.36) : (shooterTargetAngle), currentAngle, 1.0);
             }
         }else{
             if(reset){
@@ -466,9 +402,6 @@ public class Shooter {
                 if(currentAngle <= downPos){
                     slideSetPower(-0.01);
                     if((mStateTime.time() - resetTime) >= 0.25){
-                        encoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-                        encoder.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-
                         powerShotAngle = false;
                         reset = false;
                     }
@@ -523,6 +456,7 @@ public class Shooter {
                 }
                 break;
             case IDLE:
+                PROTO_AlignSlides = true;
 
                 if (mStateTime.time() <= 0.25){
                     ff = 0;

@@ -59,8 +59,16 @@ public class KalmanFilter {
     }
 
     //For the state parameter, just pass in the pose exponential
-    public void predict(SimpleMatrix state, Pose2d velo, float dt){
+    public void predict(SimpleMatrix state, Pose2d velo, double dt, double theta){
         SimpleMatrix veloMat = new SimpleMatrix(3, 1, true, new double[]{velo.getX() * dt, velo.getY() * dt, velo.getHeading() * dt});
+        SimpleMatrix rotation = new SimpleMatrix(3, 3, true, new double[]{
+                Math.cos(theta), -Math.sin(theta), 0,
+                Math.sin(theta), Math.cos(theta), 0,
+                0,               0,               1
+        });
+
+        veloMat = rotation.mult(veloMat);
+
         this.state = state.plus(veloMat);
         covariance = ((SimpleMatrix.identity(3).mult(covariance)).mult(SimpleMatrix.identity(3).transpose())).plus(processNoise);
     }

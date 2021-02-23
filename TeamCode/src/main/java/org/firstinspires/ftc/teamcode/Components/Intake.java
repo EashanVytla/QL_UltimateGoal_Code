@@ -41,7 +41,7 @@ public class Intake {
 
     public void write(){
         intake.write();
-        intake_holder.write();
+        //intake_holder.write();
     }
 
     public void operate(GamepadEx gamepad1, GamepadEx gamepad2, Telemetry telemetry){

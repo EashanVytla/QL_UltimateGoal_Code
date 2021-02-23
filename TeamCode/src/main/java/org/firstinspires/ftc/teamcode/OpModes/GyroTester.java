@@ -19,9 +19,9 @@ import org.firstinspires.ftc.teamcode.Components.Robot;
 import java.util.Locale;
 
 @Autonomous
-@Disabled
+//@Disabled
 public class GyroTester extends LinearOpMode {
-    Robot robot = null;
+    //Robot robot = null;
     //----------------------------------------------------------------------------------------------
     // State
     //----------------------------------------------------------------------------------------------
@@ -38,7 +38,7 @@ public class GyroTester extends LinearOpMode {
     //----------------------------------------------------------------------------------------------
 
     @Override public void runOpMode() {
-        robot = new Robot(hardwareMap, telemetry);
+        //robot = new Robot(hardwareMap, telemetry);
         // Set up the parameters with which we will use our IMU. Note that integration
         // algorithm here just reports accelerations to the logcat log; it doesn't actually
         // provide positional information.
@@ -53,7 +53,7 @@ public class GyroTester extends LinearOpMode {
         // Retrieve and initialize the IMU. We expect the IMU to be attached to an I2C port
         // on a Core Device Interface Module, configured to be a sensor of type "AdaFruit IMU",
         // and named "imu".
-        imu = hardwareMap.get(BNO055IMU.class, "imu");
+        imu = hardwareMap.get(BNO055IMU.class, "sangyro");
         imu.initialize(parameters);
 
         // Set up our telemetry dashboard
@@ -67,8 +67,8 @@ public class GyroTester extends LinearOpMode {
 
         // Loop and update the dashboard
         while (opModeIsActive()) {
-            robot.drive.drive(gamepad1, 1.0, 1.0);
-            robot.drive.write();
+            //robot.drive.drive(gamepad1, 1.0, 1.0);
+            //robot.drive.write();
             telemetry.update();
         }
     }
