@@ -15,9 +15,10 @@ public class Intake {
     private boolean intakeToggle = false;
     private ElapsedTime timer = new ElapsedTime();
     private Caching_Servo intake_holder;
-    private double dropPos = 0.6;
-    private double upPos = 0.9;
+    private double dropPos = 0.7484;
+    private double upPos = 0.0;
     private boolean dropToggle = false;
+    private boolean rt = false;
 
     public Intake(HardwareMap map){
         intake = new Caching_Motor(map, "intake");
@@ -25,6 +26,10 @@ public class Intake {
         intake.motor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intake.motor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         timer.startTime();
+    }
+
+    public void startTimer(){
+        timer.reset();
     }
 
     public void setPower(double power){
@@ -41,7 +46,7 @@ public class Intake {
 
     public void write(){
         intake.write();
-        //intake_holder.write();
+        intake_holder.write();
     }
 
     public void operate(GamepadEx gamepad1, GamepadEx gamepad2, Telemetry telemetry){
@@ -50,8 +55,20 @@ public class Intake {
         //if y let go then whatever a command is doing
 
 
-        if(gamepad1.isPress(GamepadEx.Control.right_bumper)){
+        if(gamepad1.isPress(GamepadEx.Control.right_bumper) || gamepad2.isPress(GamepadEx.Control.right_trigger)){
             intakeToggle = !intakeToggle;
+        }
+
+        if(gamepad1.isPress(GamepadEx.Control.right_trigger)){
+            timer.reset();
+            rt = true;
+        }
+
+        if(rt){
+            if(timer.time() >= 0.5){
+                intakeToggle = false;
+                rt = false;
+            }
         }
 
         if(gamepad1.isPress(GamepadEx.Control.left_trigger)){

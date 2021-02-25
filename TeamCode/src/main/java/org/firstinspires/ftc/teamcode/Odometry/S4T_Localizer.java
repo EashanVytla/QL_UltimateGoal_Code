@@ -2,31 +2,23 @@ package org.firstinspires.ftc.teamcode.Odometry;
 
 import android.os.SystemClock;
 
-import com.acmerobotics.dashboard.FtcDashboard;
-import com.acmerobotics.dashboard.canvas.Canvas;
 import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.dashboard.telemetry.TelemetryPacket;
 import com.acmerobotics.roadrunner.geometry.Pose2d;
 import com.acmerobotics.roadrunner.geometry.Vector2d;
 import com.arcrobotics.ftclib.geometry.Rotation2d;
 import com.arcrobotics.ftclib.geometry.Transform2d;
 import com.arcrobotics.ftclib.geometry.Translation2d;
-import com.qualcomm.ftccommon.FtcEventLoop;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.util.Hardware;
 import com.spartronics4915.lib.T265Camera;
 
-import org.ejml.simple.SimpleMatrix;
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Math.Vector2;
-import org.firstinspires.ftc.teamcode.PurePusuit.RCOffset;
 
 @Config
 public class S4T_Localizer {
     //WORKED FOR VERY LONG TIME: 2739.9319227985241529292184283395;
     public static double TRACK_WIDTH1 = 2751.221712973584;//2754.2217129735839800225467700795;//2752.5847407743298321228446875276; //2748.4333315465458503161338711337;//2743.9424860098757;//2737.9424860098754612321073812974;//2747.2530501807513383745870814547;//2744.9453035059188560059382668858;//2739.9319227985241529292184283395;//2742.1772557701833430093304257463;//13.653342515840303278727731562382;//13.629789982152818111428120849052;//13.617612893489945808623743902362;//13.581490658183012723991930114595;
 
-    //todo: This is theoretical trackwidth from old trackwidth... PLEASE TUNE
     public static double TRACK_WIDTH2 = 1380.1613856068841242660085798871; //1384.1705400702137351819820900508;//1381.7036384522893574775643917185;//1366.4406794097765947773284388111;//1384.0383147856;//1375.0191308424297533752712736568;//1375.2578632570675963789245993019;//1371.1198347366783176489336214542;//1362.4458903381700218495294563504;//1367.9367358748404109335559461868//6.8508849857360350014568370251882;//6.8125242936766372831876532920797;//6.8542971111369223086049488009311;
 
     public static double AUX_WIDTH = 3.4254424928680174;
@@ -66,11 +58,17 @@ public class S4T_Localizer {
     private double odoCovariance = 0.01;
     HardwareMap hardwareMap;
     private Pose2d kalmanFilteredPos = new Pose2d(0, 0, 0);
+    public AnalogGyro gyro;
+    public OneDimensionlKalmanFilter oneDimensionlKalmanFilter;
 
     public S4T_Localizer(Telemetry telemetry, HardwareMap hardwareMap){
         this.telemetry = telemetry;
         filter = new KalmanFilter(telemetry);
         this.hardwareMap = hardwareMap;
+        gyro = new AnalogGyro(hardwareMap);
+        oneDimensionlKalmanFilter = new OneDimensionlKalmanFilter();
+        gyro.update();
+        gyro.reset();
 
         //todo: uncomment for kalman filter
         /*if(slamra == null){
@@ -137,6 +135,7 @@ public class S4T_Localizer {
     private double prevTime = 0;
 
     public double omega = 0;
+    public double prevHeadingGyro = 0;
 
     public void startTime(){
         prevTime = SystemClock.uptimeMillis();
@@ -194,7 +193,7 @@ public class S4T_Localizer {
         telemetry.addData("T265 Pos", t265_pos);
         telemetry.addData("My Position", mypose);
 
-        double dt = (SystemClock.uptimeMillis() - prevTime)/1000;
+        double dt = (SystemClock.uptimeMillis() - prevTime)/1000.0;
         //Kalman Filter
         //_____________________________________________________________________________________
         //CORRECT
@@ -212,6 +211,27 @@ public class S4T_Localizer {
 
         telemetry.addData("Filtered Position", kalmanFilteredPos);*/
         //todo: uncomment for kalman filter
+
+        gyro.update();
+        telemetry.addData("Gyro", Math.toDegrees(gyro.getAngleCorrected()));
+        telemetry.addData("Max Voltage", gyro.findGreatestVoltage());
+        telemetry.addData("Max Angle", gyro.findGreatestAngle());
+
+
+        ////////////////////////////////////////////////////////////////////
+        oneDimensionlKalmanFilter.correct(dtheta);
+
+        double FilteredHeading = oneDimensionlKalmanFilter.state;
+
+        double dt = (SystemClock.uptimeMillis() - prevTime)/1000.0;
+        oneDimensionlKalmanFilter.predict(gyro.getAngleCorrected(), dt, (gyro.getAngleCorrected() - prevHeadingGyro)/dt);
+        prevHeadingGyro = gyro.getAngleCorrected();
+        prevTime = SystemClock.uptimeMillis();
+
+        telemetry.addData("DT", oneDimensionlKalmanFilter.covariance);
+
+        telemetry.addData("Kalman Filtered Heading", Math.toDegrees(FilteredHeading));
+        ////////////////////////////////////////////////////////////////////
 
         dashboardPos = new Pose2d(mypose.getY() + OFFSET_FROM_CENTER.getY(), -mypose.getX() + OFFSET_FROM_CENTER.getX(), (2 * Math.PI) - mypose.getHeading());
 

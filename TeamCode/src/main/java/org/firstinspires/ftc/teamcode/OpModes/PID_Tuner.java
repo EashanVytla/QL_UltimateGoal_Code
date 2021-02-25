@@ -72,6 +72,9 @@ public class PID_Tuner extends OpMode {
         packet.put("Slide Height Left: ", left);
         packet.put("Slide Height Right: ", right);
 
+        telemetry.addData("Slide Height Left: ", left);
+        telemetry.addData("Slide Height Right: ", right);
+
         if(gamepadEx.isPress(GamepadEx.Control.a)){
             pid = true;
         }
@@ -104,7 +107,7 @@ public class PID_Tuner extends OpMode {
 
     @Override
     public void stop(){
-        robot.localizer.stopCamera();
+        //robot.localizer.stopCamera();
     }
 }
 

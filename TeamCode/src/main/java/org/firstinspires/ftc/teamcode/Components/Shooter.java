@@ -216,7 +216,7 @@ public class Shooter {
         }else if(state == 2){
             pushSlide.setPosition(pushForward);
         }else if(state == 1){
-            pushSlide.setPosition(pushIdle - ((2*(pushIdle - pushForward)/3) - 0.025));
+            pushSlide.setPosition(pushIdle - ((2*(pushIdle - pushForward)/3) + 0.025));
         }else if(state == 0){
             pushSlide.setPosition(pushIdle - ((pushIdle - pushForward)/3));
         }else{

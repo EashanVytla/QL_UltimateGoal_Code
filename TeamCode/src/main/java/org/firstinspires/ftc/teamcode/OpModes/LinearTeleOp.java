@@ -73,6 +73,7 @@ public class LinearTeleOp extends LinearOpMode {
 
         timer.reset();
         robot.localizer.startTime();
+        robot.intake.startTimer();
 
         // run until the end of the match (driver presses STOP)
         while (opModeIsActive() && !isStopRequested()) {
@@ -101,7 +102,7 @@ public class LinearTeleOp extends LinearOpMode {
                         currentPoseSnapShot = robot.getPos();
                     }
 
-                    if(gamepad1ex.isPress(GamepadEx.Control.dpad_up) || gamepad1ex.isPress(GamepadEx.Control.y)){
+                    if(gamepad1ex.isPress(GamepadEx.Control.dpad_up) || gamepad2ex.isPress(GamepadEx.Control.dpad_left)){
                         robot.shooter.positionAutoAlign = !robot.shooter.positionAutoAlign;
                     }
 
@@ -131,7 +132,7 @@ public class LinearTeleOp extends LinearOpMode {
 
                     break;
                 case AutoAllign:
-                    if(gamepad1ex.isPress(GamepadEx.Control.dpad_up)){
+                    if(gamepad1ex.isPress(GamepadEx.Control.dpad_up) || gamepad2ex.isPress(GamepadEx.Control.dpad_left)){
                         robot.shooter.positionAutoAlign = !robot.shooter.positionAutoAlign;
                     }
 
