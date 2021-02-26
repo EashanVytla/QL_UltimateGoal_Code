@@ -10,7 +10,7 @@ class OneDimensionlKalmanFilter {
     double KalmanGain = 0.0;
 
     public void predict(double state, double dt, double omega){
-        this.state = state + dt * omega;
+        this.state =/* state + */dt * omega;
         covariance += processNoise;
     }
 

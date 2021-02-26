@@ -219,9 +219,11 @@ public class S4T_Localizer {
         telemetry.addData("Gyro", Math.toDegrees(gyro.getAngleCorrected()));
 
         ////////////////////////////////////////////////////////////////////
-        oneDimensionlKalmanFilter.correct((Math.toRadians(360) - heading) % Math.toRadians(360));
+        oneDimensionlKalmanFilter.correct((Math.toRadians(360) - dtheta) % Math.toRadians(360));
 
         double FilteredHeading = oneDimensionlKalmanFilter.state;
+
+        k_heading += FilteredHeading;
 
         double dt = (SystemClock.uptimeMillis() - prevTime)/1000.0;
         oneDimensionlKalmanFilter.predict(gyro.getAngleCorrected(), dt, (gyro.getAngleCorrected() - prevHeadingGyro)/dt);
