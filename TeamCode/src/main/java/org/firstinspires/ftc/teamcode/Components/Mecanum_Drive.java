@@ -34,13 +34,13 @@ public class Mecanum_Drive{
     PIDFController PID_Y;
     PIDFController PID_Z;
 
-    public static double kp = 0.17;
+    public static double kp = 0.25;
     public static double ki = 0;
     public static double kd = 0.02275;
 
-    public static double kpr = 3.23;
+    public static double kpr = 4.5;//3.23;
     public static double kir = 0;
-    public static double kdr = 0.197;
+    public static double kdr = 0.297;//0.197;
     int counter;
 
     private double scalePower(double speed, double min, double max){
@@ -157,6 +157,8 @@ public class Mecanum_Drive{
 
         telemetry.addData("Target Pos: ", targetPos);
         telemetry.addData("Current Pos: ", currentPos);
+        telemetry.addData("Translational Error", targetPos.vec().distTo(currentPos.vec()));
+        telemetry.addData("Rotational Error", Math.toDegrees(Math.abs(target_heading - heading)));
 
         PID_X.setTargetPosition(targetPos.getX());
         PID_Y.setTargetPosition(targetPos.getY());

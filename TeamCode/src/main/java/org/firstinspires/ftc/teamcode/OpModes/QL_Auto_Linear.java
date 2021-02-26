@@ -84,9 +84,9 @@ public class QL_Auto_Linear extends LinearOpMode {
             Pose2d ZONE_1 = new Pose2d(Positions.ZONE_1.x, Positions.ZONE_1.y, Positions.ZONE_1_HEADING);
             Pose2d ZONE_2 = new Pose2d(Positions.ZONE_2.x, Positions.ZONE_2.y, Positions.ZONE_2_HEADING);
             Pose2d ZONE_3 = new Pose2d(Positions.ZONE_3.x, Positions.ZONE_3.y, Positions.ZONE_3_HEADING);
-            Pose2d ZONE_1_b = new Pose2d(Positions.ZONE_1_b.x, Positions.ZONE_1_b.y, Positions.ZONE_1_HEADING);
-            Pose2d ZONE_2_b = new Pose2d(Positions.ZONE_2_b.x, Positions.ZONE_2_b.y, Positions.ZONE_2_HEADING);
-            Pose2d ZONE_3_b = new Pose2d(Positions.ZONE_3_b.x, Positions.ZONE_3_b.y, Positions.ZONE_3_HEADING);
+            Pose2d ZONE_1_b = new Pose2d(Positions.ZONE_1_b.x, Positions.ZONE_1_b.y, Math.PI);
+            Pose2d ZONE_2_b = new Pose2d(Positions.ZONE_2_b.x, Positions.ZONE_2_b.y, Math.PI/2);
+            Pose2d ZONE_3_b = new Pose2d(Positions.ZONE_3_b.x, Positions.ZONE_3_b.y, Math.PI/2);
             Pose2d POWER_SHOTS_1 = new Pose2d(Positions.POWER_SHOTS_1.x, Positions.POWER_SHOTS_1.y, Positions.POWER_SHOTS_HEADING);
             Pose2d POWER_SHOTS_2 = new Pose2d(Positions.POWER_SHOTS_2.x, Positions.POWER_SHOTS_2.y, Positions.POWER_SHOTS_HEADING);
             Pose2d POWER_SHOTS_3 = new Pose2d(Positions.POWER_SHOTS_3.x, Positions.POWER_SHOTS_3.y, Positions.POWER_SHOTS_HEADING);
@@ -96,8 +96,10 @@ public class QL_Auto_Linear extends LinearOpMode {
             Pose2d PREPARE_INTAKE = new Pose2d(Positions.PREPARE_INTAKE.x, Positions.PREPARE_INTAKE.y, Math.PI);
             Pose2d CLEAR_STACK_2 = new Pose2d(Positions.CLEAR_STACK_2.x, Positions.CLEAR_STACK_2.y, Positions.CLEAR_STACK_2_HEADING);
             Pose2d PARK = new Pose2d(Positions.PARK.x, Positions.PARK.y, Positions.PARK_HEADING);
-            Pose2d BOUNCE_BACK_1 = new Pose2d(Positions.BOUNCE_BACK_1.x, Positions.BOUNCE_BACK_1.y, Positions.WOBBLE_GOAL_2_HEADING);
+            Pose2d BOUNCE_BACK_1 = new Pose2d(Positions.BOUNCE_BACK_1.x, Positions.BOUNCE_BACK_1.y, 0.0);
             Pose2d BOUNCE_BACK_2 = new Pose2d(Positions.BOUNCE_BACK_2.x, Positions.BOUNCE_BACK_2.y, Math.PI/2);
+            Pose2d BOUNCE_BACK_3 = new Pose2d(Positions.BOUNCE_BACK_3.x, Positions.BOUNCE_BACK_3.y, Math.PI/2);
+
 
             robot.updateBulkData();
             ArrayList<CurvePoint> allPoints = new ArrayList<>();
@@ -257,6 +259,7 @@ public class QL_Auto_Linear extends LinearOpMode {
                         robot.drive.setPower(0, 0, 0);
                         robot.drive.write();
                         if(time.time() >= 1.0){
+                            time.reset();
                             RobotMovement.resetIndex();
                             robot.wobbleGoal.autoLift();
                             stage = 5;
@@ -282,16 +285,19 @@ public class QL_Auto_Linear extends LinearOpMode {
                     }
 
                     allPoints.add(new CurvePoint(WOBBLE_GOAL_2, 1, 1, 15));
-                    allPoints.add(new CurvePoint(BOUNCE_BACK_1, 1, 1, 25));
-                    allPoints.add(new CurvePoint(BOUNCE_BACK_2, 1, 1, 25));
+                    allPoints.add(new CurvePoint(BOUNCE_BACK_1, 1, 1, 15));
+                    allPoints.add(new CurvePoint(BOUNCE_BACK_2, 1, 1, 15));
+                    allPoints.add(new CurvePoint(BOUNCE_BACK_3, 1, 1, 15));
                     if(ring_case == 0){
                         allPoints.add(new CurvePoint(ZONE_1_b, 1, 1, 15));
 
-                        if(robot.getPos().vec().distTo(ZONE_1_b.vec()) <= 4){
+                        if(robot.getPos().vec().distTo(ZONE_1_b.vec()) <= 1){
                             robot.wobbleGoal.lift();
                             robot.wobbleGoal.kick();
-                            RobotMovement.resetIndex();
-                            stage = 6;
+                            if(time.time() > 0.5){
+                                RobotMovement.resetIndex();
+                                stage = 6;
+                            }
                         }
                     }else if(ring_case == 1){
                         allPoints.add(new CurvePoint(ZONE_2_b, 1, 1, 15));
@@ -478,8 +484,12 @@ public class QL_Auto_Linear extends LinearOpMode {
                     break;
             }
 
-            if(stage != 0 && stage != 2 && !error && stage != 3 && stage != 4 && stage != 6 && stage != 7 && !pausePP){
+            if(stage != 0 && stage != 2 && !error && stage != 3 && stage != 4 && stage != 6 && stage != 7 && !pausePP && stage != 5){
                 RobotMovement.followCurve(allPoints, robot, telemetry);
+            }
+
+            if(stage == 5){
+                RobotMovement.followCurveAngled(allPoints, robot, telemetry);
             }
 
             robot.wobbleGoal.write();
@@ -498,11 +508,11 @@ class Positions {
     public static Point ZONE_1 = new Point(9.464, 45.245);
     public static Point ZONE_2 = new Point(-13.923, 74.501);
     public static Point ZONE_3 = new Point(9.898, 96.822);
-    public static Point ZONE_1_b = new Point(3.464, 52.245);
+    public static Point ZONE_1_b = new Point(3.464, 82.245);
     public static Point ZONE_2_b = new Point(-17.923, 66.501);
     public static Point ZONE_3_b = new Point(3.898, 89.822);
     public static Point POWER_SHOTS_1 = new Point(-28.255, 46.955);
-    public static Point POWER_SHOTS_2 = new Point(-37.505, 46.955);
+    public static Point POWER_SHOTS_2 = new Point(-35.505, 46.955);
     public static Point POWER_SHOTS_3 = new Point(-42.205, 46.955);
     public static Point WOBBLE_GOAL_2 = new Point(-30.5, 32);
     public static Point PREPARE_INTAKE = new Point(-11, 51);
@@ -512,6 +522,7 @@ class Positions {
     public static Point CLEAR_STACK_2 = new Point(-40, 49);
     public static Point BOUNCE_BACK_1 = new Point(-54, 70);
     public static Point BOUNCE_BACK_2 = new Point(-57, 105);
+    public static Point BOUNCE_BACK_3 = new Point(0, 98.822);
 
     public static double CLEAR_STACK_HEADING = 0;
     public static double ZONE_1_HEADING = 0;

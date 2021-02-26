@@ -38,11 +38,45 @@ public class RobotMovement {
         }
     }
 
+    public static void followCurveAngled(ArrayList<CurvePoint> allPoints, Robot robot, Telemetry telemetry){
+        thisTelemetry = telemetry;
+        try{
+            if(index >= allPoints.size() - 2 && robot.getPos().vec().distTo(new Vector2d(allPoints.get(allPoints.size() - 1).x, allPoints.get(allPoints.size() - 1).y)) <= 25){
+
+                followMe = allPoints.get(allPoints.size() - 1);
+            }else{
+                followMe = getFollowPointPath(allPoints, new Pose2d(robot.getPos().getX(), robot.getPos().getY(), robot.getPos().getHeading()), allPoints.get(index).followDistance);
+
+            }
+
+            index = getCurrentLine(followMe.toVec(), allPoints);
+            telemetry.addData("Current Line: ", index);
+            previous_index = index;
+
+            telemetry.addData("PURE PURESUIT POS", robot.getPos());
+
+            robot.GoTo(followMe.x, followMe.y, getFollowAngle(0, allPoints.get(index), allPoints.get(Math.min(index + 1, allPoints.size() - 1))), allPoints.get(Math.min(index + 1, allPoints.size() - 1)).moveSpeed, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).moveSpeed, allPoints.get(Math.min(index + 1, allPoints.size() - 1)).turnSpeed);
+        }catch(Exception e){
+            System.out.println("Error: " + e);
+        }
+    }
+
+    public static double getFollowAngle(Pose2d p, CurvePoint followMe, double preferredAngle){
+        double absoluteAngleToTarget = Math.atan2(followMe.y-p.getY(),followMe.x-p.getX());
+        double relativeAngleToPoint = Math_Functions.AngleWrap(absoluteAngleToTarget - (p.getHeading() - Math.toRadians(90)));
+
+        return relativeAngleToPoint - Math.toRadians(180) + preferredAngle;
+    }
+
+    public static double getFollowAngle(double preferredAngle, CurvePoint p1, CurvePoint p2){
+        double absoluteAngle = Math_Functions.AngleWrap(Math.atan2(p2.y - p1.y, p2.x - p1.x) + preferredAngle);
+        return absoluteAngle;
+    }
+
     public static void resetIndex(){
         previous_index = 0;
         index = 0;
     }
-
 
     public static CurvePoint getFollowPointPath(ArrayList<CurvePoint> pathPoints, Pose2d robotLocation, double followRadius){
         CurvePoint followMe = new CurvePoint(pathPoints.get(0));

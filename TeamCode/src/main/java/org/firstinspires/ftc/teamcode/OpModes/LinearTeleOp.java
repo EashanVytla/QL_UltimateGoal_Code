@@ -158,10 +158,10 @@ public class LinearTeleOp extends LinearOpMode {
                             robot.GoTo(new Pose2d(robot.getPos().getX(), robot.getPos().getY(), angle), new Pose2d(1.0, 1.0, 1.0));
                         }else{
                             robot.shooter.kickOutEnabled = false;
-                            robot.GoTo(new Pose2d(-11, 40, Math.PI), new Pose2d(1.0, 1.0, 1.0));
+                            robot.GoTo(new Pose2d(-22, 50.5, Math.toRadians(188.123)), new Pose2d(1.0, 1.0, 1.0));
                         }
                     }else{
-                        robot.GoTo(new Pose2d(-11, 40, Math.PI), new Pose2d(1.0, 1.0, 1.0));
+                        robot.GoTo(new Pose2d(-22, 50.5, Math.toRadians(188.123)), new Pose2d(1.0, 1.0, 1.0));
                     }
 
                     break;
