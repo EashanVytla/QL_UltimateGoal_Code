@@ -66,7 +66,7 @@ public class QL_Auto_Linear extends LinearOpMode {
         while(!isStarted() && !isStopRequested()){
             FtcDashboard.getInstance().sendImage(robot.getWebcamImage());
             ring_case = robot.getRingStackCase();
-            ring_case = 4;
+            ring_case = 0;
             telemetry.addData("Gyro", Math.toDegrees(robot.localizer.gyro.getAngleCorrected()));
             telemetry.addData("Ring Case", ring_case);
             telemetry.update();
@@ -149,7 +149,7 @@ public class QL_Auto_Linear extends LinearOpMode {
                             time.reset();
                         }
                     }else if(ring_case == 1){
-                        if(robot.getPos().vec().distTo(ZONE_2.vec()) <= 20){
+                        if(robot.getPos().vec().distTo(ZONE_2.vec()) <= 10){
                             allPoints.add(new CurvePoint(ZONE_2, 0.2, 1.0, 15));
                         }else{
                             allPoints.add(new CurvePoint(ZONE_2, 1.0, 1.0, 15));
@@ -168,7 +168,7 @@ public class QL_Auto_Linear extends LinearOpMode {
                             time.reset();
                         }
                     }else{
-                        if(robot.getPos().vec().distTo(ZONE_3.vec()) <= 35){
+                        if(robot.getPos().vec().distTo(ZONE_3.vec()) <= 25){
                             allPoints.add(new CurvePoint(ZONE_3, 0.1, 0.5, 15));
                         }else{
                             allPoints.add(new CurvePoint(ZONE_3, 1.0, 1.0, 15));
@@ -270,7 +270,7 @@ public class QL_Auto_Linear extends LinearOpMode {
                     }else{
                         robot.shooter.pushSlide.setPosition(robot.shooter.pushIdle);
                         robot.shooter.shooter.setPower(0.2);
-                        robot.GoTo(WOBBLE_GOAL_2, new Pose2d(0.3, 0.3, 1.0));
+                        robot.GoTo(WOBBLE_GOAL_2, new Pose2d(0.5, 0.5, 1.0));
                         robot.wobbleGoal.down();
                         time.reset();
                     }
@@ -515,10 +515,10 @@ class Positions {
     public static Point ZONE_1_b = new Point(3.464, 52.245);
     public static Point ZONE_2_b = new Point(-17.923, 66.501);
     public static Point ZONE_3_b = new Point(3.898, 89.822);
-    public static Point POWER_SHOTS_1 = new Point(-26.255, 46.955);
-    public static Point POWER_SHOTS_2 = new Point(-36.505, 46.955);
+    public static Point POWER_SHOTS_1 = new Point(-28.255, 46.955);
+    public static Point POWER_SHOTS_2 = new Point(-37.505, 46.955);
     public static Point POWER_SHOTS_3 = new Point(-42.205, 46.955);
-    public static Point WOBBLE_GOAL_2 = new Point(-29.5, 32);
+    public static Point WOBBLE_GOAL_2 = new Point(-30.5, 32);
     public static Point PREPARE_INTAKE = new Point(-11, 51);
     public static Point INTAKE_STACK_1 = new Point(-11, 39);
     public static Point INTAKE_STACK_2 = new Point(-11, 25);

@@ -16,7 +16,7 @@ public class Caching_Motor {
 
     float pos = 0;
 
-    double EPSILON = 0.001;
+    double EPSILON = 0.01;
 
     double prev_write = 0;
     double current_write = 0;

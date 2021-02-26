@@ -54,6 +54,9 @@ public class LinearTeleOp extends LinearOpMode {
         // step (using the FTC Robot Controller app on the phone).
         robot = new Robot(hardwareMap, telemetry);
 
+        robot.localizer.gyro.update();
+        robot.localizer.gyro.reset();
+
         robot.shooter.init();
         robot.wobbleGoal.init();
 
@@ -90,11 +93,8 @@ public class LinearTeleOp extends LinearOpMode {
 
             switch (mDriveState){
                 case Driving:
-                    if(gamepad1ex.isPress(GamepadEx.Control.y)){
-                        xToggle = !xToggle;
-                    }
 
-                    robot.drive.driveCentric(gamepad1, xToggle ? 0.5 : 1.0, xToggle ? 0.3 : 1.0, robot.getPos().getHeading() + Math.toRadians(90));
+                    robot.drive.driveCentric(gamepad1, 1.0,  1.0, robot.getPos().getHeading() + Math.toRadians(90));
 
                     if(gamepad1ex.isPress(GamepadEx.Control.right_trigger)){
                         timer.reset();

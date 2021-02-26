@@ -32,7 +32,7 @@ public class Shooter {
     public Caching_Motor shooter;
     private Telemetry telemetry;
 
-    public final double flickPosDown = 0.19;//0.22;//.07
+    public final double flickPosDown = 0.18;//0.22;//.07
     public final double flickPosUp = 0.06;
 
     public  double stopPosUp = 0.626;
@@ -155,14 +155,16 @@ public class Shooter {
     }
 
     public double calculateShooterAngle(double dist) {
-        double myDist = Range.clip(dist - 7.25, 65, 100);
-        double y = 0.0871429 * Math.pow(myDist, 2);
-        y -= 20.4548 * myDist;
-        y += 1973.71;
+        double myDist = Range.clip(dist - 7.25, 65, 110);
+        double y = (-5.0545 * Math.pow(10, -8)) * Math.pow(myDist, 6);
+        y += 0.0000304957 * Math.pow(myDist, 5);
+        y -= 0.00770168 * Math.pow(myDist, 4);
+        y += 1.03921 * Math.pow(myDist, 3);
+        y -= 78.6528 * Math.pow(myDist, 2);
+        y += 3144.17 * myDist;
+        y -= 50567.1;
 
-
-
-        return y + 10;
+        return y;
     }
 
     public void setShooterAngle(double targetAngle, double currentAngle, double maxPower){
@@ -212,11 +214,11 @@ public class Shooter {
         if(state == 3){
             pushSlide.setPosition(pushIdle);
             flicker.setPosition(flickPosUp);
-            shooter.setPower(0.2);
+            //shooter.setPower(0.2);
         }else if(state == 2){
             pushSlide.setPosition(pushForward);
         }else if(state == 1){
-            pushSlide.setPosition(pushIdle - ((2*(pushIdle - pushForward)/3) + 0.025));
+            pushSlide.setPosition(pushIdle - ((2*(pushIdle - pushForward)/3) - 0.075));
         }else if(state == 0){
             pushSlide.setPosition(pushIdle - ((pushIdle - pushForward)/3));
         }else{
@@ -391,9 +393,9 @@ public class Shooter {
         if(PROTO_AlignSlides){
             reset = false;
             if(positionAutoAlign){
-                setShooterAngle(powerShotAngle ? (25.36) : SlidesTunerAngle, currentAngle, 1.0);
+                setShooterAngle(powerShotAngle ? (890) : SlidesTunerAngle, currentAngle, 1.0);
             }else{
-                setShooterAngle(powerShotAngle ? (25.36) : (shooterTargetAngle), currentAngle, 1.0);
+                setShooterAngle(powerShotAngle ? (890) : (shooterTargetAngle), currentAngle, 1.0);
             }
         }else{
             if(reset){

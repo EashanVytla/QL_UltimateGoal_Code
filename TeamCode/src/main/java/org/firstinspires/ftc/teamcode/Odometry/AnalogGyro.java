@@ -55,7 +55,6 @@ public class AnalogGyro {
     }
 
     public double getAngleCorrected(){
-        return  cumulativeAngle;
-        //return ((2 * Math.PI) + (cumulativeAngle - startHeading)) % (2 * Math.PI);
+        return ((2 * Math.PI) + (cumulativeAngle - startHeading)) % (2 * Math.PI);
     }
 }
