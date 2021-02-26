@@ -22,8 +22,6 @@ import java.util.ArrayList;
 public class QL_Auto_Linear extends LinearOpMode {
     ElapsedTime time = new ElapsedTime();
 
-    public static double SLIDE_POS_END = 0.0;
-
     @Override
     public void runOpMode() throws InterruptedException {
         Robot robot = null;
@@ -32,14 +30,12 @@ public class QL_Auto_Linear extends LinearOpMode {
         boolean first = true;
         boolean pausePP = false;
 
-        FtcDashboard dashboard = FtcDashboard.getInstance();
-        Telemetry dashboardTelemetry = dashboard.getTelemetry();
         boolean error = false;
         int power_shots = 0;
 
         robot = new Robot(hardwareMap, telemetry);
 
-        robot.localizer.gyro.update();
+        robot.localizer.gyro.update(robot.getData());
         robot.localizer.gyro.reset();
 
         robot.setStartPose(new Pose2d(9.368, -5.198, 0));
@@ -80,8 +76,6 @@ public class QL_Auto_Linear extends LinearOpMode {
 
         int intakeCase = 0;
 
-        boolean slidesGood = false;
-
         waitForStart();
         time.reset();
 
@@ -102,10 +96,11 @@ public class QL_Auto_Linear extends LinearOpMode {
             Pose2d PREPARE_INTAKE = new Pose2d(Positions.PREPARE_INTAKE.x, Positions.PREPARE_INTAKE.y, Math.PI);
             Pose2d CLEAR_STACK_2 = new Pose2d(Positions.CLEAR_STACK_2.x, Positions.CLEAR_STACK_2.y, Positions.CLEAR_STACK_2_HEADING);
             Pose2d PARK = new Pose2d(Positions.PARK.x, Positions.PARK.y, Positions.PARK_HEADING);
+            Pose2d BOUNCE_BACK_1 = new Pose2d(Positions.BOUNCE_BACK_1.x, Positions.BOUNCE_BACK_1.y, Positions.WOBBLE_GOAL_2_HEADING);
+            Pose2d BOUNCE_BACK_2 = new Pose2d(Positions.BOUNCE_BACK_2.x, Positions.BOUNCE_BACK_2.y, Math.PI/2);
 
             robot.updateBulkData();
             ArrayList<CurvePoint> allPoints = new ArrayList<>();
-            dashboardTelemetry.addData("Velocity", robot.shooter.getShooterVelocity());
 
             if(stage <= 4) {
                 robot.shooter.setShooterAngle(910, robot.shooter.getShooterAngle(), 1.0);
@@ -287,7 +282,8 @@ public class QL_Auto_Linear extends LinearOpMode {
                     }
 
                     allPoints.add(new CurvePoint(WOBBLE_GOAL_2, 1, 1, 15));
-                    allPoints.add(new CurvePoint(CLEAR_STACK_2, 1, 1, 15));
+                    allPoints.add(new CurvePoint(BOUNCE_BACK_1, 1, 1, 25));
+                    allPoints.add(new CurvePoint(BOUNCE_BACK_2, 1, 1, 25));
                     if(ring_case == 0){
                         allPoints.add(new CurvePoint(ZONE_1_b, 1, 1, 15));
 
@@ -373,13 +369,13 @@ public class QL_Auto_Linear extends LinearOpMode {
                             }
                             break;
                         case 2:
-                            velo = robot.shooter.shooter.motor.getVelocity(AngleUnit.RADIANS);
+                            velo = robot.shooter.getShooterVelocity();
                             targetAngle = (robot.shooter.calculateShooterAngle(robot.getPos().vec().distTo(robot.ULTIMATE_GOAL_POS)));
 
                             robot.GoTo(INTAKE_STACK_1, new Pose2d(1, 1, 1));
                             robot.intake.setPower(0.0);
 
-                            if(velo > 5.1){
+                            if(velo > 2200){
                                 if(Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(0.8)){
                                     if(time.time() >= 2.1){
                                         robot.shooter.resetAuto();
@@ -423,12 +419,12 @@ public class QL_Auto_Linear extends LinearOpMode {
                             break;
                         case 4:
                             targetAngle = (robot.shooter.calculateShooterAngle(robot.getPos().vec().distTo(robot.ULTIMATE_GOAL_POS)));
-                            velo = robot.shooter.shooter.motor.getVelocity(AngleUnit.RADIANS);
+                            velo = robot.shooter.getShooterVelocity();
 
                             robot.GoTo(INTAKE_STACK_2, new Pose2d(1, 1, 1));
                             robot.intake.setPower(0.0);
 
-                            if(velo > 5.1){
+                            if(velo > 2200){
                                 if(Math.abs(robot.getPos().getHeading() - Math.PI) <= Math.toRadians(0.8)){
                                     if(time.time() >= 2.1){
                                         robot.shooter.resetAuto();
@@ -474,11 +470,8 @@ public class QL_Auto_Linear extends LinearOpMode {
                         robot.GoTo(PARK, new Pose2d(1.0, 1.0, 1.0));
                     }
 
-                    SLIDE_POS_END = robot.shooter.getShooterAngle();
-
                     break;
                 default:
-                    SLIDE_POS_END = robot.shooter.getShooterAngle();
                     robot.drive.setPower(0, 0, 0);
                     error = true;
                     robot.drive.write();
@@ -489,16 +482,9 @@ public class QL_Auto_Linear extends LinearOpMode {
                 RobotMovement.followCurve(allPoints, robot, telemetry);
             }
 
-            telemetry.addData("target height: ", targetAngle);
-            telemetry.addData("target height: ", currentAngle);
-
             robot.wobbleGoal.write();
             robot.shooter.write();
             robot.intake.write();
-
-            dashboardTelemetry.addData("Pos", robot.getPos());
-            dashboardTelemetry.addData("Error", robot.getPos().vec().distTo(robot.drive.target_pos.vec()));
-            dashboardTelemetry.update();
 
             telemetry.addData("Pos", robot.getPos());
             telemetry.addData("Error", robot.getPos().vec().distTo(robot.drive.target_pos.vec()));
@@ -524,6 +510,8 @@ class Positions {
     public static Point INTAKE_STACK_2 = new Point(-11, 25);
     public static Point PARK = new Point(-12, 67);
     public static Point CLEAR_STACK_2 = new Point(-40, 49);
+    public static Point BOUNCE_BACK_1 = new Point(-54, 70);
+    public static Point BOUNCE_BACK_2 = new Point(-57, 105);
 
     public static double CLEAR_STACK_HEADING = 0;
     public static double ZONE_1_HEADING = 0;

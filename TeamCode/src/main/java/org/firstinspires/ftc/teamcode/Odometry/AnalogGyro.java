@@ -7,6 +7,7 @@ import com.qualcomm.robotcore.hardware.AnalogSensor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.PurePusuit.Math_Functions;
+import org.openftc.revextensions2.RevBulkData;
 
 import java.util.ArrayList;
 
@@ -23,17 +24,22 @@ public class AnalogGyro {
         cumulativeAngle = 0;
     }
 
-    public double getAngleRaw(){
-        return (out.getVoltage() / 3.25) * (2 * Math.PI);
+    public double getAngleRaw(double voltage){
+        return (voltage / 3.25) * (2 * Math.PI);
     }
 
     public void reset(){
         startHeading = cumulativeAngle;
     }
 
-    public void update(){
-        double currentAngle = getAngleRaw();
-        cumulativeAngle = currentAngle * correctionCoeff;
+    public void update(RevBulkData data){
+        if(data != null){
+            double currentAngle = getAngleRaw(data.getAnalogInputValue(out));
+            cumulativeAngle = currentAngle * correctionCoeff;
+        }else{
+            double currentAngle = getAngleRaw(out.getVoltage());
+            cumulativeAngle = currentAngle * correctionCoeff;
+        }
     }
 
     private double greatestVoltage = 0;
@@ -46,9 +52,15 @@ public class AnalogGyro {
     }
 
     private double greatestAngle = 0;
-    public double findGreatestAngle(){
-        if(getAngleRaw() > greatestAngle){
-            greatestAngle = getAngleRaw();
+    public double findGreatestAngle(RevBulkData data){
+        if(data != null){
+            if(getAngleRaw(data.getAnalogInputValue(out)) > greatestAngle){
+                greatestAngle = getAngleRaw(data.getAnalogInputValue(out));
+            }
+        }else{
+            if(getAngleRaw(out.getVoltage()) > greatestAngle){
+                greatestAngle = getAngleRaw(out.getVoltage());
+            }
         }
 
         return greatestAngle;

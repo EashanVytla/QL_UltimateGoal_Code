@@ -129,17 +129,8 @@ public class Shooter {
     private double angle = 0;
 
     public double getShooterAngle(){
-        //return Math.atan2(sensor.getDistance(DistanceUnit.INCH), 1.6693915023766982548289189220147);
-        //return sensor.getDistance(DistanceUnit.MM);
-        /*if(data != null){
-            angle = (-(data.getMotorCurrentPosition(encoder)) * (2 * Math.PI)) / 8192.0;
-            angle += Math.toRadians(20);
-            angle %= 2 * Math.PI;
-            return angle;
-        }*/
-
         if(data != null){
-            return data.getMotorCurrentPosition(leftSlide.motor)/* + QL_Auto_Linear.SLIDE_POS_END*/;
+            return data.getMotorCurrentPosition(leftSlide.motor);
         }else{
             return leftSlide.motor.getCurrentPosition();
         }
@@ -170,7 +161,6 @@ public class Shooter {
     public void setShooterAngle(double targetAngle, double currentAngle, double maxPower){
         slidesController.setTargetPosition(targetAngle);
         double power = slidesController.update(currentAngle);
-        telemetry.addData("PID Power", power);
         telemetry.addData("Target Angle", Math.toDegrees(targetAngle));
         telemetry.addData("Current Angle", Math.toDegrees(currentAngle));
         telemetry.addData("Error", Math.toDegrees(targetAngle - currentAngle));
@@ -187,8 +177,6 @@ public class Shooter {
     public void slideSetPower(double power){
         rightSlide.setPower(Range.clip(-power - ff, -1, 1));
         leftSlide.setPower(Range.clip(-power - ff, -1, 1));
-
-        telemetry.addData("Slide Power", power);
     }
 
     double desiredAngle = 25;
@@ -299,10 +287,7 @@ public class Shooter {
 
         double velo = getShooterVelocity();
 
-        telemetry.addData("Shooter Angle Required", shooterTargetAngle);
         telemetry.addData("State", mRobotState);
-
-        packet.put("Shooter Velocity: ", velo);
 
         if(gamepad1.isPress(GamepadEx.Control.left_trigger)){
             kickOutEnabled = true;
@@ -361,8 +346,6 @@ public class Shooter {
             powerShotToggle += 1;
             powerShotToggle %= 4;
         }
-
-        telemetry.addData("Current Angle", currentAngle);
 
         if(gamepad1.isPress(GamepadEx.Control.right_trigger)){
             flickerToggle = !flickerToggle;
@@ -429,9 +412,6 @@ public class Shooter {
                 }
             }
         }
-
-        packet.put("Slide Angle", currentAngle);
-        packet.put("ff", ff);
 
         switch (mRobotState){
             case PREPARE:

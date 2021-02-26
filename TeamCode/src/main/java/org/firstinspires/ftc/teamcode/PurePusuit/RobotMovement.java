@@ -18,7 +18,7 @@ public class RobotMovement {
     public static void followCurve(ArrayList<CurvePoint> allPoints, Robot robot, Telemetry telemetry){
         thisTelemetry = telemetry;
         try{
-            if(index >= allPoints.size() - 2 && robot.getPos().vec().distTo(new Vector2d(allPoints.get(allPoints.size() - 1).x, allPoints.get(allPoints.size() - 1).y)) <= 17){
+            if(index >= allPoints.size() - 2 && robot.getPos().vec().distTo(new Vector2d(allPoints.get(allPoints.size() - 1).x, allPoints.get(allPoints.size() - 1).y)) <= 25){
 
                 followMe = allPoints.get(allPoints.size() - 1);
             }else{

@@ -54,7 +54,7 @@ public class LinearTeleOp extends LinearOpMode {
         // step (using the FTC Robot Controller app on the phone).
         robot = new Robot(hardwareMap, telemetry);
 
-        robot.localizer.gyro.update();
+        robot.localizer.gyro.update(robot.getData());
         robot.localizer.gyro.reset();
 
         robot.shooter.init();
@@ -75,7 +75,7 @@ public class LinearTeleOp extends LinearOpMode {
         waitForStart();
 
         timer.reset();
-        robot.localizer.startTime();
+        robot.localizer.startTime(robot.getData());
         robot.intake.startTimer();
 
         // run until the end of the match (driver presses STOP)
@@ -244,10 +244,6 @@ public class LinearTeleOp extends LinearOpMode {
             telemetry.addData("AUTO-ALIGN MODE", robot.shooter.positionAutoAlign ? "POSITION BASED" : "FULL FIELD");
             telemetry.addData("State: ", mDriveState);
             telemetry.addData("Pos: ", robot.getPos());
-            /*telemetry.addData("Right X: ", robot.getRight_X_Dist());
-            telemetry.addData("Left X: ", robot.getLeft_X_Dist());
-            telemetry.addData("Right Y: ", robot.getRight_Y_Dist());
-            telemetry.addData("Left Y: ", robot.getLeft_Y_Dist());*/
             telemetry.update();
 
             gamepad1ex.loop();
@@ -257,23 +253,14 @@ public class LinearTeleOp extends LinearOpMode {
             //packet.put("Kalman Filtered Pos", robot.localizer.getKalmanFilteredPos());
             packet.put("Vertical Heading: ", Math.toDegrees(-(robot.getRawLeft_Y_Dist() - robot.getRawRight_Y_Dist())/ S4T_Localizer.TRACK_WIDTH1) % (360));
             packet.put("Strafe Heading: ", Math.toDegrees(-(robot.getRawLeft_X_Dist() - robot.getRawRight_X_Dist())/S4T_Localizer.TRACK_WIDTH2) % (360));
-            packet.put("wf", robot.localizer.wf);
-            packet.put("ws", robot.localizer.ws);
-            packet.put("LX", robot.getRawLeft_X_Dist());
-            packet.put("RX", robot.getRawRight_X_Dist());
-            packet.put("LY", robot.getRawLeft_Y_Dist());
-            packet.put("RY", robot.getRawRight_Y_Dist());
-            packet.put("omega", robot.localizer.omega);
-
-            packet.put("gamepad x", gamepad1ex.gamepad.left_stick_x);
 
             DashboardUtil.drawRobot(fieldOverlay, robot.localizer.dashboardPos);
             dashboard.sendTelemetryPacket(packet);
         }
 
 
-        packet.put("stopped", "stopped");
-        dashboard.sendTelemetryPacket(packet);
-        robot.localizer.stopCamera();
+        //packet.put("stopped", "stopped");
+        //dashboard.sendTelemetryPacket(packet);
+        //robot.localizer.stopCamera();
     }
 }

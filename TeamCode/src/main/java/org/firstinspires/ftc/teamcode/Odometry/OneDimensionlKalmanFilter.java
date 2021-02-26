@@ -1,8 +1,8 @@
 package org.firstinspires.ftc.teamcode.Odometry;
 
 class OneDimensionlKalmanFilter {
-    double processNoise = 0.01;
-    double measurementNoise = 0.01;
+    double processNoise = 3;
+    double measurementNoise = 0.1;
 
     double state = 0.0;
     double covariance = 0.0;

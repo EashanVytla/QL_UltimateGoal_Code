@@ -13,6 +13,7 @@ import com.spartronics4915.lib.T265Camera;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
 import org.firstinspires.ftc.teamcode.Math.Vector2;
+import org.openftc.revextensions2.RevBulkData;
 
 @Config
 public class S4T_Localizer {
@@ -61,13 +62,13 @@ public class S4T_Localizer {
     public AnalogGyro gyro;
     public OneDimensionlKalmanFilter oneDimensionlKalmanFilter;
 
-    public S4T_Localizer(Telemetry telemetry, HardwareMap hardwareMap){
+    public S4T_Localizer(Telemetry telemetry, HardwareMap hardwareMap, RevBulkData data){
         this.telemetry = telemetry;
         filter = new KalmanFilter(telemetry);
         this.hardwareMap = hardwareMap;
         gyro = new AnalogGyro(hardwareMap);
         oneDimensionlKalmanFilter = new OneDimensionlKalmanFilter();
-        gyro.update();
+        gyro.update(data);
         gyro.reset();
 
         //todo: uncomment for kalman filter
@@ -130,7 +131,6 @@ public class S4T_Localizer {
     public double ws = 1;
     double dtheta = 0;
     public Pose2d dashboardPos = new Pose2d(0, 0, 0);
-    double heading2 = 0;
     Pose2d prevT265Pos = new Pose2d(0, 0, 0);
     private double prevTime = 0;
 
@@ -139,13 +139,13 @@ public class S4T_Localizer {
 
     double k_heading = 0;
 
-    public void startTime(){
-        gyro.update();
+    public void startTime(RevBulkData data){
+        gyro.update(data);
         prevHeadingGyro = gyro.getAngleCorrected();
         prevTime = SystemClock.uptimeMillis();
     }
 
-    public void update(double elxRaw, double elyRaw, double erxRaw, double eryRaw, double xVelo, double yVelo){
+    public void update(double elxRaw, double elyRaw, double erxRaw, double eryRaw, double xVelo, double yVelo, RevBulkData data){
         double y = ((elyRaw + eryRaw)/2) / TICKS_TO_INCHES_VERT;
         double x = ((elxRaw + erxRaw)/2) / TICKS_TO_INCHES_STRAFE;
         //double x = erx;
@@ -179,7 +179,6 @@ public class S4T_Localizer {
 
         dtheta = weightedTheta(dx, dy, dthetavert, dthetastrafe);
         heading %= 2 * Math.PI;
-        telemetry.addData("Non-Weighted Heading", Math.toDegrees(heading2));
         //double dtheta = nonweightedTheta(dx, dy, dthetavert, dthetastrafe);
 
         heading += dtheta;
@@ -216,14 +215,11 @@ public class S4T_Localizer {
         telemetry.addData("Filtered Position", kalmanFilteredPos);*/
         //todo: uncomment for kalman filter
 
-        gyro.update();
+        gyro.update(data);
         telemetry.addData("Gyro", Math.toDegrees(gyro.getAngleCorrected()));
-        telemetry.addData("Max Voltage", gyro.findGreatestVoltage());
-        telemetry.addData("Max Angle", gyro.findGreatestAngle());
-
 
         ////////////////////////////////////////////////////////////////////
-        oneDimensionlKalmanFilter.correct(heading);
+        oneDimensionlKalmanFilter.correct((Math.toRadians(360) - heading) % Math.toRadians(360));
 
         double FilteredHeading = oneDimensionlKalmanFilter.state;
 
@@ -232,7 +228,7 @@ public class S4T_Localizer {
         prevHeadingGyro = gyro.getAngleCorrected();
         prevTime = SystemClock.uptimeMillis();
 
-        telemetry.addData("delta time", 1/dt);
+        telemetry.addData("Refresh Rate", 1/dt);
 
         telemetry.addData("Kalman Filtered Heading", Math.toDegrees(FilteredHeading));
         ////////////////////////////////////////////////////////////////////
@@ -241,12 +237,6 @@ public class S4T_Localizer {
 
         telemetry.addData("Vertical Heading", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
         telemetry.addData("Strafe Heading", Math.toDegrees(-(erxRaw - elxRaw)/TRACK_WIDTH2) % (360));
-
-        /*DashboardUtil.drawRobot(fieldOverlay, dashboardPos);
-        packet.put("pos", mypose);
-        packet.put("Vertical Heading: ", Math.toDegrees(-(elyRaw - eryRaw)/TRACK_WIDTH1) % (360));
-        packet.put("Strafe Heading: ", Math.toDegrees(-(erxRaw - elxRaw)/TRACK_WIDTH2) % (360));
-        dashboard.sendTelemetryPacket(packet);*/
     }
 
     public void reset(){
@@ -260,29 +250,11 @@ public class S4T_Localizer {
     }
 
     public double angleWrap(double angle){
-        return (-(2 * Math.PI) - angle) % (2 * Math.PI);
+        return ((2 * Math.PI) + angle) % (2 * Math.PI);
     }
 
     public double weightedTheta(double dx, double dy, double dthetavert, double dthetastrafe){
         determineWeights(dx, dy);
-
-        //The trash version
-        /*double total = wf + ws;
-        wf /= total;
-        ws /= total;
-
-        telemetry.addData("Case: ", OdometryCase);
-        if(ws > wf){
-            OdometryCase = State.STRAFE;
-            return dthetastrafe;
-        }else{
-            OdometryCase = State.VERTICAL;
-            return dthetavert;
-        }*/
-
-//        //todo: take this out!!!!
-//        wf = 1;
-//        ws = 0;
 
         if(Math.abs(wf) <= clipping_vert){
             wf = 0;
@@ -298,20 +270,15 @@ public class S4T_Localizer {
         if(total != 0){
             value = ((wf * dthetavert) + (ws * -dthetastrafe))/total;
         }else{
-            //value = (dthetavert - dthetastrafe)/2;
-            value = dthetavert;
+            value = (dthetavert - dthetastrafe)/2;
+            //value = dthetavert;
         }
-
-        telemetry.addData("Weight Forward", wf);
-        telemetry.addData("Weight strafe", ws);
 
         return value;
     }
 
     public double nonweightedTheta(double dx, double dy, double dthetavert, double dthetastrafe){
         OdometryCase = determineCase(dx, dy, dthetavert, dthetastrafe);
-
-        telemetry.addData("Case: ", OdometryCase);
 
         if(OdometryCase == State.STRAFE){
             return dthetastrafe;
@@ -351,8 +318,6 @@ public class S4T_Localizer {
             dy /= highest;
         }*/
 
-        //dy *= 0.49818137023672532471239330234681;
-
         double mydx = (dx + prevdx)/2;
         double mydy = (dy + prevdy)/2;
 
@@ -363,33 +328,16 @@ public class S4T_Localizer {
             mydy *= normalizationFactor;
         }
 
-        Vector2d vec = new Vector2d(dashboardPos.getX() + 15, dashboardPos.getY());
-        vec.rotated(heading);
-        vec = vec.rotated(Math.atan2(mydy, mydx));
-
-        //fieldOverlay.strokeLine(dashboardPos.getX(), dashboardPos.getY(), vec.getX(), vec.getY());
-
-        //packet.put("dx", dx);
-        //packet.put("dy", dy);
-
         //If dx is higher, wf is lower and vice versa
         if(mydx != 0) {
             wf = Math.pow(Math.E, -k_strafe * Math.abs(mydx));
         }
-        //wf = 1;
 
         //If dy is high, ws is lower and vice versa
         if(mydy != 0) {
             ws = Math.pow(Math.E, -k_vert * Math.abs(mydy));
         }
-        //ws = 0;
 
-        //packet.put("ws", ws);
-        //packet.put("wf", wf);
-
-        /*telemetry.addData("weight forward: ", wf);
-        telemetry.addData("weight strafe: ", ws);
-        telemetry.addData("weight total", wf + ws);*/
         prevdx = dx;
         prevdy = dy;
     }

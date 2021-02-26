@@ -9,7 +9,7 @@ public class Caching_Servo {
 
     double query = -2.0;
 
-    double EPSILON = 0.001;
+    double EPSILON = 0.01;
 
     public Caching_Servo(HardwareMap map, String name){
         servo = map.servo.get(name);

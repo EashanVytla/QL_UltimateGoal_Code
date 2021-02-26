@@ -3,6 +3,7 @@ package org.firstinspires.ftc.teamcode.OpModes;
 import com.acmerobotics.dashboard.config.Config;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Components.Robot;
 import org.firstinspires.ftc.teamcode.Wrapper.Caching_Servo;
@@ -14,7 +15,7 @@ public class Servo_Tester extends LinearOpMode {
     final String name = "flicker";
 
     Robot robot;
-    Caching_Servo servo;
+    Servo servo;
     private double pos;
     GamepadEx gamepadEx;
     private boolean servoToPosToggle = false;
@@ -23,7 +24,7 @@ public class Servo_Tester extends LinearOpMode {
     public void runOpMode(){
         gamepadEx = new GamepadEx(gamepad1);
         robot = Robot.getInstance(hardwareMap, telemetry);
-        servo = new Caching_Servo(hardwareMap, name);
+        servo = hardwareMap.servo.get(name);
         pos = ServoTester.pos;
 
         waitForStart();
@@ -52,8 +53,6 @@ public class Servo_Tester extends LinearOpMode {
                 telemetry.addData("    ", "Press A again to go back into set position mode");
                 servo.setPosition(pos);
             }
-
-            servo.write();
 
             telemetry.addData("Position", servo.getPosition());
             telemetry.update();

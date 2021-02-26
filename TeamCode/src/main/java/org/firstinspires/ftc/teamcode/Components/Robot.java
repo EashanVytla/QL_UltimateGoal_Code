@@ -80,7 +80,9 @@ public class Robot {
         wobbleGoal = new WobbleGoal(map, telemetry, 0.5);
         shooter = new Shooter(map, telemetry);
 
-        localizer = new S4T_Localizer(telemetry, hardwareMap);
+        updateBulkData();
+
+        localizer = new S4T_Localizer(telemetry, hardwareMap, data);
         intake = new Intake(hardwareMap);
     }
 
@@ -169,7 +171,7 @@ public class Robot {
         encoderLY.update(data);
         encoderRX.update(data);
         encoderRY.update(data);
-        localizer.update(getRawLeft_X_Dist(), getRawLeft_Y_Dist(), getRawRight_X_Dist(), getRawRight_Y_Dist(), getVelocityX(), getVelocityY());
+        localizer.update(getRawLeft_X_Dist(), getRawLeft_Y_Dist(), getRawRight_X_Dist(), getRawRight_Y_Dist(), getVelocityX(), getVelocityY(), data);
     }
 
     public double getLeft_X_Dist(){
